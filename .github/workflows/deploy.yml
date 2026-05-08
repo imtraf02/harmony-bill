@@ -36,7 +36,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           pnpm add -g vercel
-          vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_OIDC_TOKEN }}
+          vercel pull --yes --environment=preview
           vercel build
           vercel deploy --prebuilt
         env:
@@ -47,7 +47,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           pnpm add -g vercel
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_OIDC_TOKEN }}
+          vercel pull --yes --environment=production
           vercel build --prod
           vercel deploy --prebuilt --prod
         env:
