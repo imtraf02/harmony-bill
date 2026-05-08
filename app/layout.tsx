@@ -19,7 +19,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn("antialiased", inter.variable, dancingScript.variable, playfair.variable)}
     >
-      <body className={cn("min-h-screen bg-background font-sans", inter.variable, dancingScript.variable, playfair.variable)}>
+      <body className={cn("min-h-screen bg-background font-playfair", inter.variable, dancingScript.variable, playfair.variable)}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

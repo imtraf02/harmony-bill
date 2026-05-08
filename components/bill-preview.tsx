@@ -169,7 +169,9 @@ export function BillPreview({ data }: BillPreviewProps) {
 								</div>
 								<div className="flex items-center gap-2">
 									<Phone className="w-2.5 h-2.5 text-yellow-500 shrink-0" />
-									<p className="font-black text-slate-900">0388.660.678</p>
+									<p className="font-semibold font-sans text-slate-900">
+										0388.660.678
+									</p>
 								</div>
 							</div>
 						</div>
@@ -185,11 +187,11 @@ export function BillPreview({ data }: BillPreviewProps) {
 										<p className="font-bold text-yellow-700 uppercase text-[6.5px]">
 											Sacombank
 										</p>
-										<p className="font-black text-slate-900 leading-none">
+										<p className="font-semibold font-sans text-slate-900 leading-none">
 											050096596674
 										</p>
 									</div>
-									<p className="text-[6.5px] italic text-slate-400 uppercase">
+									<p className="text-[6.5px] italic text-slate-600 font-semibold uppercase">
 										Trần Quốc Hiếu
 									</p>
 								</div>
@@ -198,11 +200,11 @@ export function BillPreview({ data }: BillPreviewProps) {
 										<p className="font-bold text-yellow-700 uppercase text-[6.5px]">
 											MBBank
 										</p>
-										<p className="font-black text-slate-900 leading-none">
+										<p className="font-semibold font-sans text-slate-900 leading-none">
 											0388660678
 										</p>
 									</div>
-									<p className="text-[6.5px] italic text-slate-400 uppercase">
+									<p className="text-[6.5px] italic text-slate-600 font-semibold uppercase">
 										Trần Quốc Hiếu
 									</p>
 								</div>
@@ -308,7 +310,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 									<span className="uppercase font-black text-yellow-700 text-[8.5px] block mb-0.5">
 										Quyền lợi:
 									</span>
-									<p className="font-bold italic text-blue-900 font-dancing text-base leading-none">
+									<p className="font-bold italic text-blue-900 text-base leading-none">
 										{data.benefits ||
 											"..................................................."}
 									</p>
@@ -319,36 +321,32 @@ export function BillPreview({ data }: BillPreviewProps) {
 
 					{/* Payment and Signatures */}
 					<div className="grid grid-cols-[1.1fr_1.1fr] gap-4">
-						<div className="space-y-1.5 bg-yellow-500/5 p-2.5 rounded-xl border border-yellow-500/20 shadow-inner">
+						<div className="space-y-1.5 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner">
 							<div className="flex items-center justify-between text-[9px]">
-								<span className="uppercase font-black text-yellow-700/60">
+								<span className="uppercase font-black text-black">
 									Tổng chi phí
 								</span>
-								<div className="font-black text-slate-900 text-base">
+								<div className="font-black text-black text-base">
 									{formatCurrency(totalPrice)}
 								</div>
 							</div>
 							<div className="flex items-center justify-between text-[9px]">
-								<span className="uppercase font-black text-yellow-700/60">
-									Đặt cọc
-								</span>
-								<div className="font-black text-slate-900">
+								<span className="uppercase font-black text-black">Đặt cọc</span>
+								<div className="font-black text-black">
 									{formatCurrency(Number(data.deposit))}
 								</div>
 							</div>
-							<div className="flex items-center justify-between pt-1 border-t border-yellow-500/20 text-[9px]">
-								<span className="uppercase font-black text-red-500">
-									Còn lại
-								</span>
-								<div className="font-black text-red-600 text-lg">
+							<div className="flex items-center justify-between pt-1 border-t border-slate-200 text-[9px]">
+								<span className="uppercase font-black text-black">Còn lại</span>
+								<div className="font-black text-black text-lg">
 									{formatCurrency(remaining)}
 								</div>
 							</div>
 							<div className="flex items-center justify-between text-[9px]">
-								<span className="uppercase font-black text-yellow-700/60">
+								<span className="uppercase font-black text-black">
 									Ngày nhận
 								</span>
-								<div className="font-black text-slate-900">
+								<div className="font-black text-black">
 									{formatDate(data.pickupDate) || "../../...."}
 								</div>
 							</div>
@@ -356,7 +354,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 
 						<div className="flex flex-col">
 							<div className="text-right mb-1">
-								<p className="text-[8px] font-black text-slate-500 uppercase">
+								<p className="text-[8px] font-black text-slate-900 uppercase">
 									NGÀY {day} THÁNG {month} NĂM {year}
 								</p>
 							</div>
@@ -372,18 +370,11 @@ export function BillPreview({ data }: BillPreviewProps) {
 								<div className="flex flex-col items-center justify-center relative min-h-[50px]">
 									<div className="transform -rotate-6 absolute w-20 h-10">
 										<img
-											src="/images/Untitled.jpg"
+											src="/images/sig.png"
 											alt="Signature"
 											className="w-full h-full object-contain opacity-80"
 											onError={(e) => (e.currentTarget.style.display = "none")}
 										/>
-										<p
-											className={cn(
-												"text-2xl text-blue-800 opacity-60 tracking-tighter absolute inset-0 flex items-center justify-center -z-10 font-dancing",
-											)}
-										>
-											Hieu
-										</p>
 									</div>
 									<div className="mt-auto pt-4 text-center">
 										<p className="font-black text-[10px] underline decoration-1 underline-offset-2 tracking-tight text-slate-900">
@@ -407,7 +398,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 
 						<div
 							className={cn(
-								"text-yellow-600 font-black text-[10px] text-center mt-0.5 italic font-dancing normal-case",
+								"text-black font-black text-[10px] text-center mt-0.5 italic normal-case",
 							)}
 						>
 							Chân thành cảm ơn quý khách!
