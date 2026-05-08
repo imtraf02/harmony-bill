@@ -5,7 +5,7 @@
     .no-print {
       display: none !important;
     }
-    
+
     body {
       background: white !important;
       padding: 0 !important;
@@ -27,9 +27,7 @@
 
 @theme {
     --font-sans: var(--font-sans), ui-sans-serif, system-ui;
-    --font-playfair: var(--font-playfair), serif;
-    --font-dancing: var(--font-dancing), cursive;
-    --font-heading: var(--font-playfair);
+    --font-heading: var(--font-sans);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -152,4 +150,18 @@
   html {
     @apply font-sans;
     }
+}
+
+/* Hide number input spinners */
+@layer base {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
 }

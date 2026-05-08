@@ -1,27 +1,32 @@
-import { Dancing_Script, Playfair_Display, Inter } from "next/font/google"
+import { Roboto } from "next/font/google";
 
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
+import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ['latin', 'vietnamese'], variable: '--font-sans' })
-const dancingScript = Dancing_Script({ subsets: ['latin', 'vietnamese'], variable: '--font-dancing' })
-const playfair = Playfair_Display({ subsets: ['latin', 'vietnamese'], variable: '--font-playfair' })
+const roboto = Roboto({
+	subsets: ["latin", "vietnamese"],
+	variable: "--font-sans",
+});
 
 export default function RootLayout({
-  children,
+	children,
 }: Readonly<{
-  children: React.ReactNode
+	children: React.ReactNode;
 }>) {
-  return (
-    <html
-      lang="vi"
-      suppressHydrationWarning
-      className={cn("antialiased", inter.variable, dancingScript.variable, playfair.variable)}
-    >
-      <body className={cn("min-h-screen bg-background font-playfair", inter.variable, dancingScript.variable, playfair.variable)}>
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
-    </html>
-  )
+	return (
+		<html
+			lang="vi"
+			suppressHydrationWarning
+			className={cn("antialiased", roboto.variable)}
+		>
+			<body className={cn("min-h-screen bg-background", roboto.variable)}>
+				<ThemeProvider>
+					{children}
+					<Toaster />
+				</ThemeProvider>
+			</body>
+		</html>
+	);
 }

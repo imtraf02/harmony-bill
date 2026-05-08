@@ -13,8 +13,9 @@ export const billSchema = z.object({
 
   // Dynamic Packages
   packages: z.array(z.object({
-    label: z.string().min(1, "Tên gói không được để trống"),
-    price: z.coerce.number().min(0),
+    id: z.string().optional(),
+    label: z.string().min(1, "Vui lòng chọn gói"),
+    price: z.number(),
   })).min(1, "Vui lòng thêm ít nhất một gói dịch vụ"),
 
   // Event details
@@ -25,6 +26,8 @@ export const billSchema = z.object({
     required_error: "Vui lòng chọn ngày kết thúc",
   }),
   travelFee: z.coerce.number().min(0),
+  discount: z.coerce.number().min(0).default(0),
+  includeVAT: z.boolean().default(true),
   benefits: z.string().optional(),
 
   // Payment

@@ -1,7 +1,7 @@
 /**
  * components/bill-preview.tsx
  * Redesigned printable preview for A5 paper size.
- * Uses Playfair Display as the primary font for the entire bill.
+ * Uses Roboto as the primary font for the entire bill.
  * Optimized for A5 printing with corrected signature alignment.
  */
 
@@ -61,8 +61,9 @@ export function BillPreview({ data }: BillPreviewProps) {
 		(acc, curr) => acc + (Number(curr.price) || 0),
 		0,
 	);
-	const subtotal = packageTotal + (Number(data.travelFee) || 0);
-	const vatAmount = subtotal * 0.1;
+	const subtotalBeforeDiscount = packageTotal + (Number(data.travelFee) || 0);
+	const subtotal = subtotalBeforeDiscount - (Number(data.discount) || 0);
+	const vatAmount = data.includeVAT ? subtotal * 0.1 : 0;
 	const totalPrice = subtotal + vatAmount;
 	const remaining = totalPrice - (Number(data.deposit) || 0);
 
@@ -90,14 +91,12 @@ export function BillPreview({ data }: BillPreviewProps) {
       `}</style>
 			<div
 				className={cn(
-					"relative bg-white text-black font-playfair shadow-2xl overflow-hidden",
+					"relative bg-white text-black shadow-2xl overflow-hidden",
 					"print:shadow-none print:m-0 print:!transform-none print:w-[148mm] print:h-[210mm] print:fixed print:top-0 print:left-0 print:z-[10000]",
 				)}
 				style={{
 					width: "559px",
 					height: "794px",
-					fontFamily:
-						'var(--font-playfair), "Playfair Display", Georgia, serif',
 					transform: `scale(${scale})`,
 					transformOrigin: "top center",
 					backgroundImage: 'url("/images/bg.jpg")',
@@ -191,7 +190,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 											050096596674
 										</p>
 									</div>
-									<p className="text-[6.5px] italic text-slate-600 font-semibold uppercase">
+									<p className="text-[6.5px] text-slate-600 font-semibold uppercase">
 										Trần Quốc Hiếu
 									</p>
 								</div>
@@ -204,7 +203,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 											0388660678
 										</p>
 									</div>
-									<p className="text-[6.5px] italic text-slate-600 font-semibold uppercase">
+									<p className="text-[6.5px] text-slate-600 font-semibold uppercase">
 										Trần Quốc Hiếu
 									</p>
 								</div>
@@ -228,7 +227,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 									<span className="uppercase font-black text-yellow-700 text-[8.5px]">
 										Tên khách hàng:
 									</span>
-									<span className="font-black text-slate-900">
+									<span className="font-medium text-slate-900">
 										{data.customerName ||
 											"......................................."}
 									</span>
@@ -247,7 +246,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 								<span className="uppercase font-black text-yellow-700 text-[8.5px]">
 									Địa chỉ:
 								</span>
-								<span className="font-bold italic text-slate-800 flex-1">
+								<span className="font-bold text-slate-800 flex-1">
 									{data.address ||
 										"..........................................................................."}
 								</span>
@@ -263,7 +262,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 											<span className="uppercase font-black text-yellow-700 text-[8.5px]">
 												Đặt gói {index + 1}:
 											</span>
-											<span className="font-black text-blue-900">
+											<span className="font-black text-yellow-800">
 												{pkg.label || "......................................."}
 											</span>
 										</div>
@@ -310,7 +309,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 									<span className="uppercase font-black text-yellow-700 text-[8.5px] block mb-0.5">
 										Quyền lợi:
 									</span>
-									<p className="font-bold italic text-blue-900 text-base leading-none">
+									<p className="font-medium text-base leading-none">
 										{data.benefits ||
 											"..................................................."}
 									</p>
@@ -324,12 +323,40 @@ export function BillPreview({ data }: BillPreviewProps) {
 						<div className="space-y-1.5 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner">
 							<div className="flex items-center justify-between text-[9px]">
 								<span className="uppercase font-black text-black">
+									Tạm tính
+								</span>
+								<div className="font-black text-black">
+									{formatCurrency(subtotalBeforeDiscount)}
+								</div>
+							</div>
+							{Number(data.discount) > 0 && (
+								<div className="flex items-center justify-between text-[9px]">
+									<span className="uppercase font-black text-green-700">
+										Giảm giá
+									</span>
+									<div className="font-black text-green-700">
+										- {formatCurrency(Number(data.discount))}
+									</div>
+								</div>
+							)}
+							<div className="flex items-center justify-between text-[9px]">
+								<span className="uppercase font-black text-black">
 									Tổng chi phí
 								</span>
 								<div className="font-black text-black text-base">
 									{formatCurrency(totalPrice)}
 								</div>
 							</div>
+							{data.includeVAT && (
+								<div className="flex items-center justify-between text-[9px]">
+									<span className="uppercase font-black text-black">
+										Thuế VAT (10%)
+									</span>
+									<div className="font-black text-black">
+										{formatCurrency(vatAmount)}
+									</div>
+								</div>
+							)}
 							<div className="flex items-center justify-between text-[9px]">
 								<span className="uppercase font-black text-black">Đặt cọc</span>
 								<div className="font-black text-black">
@@ -398,7 +425,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 
 						<div
 							className={cn(
-								"text-black font-black text-[10px] text-center mt-0.5 italic normal-case",
+								"text-black font-black text-[10px] text-center mt-0.5 normal-case",
 							)}
 						>
 							Chân thành cảm ơn quý khách!
