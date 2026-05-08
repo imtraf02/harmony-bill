@@ -1,15 +1,12 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import { Dancing_Script, Playfair_Display, Inter } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'})
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-})
+const inter = Inter({ subsets: ['latin', 'vietnamese'], variable: '--font-sans' })
+const dancingScript = Dancing_Script({ subsets: ['latin', 'vietnamese'], variable: '--font-dancing' })
+const playfair = Playfair_Display({ subsets: ['latin', 'vietnamese'], variable: '--font-playfair' })
 
 export default function RootLayout({
   children,
@@ -18,11 +15,11 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="vi"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
+      className={cn("antialiased", inter.variable, dancingScript.variable, playfair.variable)}
     >
-      <body>
+      <body className={cn("min-h-screen bg-background font-sans", inter.variable, dancingScript.variable, playfair.variable)}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
