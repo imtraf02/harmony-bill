@@ -34,9 +34,9 @@ function HomeContent() {
 	}, [editId]);
 
 	return (
-		<main className="min-h-screen bg-slate-50/50">
-			<div className="container mx-auto py-10 px-4 md:px-8">
-				<header className="mb-10 no-print flex flex-col md:flex-row md:items-center justify-between gap-4">
+		<main className="min-h-screen bg-slate-50/50 pb-16">
+			<div className="container mx-auto py-6 px-2 md:px-8">
+				<header className="mb-6 no-print flex flex-col md:flex-row md:items-center justify-between gap-4">
 					<div>
 						<h1 className="text-3xl font-extrabold tracking-tight">
 							Hợp đồng Quay phim & Chụp ảnh

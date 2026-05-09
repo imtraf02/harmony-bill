@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import * as htmlToImage from "html-to-image";
-import { CalendarIcon, Plus, Printer, Settings, Trash2 } from "lucide-react";
+import { CalendarIcon, Plus, Printer, Settings, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
@@ -63,7 +63,7 @@ const studioInfo = {
 
 /* ─────────────────────────────────────────
    Reusable section wrapper with gold rule
-───────────────────────────────────────── */
+ ───────────────────────────────────────── */
 function Section({
 	title,
 	children,
@@ -76,7 +76,7 @@ function Section({
 	return (
 		<div className="rounded-2xl border border-[#e8dcc8] bg-white shadow-[0_2px_16px_0_rgba(180,150,80,0.07)] overflow-hidden">
 			{/* Section header */}
-			<div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
+			<div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
 				<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[#b49050] font-sans">
 					{title}
 				</span>
@@ -89,7 +89,7 @@ function Section({
 
 /* ─────────────────────────────────────────
    Elegant label component
-───────────────────────────────────────── */
+ ───────────────────────────────────────── */
 function ElegantLabel({
 	htmlFor,
 	children,
@@ -109,9 +109,9 @@ function ElegantLabel({
 
 /* ─────────────────────────────────────────
    Styled input wrapper
-───────────────────────────────────────── */
+ ───────────────────────────────────────── */
 const inputCls =
-	"w-full h-11 rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-3.5 text-sm text-[#2d2418] placeholder:text-[#c0aa88] focus:outline-none focus:ring-2 focus:ring-[#c8a84b]/40 focus:border-[#c8a84b] transition-all duration-200";
+	"w-full h-11 rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-2 text-sm text-[#2d2418] placeholder:text-[#c0aa88] focus:outline-none focus:ring-2 focus:ring-[#c8a84b]/40 focus:border-[#c8a84b] transition-all duration-200";
 
 export function BillForm({ onDataChange, initialData }: BillFormProps) {
 	const [masterPackages, setMasterPackages] = React.useState<any[]>([]);
@@ -241,7 +241,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 								<button
 									type="button"
 									className={cn(
-										"w-full h-11 flex items-center rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-3.5 text-sm text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#c8a84b]/40 focus:border-[#c8a84b]",
+										"w-full h-11 flex items-center rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-2 text-sm text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#c8a84b]/40 focus:border-[#c8a84b]",
 										!field.value && "text-[#c0aa88]",
 									)}
 								/>
@@ -280,18 +280,18 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 			{/* ── Studio Header ── */}
 			<div className="rounded-2xl overflow-hidden shadow-[0_4px_24px_0_rgba(180,150,80,0.13)] border border-[#e0cc9a]">
 				{/* Gold gradient banner */}
-				<div className="h-1.5 w-full bg-gradient-to-r from-[#c8a84b] via-[#e8d07a] to-[#c8a84b]" />
-				<div className="bg-gradient-to-br from-[#fdfaf3] to-white px-6 pt-5 pb-5 text-center relative">
+				<div className="h-1 w-full bg-gradient-to-r from-[#c8a84b] via-[#e8d07a] to-[#c8a84b]" />
+				<div className="bg-gradient-to-br from-[#fdfaf3] to-white px-4 pt-4 pb-4 text-center relative">
 					<Link
 						href="/packages"
-						className="absolute top-3 right-3 p-2 rounded-xl hover:bg-[#f5edd8] text-[#c8a84b] transition-colors print:hidden"
+						className="absolute top-1 right-3 p-2 rounded-xl hover:bg-[#f5edd8] text-[#c8a84b] transition-colors print:hidden"
 						title="Quản lý gói"
 					>
 						<Settings className="w-4 h-4" />
 					</Link>
 
 					{/* Studio name */}
-					<div className="flex items-center justify-center gap-3 mb-1">
+					<div className="flex items-center justify-center gap-1 mb-1">
 						<div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#c8a84b]/50" />
 						<h1
 							className="text-2xl md:text-3xl font-bold tracking-[0.15em] text-[#8a6820]"
@@ -319,7 +319,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 						{studioInfo.bankAccounts.map((acc, i) => (
 							<div
 								key={i}
-								className="flex items-center gap-1.5 bg-[#faf6ea] border border-[#e0cc9a] rounded-lg px-3 py-1.5 text-[11px] text-[#6b5530]"
+								className="flex items-center gap-1.5 bg-[#faf6ea] border border-[#e0cc9a] rounded-lg px-3 py-1 text-[11px] text-[#6b5530]"
 							>
 								<span className="font-semibold text-[#b49050]">{acc.bank}</span>
 								<span className="text-[#c8a84b]">·</span>
@@ -388,7 +388,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					<button
 						type="button"
 						onClick={() => append({ label: "", price: 0 })}
-						className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#b49050] hover:text-[#8a6820] border border-[#e0cc9a] hover:border-[#c8a84b] rounded-lg px-3 py-1.5 bg-white hover:bg-[#faf6ea] transition-all duration-200"
+						className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#b49050] hover:text-[#8a6820] border border-[#e0cc9a] hover:border-[#c8a84b] rounded-lg px-3 py-1 bg-white hover:bg-[#faf6ea] transition-all duration-200"
 					>
 						<Plus className="w-3.5 h-3.5" /> Thêm gói
 					</button>
@@ -397,9 +397,28 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 				<div className="space-y-3">
 					{fields.map((field, index) => (
 						<div key={field.id} className="relative rounded-xl group">
-							<div className="flex items-start gap-3">
+							<div className="flex items-start gap-1">
 								<div className="flex-1 space-y-2">
-									<ElegantLabel>Chọn gói {index + 1}</ElegantLabel>
+									<div className="flex items-center justify-between">
+										<ElegantLabel>Chọn gói {index + 1}</ElegantLabel>
+										{values.packages?.[index]?.label && (
+											<button
+												type="button"
+												onClick={() => {
+													if (fields.length > 1) {
+														remove(index);
+													} else {
+														setValue(`packages.${index}.label`, "");
+														setValue(`packages.${index}.price`, 0);
+														setValue(`packages.${index}.id`, undefined);
+													}
+												}}
+												className="text-[10px] font-bold text-red-500 hover:text-red-600 transition-colors flex items-center gap-1"
+											>
+												<X className="w-3 h-3" /> Bỏ chọn
+											</button>
+										)}
+									</div>
 									<Controller
 										control={control}
 										name={`packages.${index}.label`}
@@ -417,14 +436,39 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 													}
 												}}
 											>
-												<SelectTrigger className="w-full h-11 rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] text-sm text-[#2d2418] focus:ring-[#c8a84b]/40 focus:border-[#c8a84b]">
-													<SelectValue placeholder="Bấm để chọn gói..." />
+												<SelectTrigger className="w-full !h-[52px] rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-2 text-sm text-[#2d2418] focus:ring-[#c8a84b]/40 focus:border-[#c8a84b] transition-all">
+													<SelectValue placeholder="Bấm để chọn gói...">
+														{(val: string) => {
+															if (!val) return "Bấm để chọn gói...";
+															const pkg = masterPackages.find(
+																(p) => p.label === val,
+															);
+															if (!pkg) return val;
+															return (
+																<span className="flex flex-col items-start gap-0">
+																	<span className="font-bold text-sm leading-tight">
+																		{pkg.label}
+																	</span>
+																	<span className="text-[10px] text-[#9a8060] font-semibold">
+																		{formatCurrency(pkg.price)}
+																	</span>
+																</span>
+															);
+														}}
+													</SelectValue>
 												</SelectTrigger>
 												<SelectContent className="rounded-xl border-[#e8dcc8] shadow-xl">
 													<SelectGroup>
 														{masterPackages.map((p) => (
 															<SelectItem key={p.id} value={p.label}>
-																{p.label}
+																<div className="flex flex-col items-start gap-0 py-1">
+																	<span className="font-semibold text-sm">
+																		{p.label}
+																	</span>
+																	<span className="text-[10px] opacity-70 font-medium">
+																		{formatCurrency(p.price)}
+																	</span>
+																</div>
 															</SelectItem>
 														))}
 													</SelectGroup>
@@ -432,17 +476,6 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 											</Select>
 										)}
 									/>
-
-									{values.packages?.[index]?.price > 0 && (
-										<div className="flex justify-between items-center bg-gradient-to-r from-[#faf6ea] to-[#fdfbf8] border border-[#e8dcc8] rounded-lg px-3 py-2">
-											<span className="text-[11px] uppercase tracking-wider text-[#9a8060]">
-												Đơn giá
-											</span>
-											<span className="text-sm font-bold text-[#c8a84b]">
-												{formatCurrency(values.packages[index].price)}
-											</span>
-										</div>
-									)}
 								</div>
 							</div>
 
@@ -528,7 +561,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 										currentVal ? `${currentVal}\n${val}` : val,
 									);
 								}}
-								className="text-[10px] border border-[#e0cc9a] rounded-lg px-2.5 py-1.5 bg-[#faf6ea] text-[#8a6820] hover:bg-[#f0e8cc] hover:border-[#c8a84b] transition-colors leading-tight"
+								className="text-[10px] border border-[#e0cc9a] rounded-lg px-2 py-1 bg-[#faf6ea] text-[#8a6820] hover:bg-[#f0e8cc] hover:border-[#c8a84b] transition-colors leading-tight"
 							>
 								{val}
 							</button>
@@ -555,9 +588,9 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					</label>
 				</div>
 
-				<div className="bg-white px-5 py-5 space-y-5">
+				<div className="bg-white p-2 space-y-5">
 					{/* Summary numbers */}
-					<div className="grid grid-cols-3 gap-3">
+					<div className="grid grid-cols-3 gap-1">
 						{[
 							{
 								label: "Tạm tính",
@@ -577,7 +610,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 						].map((item) => (
 							<div
 								key={item.label}
-								className="bg-[#fdfbf8] border border-[#e8dcc8] rounded-xl p-3 text-center"
+								className="bg-[#fdfbf8] border border-[#e8dcc8] rounded-xl p-1 text-center"
 							>
 								<p className="text-[10px] uppercase tracking-wider text-[#9a8060] mb-1">
 									{item.label}
