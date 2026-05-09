@@ -54,6 +54,25 @@ export async function saveContract(data: BillSchema) {
 	return { success: true, id: contract.id };
 }
 
+export async function getContractById(id: string) {
+	const supabase = await createClient();
+	const { data, error } = await supabase
+		.from("contracts")
+		.select(`
+      *,
+      contract_packages (*)
+    `)
+		.match({ id })
+		.single();
+
+	if (error) {
+		console.error("Error fetching contract:", error);
+		return null;
+	}
+
+	return data;
+}
+
 export async function getContracts() {
 	const supabase = await createClient();
 	const { data, error } = await supabase

@@ -17,8 +17,6 @@ import {
 	getMasterPackages,
 	updateMasterPackage,
 } from "@/app/actions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 export default function PackagesPage() {
 	const [packages, setPackages] = React.useState<any[]>([]);
@@ -77,162 +75,211 @@ export default function PackagesPage() {
 			currency: "VND",
 		}).format(amount);
 
+	const inputCls =
+		"w-full h-10 rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-3.5 text-sm text-[#2d2418] placeholder:text-[#c0aa88] focus:outline-none focus:ring-2 focus:ring-[#c8a84b]/40 focus:border-[#c8a84b] transition-all duration-200";
+
 	return (
-		<div className="min-h-screen bg-gray-50">
-			{/* Header */}
-			<div className="bg-white border-b sticky top-0 z-10">
+		<div
+			className="min-h-screen"
+			style={{
+				fontFamily: "'Outfit', 'Be Vietnam Pro', sans-serif",
+				background: "linear-gradient(160deg, #fdfaf3 0%, #f5f0e8 100%)",
+			}}
+		>
+			{/* ── Sticky Header ── */}
+			<div
+				className="sticky top-0 z-10"
+				style={{
+					background: "rgba(253, 250, 243, 0.92)",
+					backdropFilter: "blur(12px)",
+					borderBottom: "1px solid #e8dcc8",
+				}}
+			>
 				<div className="flex items-center gap-3 px-4 py-4 max-w-2xl mx-auto">
 					<Link href="/">
-						<Button variant="ghost" size="icon" className="shrink-0 -ml-2">
-							<ArrowLeft className="w-5 h-5" />
-						</Button>
+						<button className="w-9 h-9 rounded-xl flex items-center justify-center border border-[#e0cc9a] bg-[#faf6ea] hover:bg-[#f0e8cc] text-[#b49050] transition-colors -ml-1">
+							<ArrowLeft className="w-4 h-4" />
+						</button>
 					</Link>
-					<h1 className="text-xl font-bold tracking-tight">Gói dịch vụ</h1>
-					<span className="ml-auto text-sm font-medium text-muted-foreground bg-gray-100 rounded-full px-2.5 py-0.5">
-						{packages.length}
-					</span>
+
+					<div className="flex items-center gap-2.5 ml-1">
+						<div className="h-5 w-px bg-[#e0cc9a]" />
+						<h1
+							className="text-lg font-bold tracking-wide text-[#5a3e1b]"
+							style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+						>
+							Gói dịch vụ
+						</h1>
+					</div>
+
+					<div className="ml-auto flex items-center gap-1.5 bg-gradient-to-r from-[#c8a84b] to-[#e8c84b] text-white rounded-full px-3 py-1 shadow-sm">
+						<span className="text-xs font-bold">{packages.length}</span>
+						<span className="text-[10px] opacity-80">gói</span>
+					</div>
 				</div>
 			</div>
 
-			<div className="px-4 py-4 max-w-2xl mx-auto space-y-3">
-				{/* Add new package - collapsed button or expanded form */}
+			<div className="px-4 py-5 max-w-2xl mx-auto space-y-3">
+
+				{/* ── Add form toggle ── */}
 				{!showAddForm ? (
 					<button
 						onClick={() => setShowAddForm(true)}
-						className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-dashed border-gray-200 text-sm font-medium text-gray-400 hover:border-rose-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+						className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl border-2 border-dashed border-[#e0cc9a] text-sm font-semibold text-[#b49050] hover:border-[#c8a84b] hover:text-[#8a6820] hover:bg-[#faf6ea] transition-all duration-200 group"
 					>
-						<Plus className="w-4 h-4" /> Thêm gói mới
+						<div className="w-5 h-5 rounded-full border-2 border-current flex items-center justify-center group-hover:bg-[#c8a84b] group-hover:border-[#c8a84b] group-hover:text-white transition-all">
+							<Plus className="w-3 h-3" />
+						</div>
+						Thêm gói mới
 					</button>
 				) : (
-					<div className="bg-white rounded-2xl border border-rose-100 shadow-sm p-4 space-y-3">
-						<div className="flex items-center justify-between mb-1">
-							<p className="font-semibold text-sm">Gói mới</p>
-							<Button
-								size="icon"
-								variant="ghost"
-								className="w-7 h-7"
+					<div className="rounded-2xl border border-[#e0cc9a] bg-white shadow-[0_4px_20px_0_rgba(200,168,75,0.12)] overflow-hidden">
+						{/* Form header */}
+						<div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
+							<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[#b49050]">
+								Gói mới
+							</span>
+							<button
 								onClick={() => setShowAddForm(false)}
+								className="w-6 h-6 rounded-lg flex items-center justify-center text-[#b49050] hover:bg-[#faf6ea] transition-colors"
 							>
-								<X className="w-4 h-4 text-muted-foreground" />
-							</Button>
+								<X className="w-3.5 h-3.5" />
+							</button>
 						</div>
 
-						<form onSubmit={handleAdd} className="space-y-3">
-							<div className="space-y-1.5">
-								<label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+						<form onSubmit={handleAdd} className="px-5 py-5 space-y-4">
+							<div>
+								<label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a8060] mb-1.5">
 									Tên gói
 								</label>
-								<Input
+								<input
 									value={newLabel}
 									onChange={(e) => setNewLabel(e.target.value)}
 									placeholder="VD: Gói Phóng Sự"
 									autoFocus
+									className={inputCls}
 								/>
 							</div>
-							<div className="space-y-1.5">
-								<label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+							<div>
+								<label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a8060] mb-1.5">
 									Giá tiền (₫)
 								</label>
-								<Input
+								<input
 									type="number"
 									value={newPrice}
 									onChange={(e) => setNewPrice(Number(e.target.value))}
 									placeholder="0"
+									className={inputCls}
 								/>
 							</div>
-							<Button
+							<button
 								type="submit"
-								className="w-full gap-2 bg-rose-500 hover:bg-rose-600"
+								className="w-full h-11 rounded-xl bg-gradient-to-r from-[#c8a84b] to-[#e8c84b] hover:from-[#b49040] hover:to-[#d8b83b] text-white text-sm font-bold tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
 							>
 								<Plus className="w-4 h-4" /> Thêm gói
-							</Button>
+							</button>
 						</form>
 					</div>
 				)}
 
-				{/* Package list */}
+				{/* ── Package list ── */}
 				{packages.length === 0 ? (
-					<div className="text-center py-16 text-muted-foreground">
-						<Package className="w-10 h-10 mx-auto mb-3 opacity-30" />
-						<p className="font-medium">Chưa có gói dịch vụ nào</p>
-						<p className="text-sm mt-1">Nhấn nút bên trên để thêm gói mới</p>
+					<div className="text-center py-20">
+						<div className="w-16 h-16 rounded-2xl bg-[#faf6ea] border border-[#e8dcc8] flex items-center justify-center mx-auto mb-4">
+							<Package className="w-7 h-7 text-[#c8a84b] opacity-50" />
+						</div>
+						<p className="font-semibold text-[#8a7550] text-sm">Chưa có gói dịch vụ nào</p>
+						<p className="text-xs text-[#b0a080] mt-1">Nhấn nút bên trên để thêm gói mới</p>
 					</div>
 				) : (
-					packages.map((pkg) => (
+					packages.map((pkg, i) => (
 						<div
 							key={pkg.id}
-							className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+							className="rounded-2xl border border-[#e8dcc8] bg-white overflow-hidden group transition-all duration-200 hover:border-[#c8a84b] hover:shadow-[0_4px_16px_0_rgba(200,168,75,0.13)]"
 						>
+							{/* Gold hover line */}
+							<div className="h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-[#c8a84b] via-[#e8d07a] to-[#c8a84b] transition-all duration-300" />
+
 							{editingId === pkg.id ? (
-								/* Edit mode */
-								<div className="p-4 space-y-3">
-									<div className="space-y-1.5">
-										<label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+								/* ── Edit mode ── */
+								<div className="px-5 py-5 space-y-4">
+									<div>
+										<label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a8060] mb-1.5">
 											Tên gói
 										</label>
-										<Input
+										<input
 											value={editLabel}
 											onChange={(e) => setEditLabel(e.target.value)}
 											autoFocus
+											className={inputCls}
 										/>
 									</div>
-									<div className="space-y-1.5">
-										<label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+									<div>
+										<label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a8060] mb-1.5">
 											Giá tiền (₫)
 										</label>
-										<Input
+										<input
 											type="number"
 											value={editPrice}
 											onChange={(e) => setEditPrice(Number(e.target.value))}
+											className={inputCls}
 										/>
 									</div>
-									<div className="flex gap-2 pt-1">
-										<Button
-											className="flex-1 gap-2 bg-green-500 hover:bg-green-600"
+									<div className="flex gap-2">
+										<button
 											onClick={() => handleUpdate(pkg.id)}
+											className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#4caf7a] to-[#5dc98a] hover:from-[#3a9f6a] hover:to-[#4db87a] text-white text-sm font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all"
 										>
 											<Check className="w-4 h-4" /> Lưu
-										</Button>
-										<Button
-											variant="outline"
-											className="flex-1 gap-2"
+										</button>
+										<button
 											onClick={() => setEditingId(null)}
+											className="flex-1 h-10 rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] text-[#8a7550] text-sm font-semibold flex items-center justify-center gap-1.5 hover:bg-[#faf6ea] hover:border-[#c8a84b] transition-all"
 										>
 											<X className="w-4 h-4" /> Huỷ
-										</Button>
+										</button>
 									</div>
 								</div>
 							) : (
-								/* View mode */
+								/* ── View mode ── */
 								<div className="flex items-center px-4 py-3.5">
-									<div className="w-9 h-9 rounded-full bg-rose-50 flex items-center justify-center shrink-0">
-										<Package className="w-4 h-4 text-rose-500" />
+									{/* Index + icon */}
+									<div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#faf6ea] to-[#f0e8cc] border border-[#e0cc9a] flex items-center justify-center shrink-0 relative">
+										<Package className="w-4 h-4 text-[#c8a84b]" />
+										<span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-br from-[#c8a84b] to-[#e8d07a] text-white text-[9px] font-bold flex items-center justify-center shadow-sm">
+											{i + 1}
+										</span>
 									</div>
+
+									{/* Label + price */}
 									<div className="ml-3 flex-1 min-w-0">
-										<p className="font-semibold text-sm truncate">
+										<p
+											className="font-semibold text-sm text-[#2d2418] truncate"
+											style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+										>
 											{pkg.label}
 										</p>
-										<p className="text-xs text-muted-foreground mt-0.5">
+										<p className="text-xs font-bold text-[#c8a84b] mt-0.5">
 											{formatCurrency(pkg.price)}
 										</p>
 									</div>
-									<div className="flex items-center gap-1 ml-2 shrink-0">
-										<Button
-											size="icon"
-											variant="ghost"
-											className="w-8 h-8 text-gray-400 hover:text-gray-700"
+
+									{/* Actions */}
+									<div className="flex items-center gap-0.5 ml-2 shrink-0">
+										<button
 											onClick={() => startEdit(pkg)}
+											className="w-8 h-8 rounded-lg flex items-center justify-center text-[#9a8060] hover:text-[#5a3e1b] hover:bg-[#faf6ea] transition-colors"
+											title="Chỉnh sửa"
 										>
-											<Edit2 className="w-4 h-4" />
-										</Button>
-										<Button
-											size="icon"
-											variant="ghost"
-											className="w-8 h-8 text-red-400 hover:text-red-600 hover:bg-red-50"
+											<Edit2 className="w-3.5 h-3.5" />
+										</button>
+										<button
 											onClick={() => handleDelete(pkg.id)}
+											className="w-8 h-8 rounded-lg flex items-center justify-center text-[#b0a0a0] hover:text-red-500 hover:bg-red-50 transition-colors"
+											title="Xoá"
 										>
-											<Trash2 className="w-4 h-4" />
-										</Button>
+											<Trash2 className="w-3.5 h-3.5" />
+										</button>
 									</div>
 								</div>
 							)}

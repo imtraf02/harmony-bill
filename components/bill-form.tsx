@@ -2,6 +2,7 @@
  * components/bill-form.tsx
  * Main form component for capturing wedding photography contract details.
  * Updated to support dynamic packages and simplified event details.
+ * UI redesigned: luxury / refined aesthetic — gold accents, serif typography, soft shadows.
  */
 
 "use client";
@@ -14,11 +15,10 @@ import { CalendarIcon, Plus, Printer, Settings, Trash2 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { getMasterPackages, saveContract } from "@/app/actions";
 import { toast } from "sonner";
+import { getMasterPackages, saveContract } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Field,
 	FieldError,
@@ -47,6 +47,7 @@ import { cn } from "@/lib/utils";
 
 interface BillFormProps {
 	onDataChange: (data: BillSchema) => void;
+	initialData?: Partial<BillSchema>;
 }
 
 const studioInfo = {
@@ -60,7 +61,59 @@ const studioInfo = {
 	],
 };
 
-export function BillForm({ onDataChange }: BillFormProps) {
+/* ─────────────────────────────────────────
+   Reusable section wrapper with gold rule
+───────────────────────────────────────── */
+function Section({
+	title,
+	children,
+	action,
+}: {
+	title: string;
+	children: React.ReactNode;
+	action?: React.ReactNode;
+}) {
+	return (
+		<div className="rounded-2xl border border-[#e8dcc8] bg-white shadow-[0_2px_16px_0_rgba(180,150,80,0.07)] overflow-hidden">
+			{/* Section header */}
+			<div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
+				<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[#b49050] font-sans">
+					{title}
+				</span>
+				{action}
+			</div>
+			<div className="p-2 space-y-4">{children}</div>
+		</div>
+	);
+}
+
+/* ─────────────────────────────────────────
+   Elegant label component
+───────────────────────────────────────── */
+function ElegantLabel({
+	htmlFor,
+	children,
+}: {
+	htmlFor?: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<label
+			htmlFor={htmlFor}
+			className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a8060] mb-1.5"
+		>
+			{children}
+		</label>
+	);
+}
+
+/* ─────────────────────────────────────────
+   Styled input wrapper
+───────────────────────────────────────── */
+const inputCls =
+	"w-full h-11 rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-3.5 text-sm text-[#2d2418] placeholder:text-[#c0aa88] focus:outline-none focus:ring-2 focus:ring-[#c8a84b]/40 focus:border-[#c8a84b] transition-all duration-200";
+
+export function BillForm({ onDataChange, initialData }: BillFormProps) {
 	const [masterPackages, setMasterPackages] = React.useState<any[]>([]);
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -71,7 +124,7 @@ export function BillForm({ onDataChange }: BillFormProps) {
 			travelFee: 0,
 			discount: 0,
 			deposit: 0,
-			includeVAT: true,
+			includeVAT: false,
 			contractDate: new Date(),
 		},
 	});
@@ -89,19 +142,20 @@ export function BillForm({ onDataChange }: BillFormProps) {
 		name: "packages",
 	});
 
+	React.useEffect(() => {
+		if (initialData) {
+			form.reset(initialData);
+		}
+	}, [initialData, form]);
+
 	const values = watch();
 
-	// Load packages
 	React.useEffect(() => {
 		getMasterPackages().then(setMasterPackages);
 	}, []);
 
-	// Sync form values to parent for preview
 	React.useEffect(() => {
-		// Initial sync
 		onDataChange(form.getValues() as BillSchema);
-
-		// Subscribe to changes
 		const subscription = watch((value) => {
 			onDataChange(value as BillSchema);
 		});
@@ -114,24 +168,22 @@ export function BillForm({ onDataChange }: BillFormProps) {
 			const result = await saveContract(data);
 			if (result.success) {
 				toast.success("Hợp đồng đã được lưu thành công!");
-				
-				// Generate image
 				try {
 					const element = document.getElementById("bill-preview-content");
 					if (element) {
-						// Use html-to-image with scale(1) to get full resolution
 						const dataUrl = await htmlToImage.toJpeg(element, {
 							quality: 0.95,
 							pixelRatio: 2,
 							style: {
-								transform: 'scale(1)',
-								transformOrigin: 'top left',
-								marginBottom: '0'
-							}
+								transform: "scale(1)",
+								transformOrigin: "top left",
+								marginBottom: "0",
+							},
 						});
-						
 						const link = document.createElement("a");
-						const safeName = (data.customerName || "khach-hang").replace(/[^a-z0-9]/gi, '-').toLowerCase();
+						const safeName = (data.customerName || "khach-hang")
+							.replace(/[^a-z0-9]/gi, "-")
+							.toLowerCase();
 						link.download = `hop-dong-${safeName}.jpg`;
 						link.href = dataUrl;
 						link.click();
@@ -140,8 +192,6 @@ export function BillForm({ onDataChange }: BillFormProps) {
 					console.error("Lỗi tạo ảnh:", err);
 					toast.error("Đã lưu hợp đồng nhưng không thể tạo file ảnh.");
 				}
-
-				// Small delay to ensure the download starts before the print dialog blocks the UI
 				setTimeout(() => {
 					window.print();
 				}, 500);
@@ -166,488 +216,489 @@ export function BillForm({ onDataChange }: BillFormProps) {
 	const totalPrice = subtotal + vatAmount;
 	const remaining = totalPrice - (Number(values.deposit) || 0);
 
-	const formatCurrency = (amount: number) => {
-		return new Intl.NumberFormat("vi-VN", {
+	const formatCurrency = (amount: number) =>
+		new Intl.NumberFormat("vi-VN", {
 			style: "currency",
 			currency: "VND",
 		}).format(amount);
-	};
+
+	/* ── Date picker helper ── */
+	function DatePicker({
+		name,
+		error,
+	}: {
+		name: "weddingDateStart" | "weddingDateEnd" | "pickupDate" | "contractDate";
+		error?: any;
+	}) {
+		return (
+			<Controller
+				control={control}
+				name={name}
+				render={({ field }) => (
+					<Popover>
+						<PopoverTrigger
+							render={
+								<button
+									type="button"
+									className={cn(
+										"w-full h-11 flex items-center rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-3.5 text-sm text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#c8a84b]/40 focus:border-[#c8a84b]",
+										!field.value && "text-[#c0aa88]",
+									)}
+								/>
+							}
+						>
+							<CalendarIcon className="mr-2 h-4 w-4 text-[#c8a84b]" />
+							{field.value ? (
+								<span className="text-[#2d2418]">
+									{format(field.value, "dd/MM/yyyy")}
+								</span>
+							) : (
+								<span>Chọn ngày</span>
+							)}
+						</PopoverTrigger>
+						<PopoverContent className="w-auto p-0 shadow-xl border-[#e8dcc8] rounded-2xl overflow-hidden">
+							<Calendar
+								mode="single"
+								selected={field.value}
+								onSelect={field.onChange}
+								initialFocus
+								locale={vi}
+							/>
+						</PopoverContent>
+					</Popover>
+				)}
+			/>
+		);
+	}
 
 	return (
-		<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pb-24">
-			{/* Studio Header (Read-only) */}
-			<Card className="border-none shadow-none bg-muted/30">
-				<CardHeader className="text-center p-4 relative">
+		<form
+			onSubmit={form.handleSubmit(onSubmit)}
+			className="space-y-5 pb-28 max-w-2xl mx-auto"
+			style={{ fontFamily: "'Outfit', 'Be Vietnam Pro', sans-serif" }}
+		>
+			{/* ── Studio Header ── */}
+			<div className="rounded-2xl overflow-hidden shadow-[0_4px_24px_0_rgba(180,150,80,0.13)] border border-[#e0cc9a]">
+				{/* Gold gradient banner */}
+				<div className="h-1.5 w-full bg-gradient-to-r from-[#c8a84b] via-[#e8d07a] to-[#c8a84b]" />
+				<div className="bg-gradient-to-br from-[#fdfaf3] to-white px-6 pt-5 pb-5 text-center relative">
 					<Link
 						href="/packages"
-						className="absolute top-2 right-2 text-muted-foreground hover:text-primary print:hidden p-2"
+						className="absolute top-3 right-3 p-2 rounded-xl hover:bg-[#f5edd8] text-[#c8a84b] transition-colors print:hidden"
 						title="Quản lý gói"
 					>
-						<Settings className="w-5 h-5" />
+						<Settings className="w-4 h-4" />
 					</Link>
-					<CardTitle className="text-xl md:text-2xl font-bold tracking-tight text-primary">
-						{studioInfo.name}
-					</CardTitle>
-					<div className="text-xs md:text-sm text-muted-foreground space-y-1">
-						<p>{studioInfo.address}</p>
-						<p className="flex flex-col md:block">
-							<span>Email: {studioInfo.email}</span>
-							<span className="hidden md:inline"> | </span>
-							<span>SĐT: {studioInfo.phone}</span>
-						</p>
-						<div className="flex flex-wrap justify-center gap-2 mt-2">
-							{studioInfo.bankAccounts.map((acc, i) => (
-								<p
-									key={i}
-									className="bg-background px-2 py-1 rounded border text-[10px] md:text-xs"
-								>
-									{acc.bank}: <span className="font-mono">{acc.account}</span>
-								</p>
-							))}
-						</div>
-					</div>
-				</CardHeader>
-			</Card>
 
-			<div className="grid grid-cols-1 gap-6">
-				{/* Customer Info */}
-				<FieldSet>
-					<FieldLegend>Thông tin khách hàng</FieldLegend>
-					<FieldGroup>
-						<Field data-invalid={!!errors.customerName}>
-							<FieldLabel htmlFor="customerName">Tên khách hàng</FieldLabel>
-							<Input
-								id="customerName"
-								placeholder="Nguyễn Văn A"
-								className="h-10 md:h-12 text-base md:text-sm"
-								{...register("customerName")}
-							/>
-							<FieldError errors={[errors.customerName]} />
-						</Field>
-
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<Field data-invalid={!!errors.phone}>
-								<FieldLabel htmlFor="phone">Số điện thoại</FieldLabel>
-								<Input
-									id="phone"
-									placeholder="090xxxxxxx"
-									type="tel"
-									className="h-10 md:h-12 text-base md:text-sm"
-									{...register("phone")}
-								/>
-								<FieldError errors={[errors.phone]} />
-							</Field>
-
-							<Field data-invalid={!!errors.address}>
-								<FieldLabel htmlFor="address">Địa chỉ</FieldLabel>
-								<Input
-									id="address"
-									placeholder="Số nhà, đường, phường..."
-									className="h-10 md:h-12 text-base md:text-sm"
-									{...register("address")}
-								/>
-								<FieldError errors={[errors.address]} />
-							</Field>
-						</div>
-					</FieldGroup>
-				</FieldSet>
-
-				{/* Dynamic Packages */}
-				<FieldSet>
-					<div className="flex items-center justify-between">
-						<FieldLegend>Danh sách gói dịch vụ</FieldLegend>
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							onClick={() => append({ label: "", price: 0 })}
-							className="gap-1 h-9 px-3"
+					{/* Studio name */}
+					<div className="flex items-center justify-center gap-3 mb-1">
+						<div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#c8a84b]/50" />
+						<h1
+							className="text-2xl md:text-3xl font-bold tracking-[0.15em] text-[#8a6820]"
+							style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
 						>
-							<Plus className="w-4 h-4" /> Thêm gói
-						</Button>
+							{studioInfo.name}
+						</h1>
+						<div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#c8a84b]/50" />
 					</div>
-					<FieldGroup className="space-y-4">
-						{fields.map((field, index) => (
+
+					<p className="text-[11px] tracking-[0.2em] uppercase text-[#b49050] mb-3">
+						Wedding Photography Studio
+					</p>
+
+					<div className="text-xs text-[#8a7550] space-y-1 mb-3">
+						<p>{studioInfo.address}</p>
+						<p>
+							{studioInfo.email}
+							<span className="mx-2 text-[#c8a84b]">·</span>
+							{studioInfo.phone}
+						</p>
+					</div>
+
+					<div className="flex flex-wrap justify-center gap-2">
+						{studioInfo.bankAccounts.map((acc, i) => (
 							<div
-								key={field.id}
-								className="relative group border p-3 md:p-4 rounded-lg bg-card/50"
+								key={i}
+								className="flex items-center gap-1.5 bg-[#faf6ea] border border-[#e0cc9a] rounded-lg px-3 py-1.5 text-[11px] text-[#6b5530]"
 							>
-								<div className="grid grid-cols-1 gap-4">
-									<Field data-invalid={!!errors.packages?.[index]?.label}>
-										<FieldLabel>Chọn gói {index + 1}</FieldLabel>
-										<Controller
-											control={control}
-											name={`packages.${index}.label`}
-											render={({ field: selectField }) => (
-												<Select
-													value={selectField.value}
-													onValueChange={(val) => {
-														const pkg = masterPackages.find(
-															(p) => p.label === val,
-														);
-														if (pkg) {
-															setValue(`packages.${index}.label`, pkg.label);
-															setValue(`packages.${index}.price`, pkg.price);
-															setValue(`packages.${index}.id`, pkg.id);
-														}
-													}}
-												>
-													<SelectTrigger className="w-full h-10 md:h-12">
-														<SelectValue placeholder="Bấm để chọn gói..." />
-													</SelectTrigger>
-													<SelectContent>
-														<SelectGroup>
-															{masterPackages.map((p) => (
-																<SelectItem key={p.id} value={p.label}>
-																	{p.label} - {formatCurrency(p.price)}
-																</SelectItem>
-															))}
-														</SelectGroup>
-													</SelectContent>
-												</Select>
-											)}
-										/>
-										<FieldError errors={[errors.packages?.[index]?.label]} />
-									</Field>
+								<span className="font-semibold text-[#b49050]">{acc.bank}</span>
+								<span className="text-[#c8a84b]">·</span>
+								<span className="font-mono tracking-wide">{acc.account}</span>
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+
+			{/* ── Customer Info ── */}
+			<Section title="Thông tin khách hàng">
+				<div>
+					<ElegantLabel htmlFor="customerName">Tên khách hàng</ElegantLabel>
+					<input
+						id="customerName"
+						placeholder="Nguyễn Văn A"
+						className={inputCls}
+						{...register("customerName")}
+					/>
+					{errors.customerName && (
+						<p className="mt-1 text-xs text-red-500">
+							{errors.customerName.message}
+						</p>
+					)}
+				</div>
+
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div>
+						<ElegantLabel htmlFor="phone">Số điện thoại</ElegantLabel>
+						<input
+							id="phone"
+							placeholder="090xxxxxxx"
+							type="tel"
+							className={inputCls}
+							{...register("phone")}
+						/>
+						{errors.phone && (
+							<p className="mt-1 text-xs text-red-500">
+								{errors.phone.message}
+							</p>
+						)}
+					</div>
+
+					<div>
+						<ElegantLabel htmlFor="address">Địa chỉ</ElegantLabel>
+						<input
+							id="address"
+							placeholder="Số nhà, đường, phường..."
+							className={inputCls}
+							{...register("address")}
+						/>
+						{errors.address && (
+							<p className="mt-1 text-xs text-red-500">
+								{errors.address.message}
+							</p>
+						)}
+					</div>
+				</div>
+			</Section>
+
+			{/* ── Packages ── */}
+			<Section
+				title="Danh sách gói dịch vụ"
+				action={
+					<button
+						type="button"
+						onClick={() => append({ label: "", price: 0 })}
+						className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#b49050] hover:text-[#8a6820] border border-[#e0cc9a] hover:border-[#c8a84b] rounded-lg px-3 py-1.5 bg-white hover:bg-[#faf6ea] transition-all duration-200"
+					>
+						<Plus className="w-3.5 h-3.5" /> Thêm gói
+					</button>
+				}
+			>
+				<div className="space-y-3">
+					{fields.map((field, index) => (
+						<div key={field.id} className="relative rounded-xl group">
+							<div className="flex items-start gap-3">
+								<div className="flex-1 space-y-2">
+									<ElegantLabel>Chọn gói {index + 1}</ElegantLabel>
+									<Controller
+										control={control}
+										name={`packages.${index}.label`}
+										render={({ field: selectField }) => (
+											<Select
+												value={selectField.value}
+												onValueChange={(val) => {
+													const pkg = masterPackages.find(
+														(p) => p.label === val,
+													);
+													if (pkg) {
+														setValue(`packages.${index}.label`, pkg.label);
+														setValue(`packages.${index}.price`, pkg.price);
+														setValue(`packages.${index}.id`, pkg.id);
+													}
+												}}
+											>
+												<SelectTrigger className="w-full h-11 rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] text-sm text-[#2d2418] focus:ring-[#c8a84b]/40 focus:border-[#c8a84b]">
+													<SelectValue placeholder="Bấm để chọn gói..." />
+												</SelectTrigger>
+												<SelectContent className="rounded-xl border-[#e8dcc8] shadow-xl">
+													<SelectGroup>
+														{masterPackages.map((p) => (
+															<SelectItem key={p.id} value={p.label}>
+																{p.label}
+															</SelectItem>
+														))}
+													</SelectGroup>
+												</SelectContent>
+											</Select>
+										)}
+									/>
 
 									{values.packages?.[index]?.price > 0 && (
-										<div className="text-sm font-medium text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md flex justify-between">
-											<span>Đơn giá:</span>
-											<span className="text-foreground">
+										<div className="flex justify-between items-center bg-gradient-to-r from-[#faf6ea] to-[#fdfbf8] border border-[#e8dcc8] rounded-lg px-3 py-2">
+											<span className="text-[11px] uppercase tracking-wider text-[#9a8060]">
+												Đơn giá
+											</span>
+											<span className="text-sm font-bold text-[#c8a84b]">
 												{formatCurrency(values.packages[index].price)}
 											</span>
 										</div>
 									)}
 								</div>
-								{fields.length > 1 && (
-									<Button
-										type="button"
-										variant="ghost"
-										size="icon"
-										className="absolute -top-2 -right-2 h-7 w-7 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm"
-										onClick={() => remove(index)}
-									>
-										<Trash2 className="w-4 h-4" />
-									</Button>
-								)}
+							</div>
+
+							{fields.length > 1 && (
+								<button
+									type="button"
+									onClick={() => remove(index)}
+									className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-md transition-colors opacity-0 group-hover:opacity-100"
+								>
+									<Trash2 className="w-3 h-3" />
+								</button>
+							)}
+						</div>
+					))}
+				</div>
+			</Section>
+
+			{/* ── Wedding Details & Fees ── */}
+			<Section title="Chi tiết ngày cưới & Phí">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div>
+						<ElegantLabel>Ngày bắt đầu</ElegantLabel>
+						<DatePicker
+							name="weddingDateStart"
+							error={errors.weddingDateStart}
+						/>
+					</div>
+					<div>
+						<ElegantLabel>Ngày kết thúc</ElegantLabel>
+						<DatePicker name="weddingDateEnd" error={errors.weddingDateEnd} />
+					</div>
+				</div>
+
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div>
+						<ElegantLabel htmlFor="travelFee">Phí di chuyển (₫)</ElegantLabel>
+						<input
+							id="travelFee"
+							type="number"
+							inputMode="numeric"
+							placeholder="0"
+							className={inputCls}
+							{...register("travelFee")}
+						/>
+					</div>
+					<div>
+						<ElegantLabel htmlFor="discount">Giảm giá (₫)</ElegantLabel>
+						<input
+							id="discount"
+							type="number"
+							inputMode="numeric"
+							placeholder="0"
+							className={inputCls}
+							{...register("discount")}
+						/>
+					</div>
+				</div>
+
+				<div>
+					<ElegantLabel htmlFor="benefits">
+						Quyền lợi khách hàng nhận được
+					</ElegantLabel>
+					<Textarea
+						id="benefits"
+						placeholder="Album + 100 ảnh rửa 13x18..."
+						className="min-h-[90px] rounded-xl border-[#ddd0b8] bg-[#fdfbf8] text-sm text-[#2d2418] placeholder:text-[#c0aa88] focus:ring-[#c8a84b]/40 focus:border-[#c8a84b] resize-none"
+						{...register("benefits")}
+					/>
+					<div className="flex flex-wrap gap-1.5 mt-2">
+						{[
+							"Album bìa photobook kèm hộp 50 ảnh rửa 13x18",
+							"Album bìa photobook kèm hộp 100 ảnh rửa 13x18",
+							"Album + 100 ảnh rửa 13x18 + xe hoa (dưới 20km)",
+							"Album + 50 ảnh rửa 13x18",
+						].map((val, idx) => (
+							<button
+								key={idx}
+								type="button"
+								onClick={() => {
+									const currentVal = watch("benefits") || "";
+									setValue(
+										"benefits",
+										currentVal ? `${currentVal}\n${val}` : val,
+									);
+								}}
+								className="text-[10px] border border-[#e0cc9a] rounded-lg px-2.5 py-1.5 bg-[#faf6ea] text-[#8a6820] hover:bg-[#f0e8cc] hover:border-[#c8a84b] transition-colors leading-tight"
+							>
+								{val}
+							</button>
+						))}
+					</div>
+				</div>
+			</Section>
+
+			{/* ── Payment Summary ── */}
+			<div className="rounded-2xl overflow-hidden border border-[#e0cc9a] shadow-[0_4px_24px_0_rgba(180,150,80,0.10)]">
+				{/* Header */}
+				<div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
+					<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[#b49050]">
+						Thanh toán & Lịch hẹn
+					</span>
+					<label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#8a7550] font-medium">
+						<input
+							type="checkbox"
+							id="includeVAT"
+							className="w-4 h-4 rounded border-[#ddd0b8] accent-[#c8a84b]"
+							{...register("includeVAT")}
+						/>
+						Tính VAT 10%
+					</label>
+				</div>
+
+				<div className="bg-white px-5 py-5 space-y-5">
+					{/* Summary numbers */}
+					<div className="grid grid-cols-3 gap-3">
+						{[
+							{
+								label: "Tạm tính",
+								value: formatCurrency(subtotalBeforeDiscount),
+								color: "text-[#2d2418]",
+							},
+							{
+								label: "Giảm giá",
+								value: `- ${formatCurrency(Number(values.discount) || 0)}`,
+								color: "text-emerald-600",
+							},
+							{
+								label: `Thuế ${values.includeVAT ? "10%" : "0%"}`,
+								value: formatCurrency(vatAmount),
+								color: "text-[#2d2418]",
+							},
+						].map((item) => (
+							<div
+								key={item.label}
+								className="bg-[#fdfbf8] border border-[#e8dcc8] rounded-xl p-3 text-center"
+							>
+								<p className="text-[10px] uppercase tracking-wider text-[#9a8060] mb-1">
+									{item.label}
+								</p>
+								<p className={`text-xs font-bold ${item.color} leading-tight`}>
+									{item.value}
+								</p>
 							</div>
 						))}
-						{errors.packages?.root && (
-							<FieldError errors={[errors.packages.root]} />
-						)}
-					</FieldGroup>
-				</FieldSet>
+					</div>
 
-				{/* Event Details */}
-				<FieldSet>
-					<FieldLegend>Chi tiết ngày cưới & Phí</FieldLegend>
-					<FieldGroup>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<Field data-invalid={!!errors.weddingDateStart}>
-								<FieldLabel>Ngày bắt đầu</FieldLabel>
-								<Controller
-									control={control}
-									name="weddingDateStart"
-									render={({ field }) => (
-										<Popover>
-											<PopoverTrigger
-												render={
-													<Button
-														variant={"outline"}
-														className={cn(
-															"w-full h-10 md:h-12 justify-start text-left font-normal",
-															!field.value && "text-muted-foreground",
-														)}
-													/>
-												}
-											>
-												<CalendarIcon className="mr-2 h-4 w-4" />
-												{field.value ? (
-													format(field.value, "dd/MM/yyyy")
-												) : (
-													<span>Chọn ngày</span>
-												)}
-											</PopoverTrigger>
-											<PopoverContent className="w-auto p-0">
-												<Calendar
-													mode="single"
-													selected={field.value}
-													onSelect={field.onChange}
-													initialFocus
-													locale={vi}
-												/>
-											</PopoverContent>
-										</Popover>
-									)}
-								/>
-								<FieldError errors={[errors.weddingDateStart]} />
-							</Field>
+					{/* Total */}
+					<div className="rounded-xl bg-gradient-to-r from-[#faf6ea] via-[#fdf9f0] to-[#faf6ea] border border-[#e0cc9a] px-5 py-4 flex items-center justify-between">
+						<span className="text-[11px] uppercase tracking-[0.18em] font-bold text-[#b49050]">
+							Tổng cộng
+						</span>
+						<span
+							className="text-2xl md:text-3xl font-black text-[#c8a84b]"
+							style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+						>
+							{formatCurrency(totalPrice)}
+						</span>
+					</div>
 
-							<Field data-invalid={!!errors.weddingDateEnd}>
-								<FieldLabel>Ngày kết thúc</FieldLabel>
-								<Controller
-									control={control}
-									name="weddingDateEnd"
-									render={({ field }) => (
-										<Popover>
-											<PopoverTrigger
-												render={
-													<Button
-														variant={"outline"}
-														className={cn(
-															"w-full h-10 md:h-12 justify-start text-left font-normal",
-															!field.value && "text-muted-foreground",
-														)}
-													/>
-												}
-											>
-												<CalendarIcon className="mr-2 h-4 w-4" />
-												{field.value ? (
-													format(field.value, "dd/MM/yyyy")
-												) : (
-													<span>Chọn ngày</span>
-												)}
-											</PopoverTrigger>
-											<PopoverContent className="w-auto p-0">
-												<Calendar
-													mode="single"
-													selected={field.value}
-													onSelect={field.onChange}
-													initialFocus
-													locale={vi}
-												/>
-											</PopoverContent>
-										</Popover>
-									)}
-								/>
-								<FieldError errors={[errors.weddingDateEnd]} />
-							</Field>
-						</div>
-
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<Field data-invalid={!!errors.travelFee}>
-								<FieldLabel htmlFor="travelFee">Phí di chuyển (₫)</FieldLabel>
-								<Input
-									id="travelFee"
-									type="number"
-									inputMode="numeric"
-									className="h-10 md:h-12 text-base md:text-sm"
-									{...register("travelFee")}
-								/>
-								<FieldError errors={[errors.travelFee]} />
-							</Field>
-
-							<Field data-invalid={!!errors.discount}>
-								<FieldLabel htmlFor="discount">Giảm giá (₫)</FieldLabel>
-								<Input
-									id="discount"
-									type="number"
-									inputMode="numeric"
-									placeholder="0"
-									className="h-10 md:h-12 text-base md:text-sm"
-									{...register("discount")}
-								/>
-								<FieldError errors={[errors.discount]} />
-							</Field>
-						</div>
-
-						<Field data-invalid={!!errors.benefits}>
-							<FieldLabel htmlFor="benefits">
-								Quyền lợi khách hàng nhận được
-							</FieldLabel>
-							<Textarea
-								id="benefits"
-								placeholder="Album + 100 ảnh rửa 13x18..."
-								className="min-h-[100px] text-base md:text-sm"
-								{...register("benefits")}
-							/>
-							<FieldError errors={[errors.benefits]} />
-						</Field>
-					</FieldGroup>
-				</FieldSet>
-
-				{/* Payment Summary */}
-				<FieldSet className="bg-muted/50 p-4 md:p-6 rounded-lg border border-border/50">
-					<div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
-						<FieldLegend className="mb-0">Thanh toán & Lịch hẹn</FieldLegend>
-						<div className="flex items-center gap-2 bg-background px-3 py-2 rounded-md border text-sm font-medium w-fit self-start md:self-auto">
+					{/* Deposit */}
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<ElegantLabel htmlFor="deposit">Tiền đặt cọc (₫)</ElegantLabel>
 							<input
-								type="checkbox"
-								id="includeVAT"
-								className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
-								{...register("includeVAT")}
+								id="deposit"
+								type="number"
+								inputMode="numeric"
+								className={inputCls}
+								{...register("deposit")}
 							/>
-							<label
-								htmlFor="includeVAT"
-								className="cursor-pointer select-none"
-							>
-								Tính thuế VAT (10%)
-							</label>
+							<div className="flex flex-wrap gap-1.5 mt-2">
+								{[
+									1_000_000, 2_000_000, 3_000_000, 4_000_000, 5_000_000,
+									6_000_000, 7_000_000,
+								].map((val) => (
+									<button
+										key={val}
+										type="button"
+										onClick={() => setValue("deposit", val)}
+										className="text-[10px] border border-[#e0cc9a] rounded-lg px-2 py-1 bg-[#faf6ea] text-[#8a6820] hover:bg-[#f0e8cc] hover:border-[#c8a84b] transition-colors font-medium"
+									>
+										{new Intl.NumberFormat("vi-VN").format(val)}
+									</button>
+								))}
+							</div>
+						</div>
+
+						<div className="flex flex-col justify-center bg-[#fdfbf8] border border-[#e8dcc8] rounded-xl px-4 py-3">
+							<p className="text-[10px] uppercase tracking-[0.18em] text-[#9a8060] mb-1">
+								Còn lại phải thu
+							</p>
+							<p className="text-2xl font-black text-red-500">
+								{formatCurrency(remaining)}
+							</p>
 						</div>
 					</div>
 
-					<FieldGroup>
-						<div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-left border-b pb-6 border-border/50">
-							<Field className="col-span-1">
-								<FieldLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-									Tạm tính
-								</FieldLabel>
-								<div className="text-base md:text-lg font-semibold">
-									{formatCurrency(subtotalBeforeDiscount)}
-								</div>
-							</Field>
-
-							<Field className="col-span-1">
-								<FieldLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-									Giảm giá
-								</FieldLabel>
-								<div className="text-base md:text-lg font-semibold text-green-600">
-									- {formatCurrency(Number(values.discount) || 0)}
-								</div>
-							</Field>
-
-							<Field className="col-span-2 md:col-span-1">
-								<FieldLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-									Thuế ({values.includeVAT ? "10%" : "0%"})
-								</FieldLabel>
-								<div className="text-base md:text-lg font-semibold">
-									{formatCurrency(vatAmount)}
-								</div>
-							</Field>
-
-							<Field className="col-span-2 pt-2">
-								<FieldLabel className="text-xs uppercase tracking-widest text-primary font-bold">
-									Tổng cộng sau cùng
-								</FieldLabel>
-								<div className="text-2xl md:text-3xl font-black text-primary">
-									{formatCurrency(totalPrice)}
-								</div>
-							</Field>
+					{/* Date pickers */}
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<ElegantLabel>Ngày hẹn thanh toán</ElegantLabel>
+							<DatePicker name="pickupDate" error={errors.pickupDate} />
 						</div>
-
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-							<Field data-invalid={!!errors.deposit}>
-								<FieldLabel htmlFor="deposit">Tiền đặt cọc (₫)</FieldLabel>
-								<Input
-									id="deposit"
-									type="number"
-									inputMode="numeric"
-									className="h-10 md:h-12 text-base md:text-sm"
-									{...register("deposit")}
-								/>
-								<FieldError errors={[errors.deposit]} />
-							</Field>
-
-							<Field>
-								<FieldLabel>Còn lại phải thu</FieldLabel>
-								<div className="text-xl md:text-2xl font-bold text-destructive">
-									{formatCurrency(remaining)}
-								</div>
-							</Field>
+						<div>
+							<ElegantLabel>Ngày lập hợp đồng</ElegantLabel>
+							<DatePicker name="contractDate" error={errors.contractDate} />
 						</div>
-
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<Field data-invalid={!!errors.pickupDate}>
-								<FieldLabel>Ngày hẹn lấy sản phẩm</FieldLabel>
-								<Controller
-									control={control}
-									name="pickupDate"
-									render={({ field }) => (
-										<Popover>
-											<PopoverTrigger
-												render={
-													<Button
-														variant={"outline"}
-														className={cn(
-															"w-full h-10 md:h-12 justify-start text-left font-normal",
-															!field.value && "text-muted-foreground",
-														)}
-													/>
-												}
-											>
-												<CalendarIcon className="mr-2 h-4 w-4" />
-												{field.value ? (
-													format(field.value, "dd/MM/yyyy")
-												) : (
-													<span>Chọn ngày</span>
-												)}
-											</PopoverTrigger>
-											<PopoverContent className="w-auto p-0">
-												<Calendar
-													mode="single"
-													selected={field.value}
-													onSelect={field.onChange}
-													initialFocus
-													locale={vi}
-												/>
-											</PopoverContent>
-										</Popover>
-									)}
-								/>
-								<FieldError errors={[errors.pickupDate]} />
-							</Field>
-
-							<Field data-invalid={!!errors.contractDate}>
-								<FieldLabel>Ngày lập hợp đồng</FieldLabel>
-								<Controller
-									control={control}
-									name="contractDate"
-									render={({ field }) => (
-										<Popover>
-											<PopoverTrigger
-												render={
-													<Button
-														variant={"outline"}
-														className={cn(
-															"w-full h-10 md:h-12 justify-start text-left font-normal",
-															!field.value && "text-muted-foreground",
-														)}
-													/>
-												}
-											>
-												<CalendarIcon className="mr-2 h-4 w-4" />
-												{field.value ? (
-													format(field.value, "dd/MM/yyyy")
-												) : (
-													<span>Chọn ngày</span>
-												)}
-											</PopoverTrigger>
-											<PopoverContent className="w-auto p-0">
-												<Calendar
-													mode="single"
-													selected={field.value}
-													onSelect={field.onChange}
-													initialFocus
-													locale={vi}
-												/>
-											</PopoverContent>
-										</Popover>
-									)}
-								/>
-								<FieldError errors={[errors.contractDate]} />
-							</Field>
-						</div>
-					</FieldGroup>
-				</FieldSet>
+					</div>
+				</div>
 			</div>
 
-			{/* Sticky Bottom Bar */}
-			<div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t flex justify-center md:justify-end md:px-8 z-50 print:hidden">
-				<Button
-					size="lg"
-					className="w-full md:w-auto h-12 md:h-10 gap-2 font-bold"
-					type="submit"
-					disabled={isSubmitting}
-				>
-					{isSubmitting ? (
-						"Đang lưu..."
-					) : (
-						<>
-							<Printer className="w-5 h-5 md:w-4 md:h-4" />
-							LƯU & IN HỢP ĐỒNG
-						</>
-					)}
-				</Button>
+			{/* ── Sticky Submit Bar ── */}
+			<div className="fixed bottom-0 left-0 right-0 z-50 print:hidden">
+				{/* Blur backdrop */}
+				<div className="backdrop-blur-md bg-white/80 border-t border-[#e8dcc8] px-4 py-3 flex justify-center md:justify-end md:px-8">
+					<button
+						type="submit"
+						disabled={isSubmitting}
+						className={cn(
+							"flex items-center gap-2.5 h-12 px-8 rounded-xl font-bold text-sm tracking-wide text-white transition-all duration-200 shadow-lg",
+							isSubmitting
+								? "bg-[#c8a84b]/60 cursor-not-allowed"
+								: "bg-gradient-to-r from-[#c8a84b] to-[#e8c84b] hover:from-[#b49040] hover:to-[#d8b83b] shadow-[#c8a84b]/30 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0",
+						)}
+					>
+						{isSubmitting ? (
+							<span className="flex items-center gap-2">
+								<svg
+									className="animate-spin h-4 w-4"
+									viewBox="0 0 24 24"
+									fill="none"
+								>
+									<circle
+										className="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										strokeWidth="4"
+									/>
+									<path
+										className="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+									/>
+								</svg>
+								Đang lưu...
+							</span>
+						) : (
+							<>
+								<Printer className="w-4 h-4" />
+								LƯU & IN HỢP ĐỒNG
+							</>
+						)}
+					</button>
+				</div>
 			</div>
 		</form>
 	);

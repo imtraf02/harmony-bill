@@ -123,12 +123,12 @@ export function BillPreview({ data }: BillPreviewProps) {
 					</div>
 
 					{/* Title */}
-					<div className="mb-2 flex justify-center">
+					<div className="mb-10 flex justify-center">
 						<div className="relative">
-							<h2 className="text-xl font-semibold uppercase text-gray-900 px-2 tracking-tight">
+							<h2 className="text-lg font-semibold uppercase text-gray-900 px-2 tracking-tight">
 								Hợp Đồng Chụp Ảnh Cưới
 							</h2>
-							<div className="absolute -bottom-1 left-0 w-full h-0.5 bg-black"></div>
+							<div className="absolute -bottom-1 left-0 w-full h-px bg-slate-900/40"></div>
 						</div>
 					</div>
 
