@@ -1,8 +1,8 @@
 /**
  * components/bill-preview.tsx
  * Redesigned printable preview for A5 paper size.
- * Uses Roboto as the primary font for the entire bill.
- * Optimized for A5 printing with corrected signature alignment.
+ * Fixed for iOS: images preloaded as base64, backdrop-blur disabled during capture,
+ * background set via inline style (not absolute <img>) for html-to-image compatibility.
  */
 
 "use client";
@@ -23,11 +23,51 @@ import { cn } from "@/lib/utils";
 
 interface BillPreviewProps {
 	data: Partial<BillSchema>;
+	/** Set to true during image capture to disable effects unsupported by iOS canvas */
+	isCapturing?: boolean;
 }
 
-export function BillPreview({ data }: BillPreviewProps) {
+/**
+ * Preloads an image URL and returns a base64 data URL.
+ * This is required for html-to-image on iOS Safari, which cannot
+ * capture <img> tags with relative/external src paths via canvas.
+ */
+function useBase64Image(src: string): string {
+	const [base64, setBase64] = React.useState<string>("");
+
+	React.useEffect(() => {
+		if (!src) return;
+		const img = new window.Image();
+		img.crossOrigin = "anonymous";
+		img.onload = () => {
+			try {
+				const canvas = document.createElement("canvas");
+				canvas.width = img.naturalWidth || img.width;
+				canvas.height = img.naturalHeight || img.height;
+				const ctx = canvas.getContext("2d");
+				if (!ctx) return;
+				ctx.drawImage(img, 0, 0);
+				setBase64(canvas.toDataURL("image/png"));
+			} catch {
+				// Fallback: keep original src (CORS issue)
+				setBase64(src);
+			}
+		};
+		img.onerror = () => setBase64(src);
+		img.src = src;
+	}, [src]);
+
+	return base64;
+}
+
+export function BillPreview({ data, isCapturing = false }: BillPreviewProps) {
 	const [scale, setScale] = React.useState(1);
 	const containerRef = React.useRef<HTMLDivElement>(null);
+
+	// Preload all images as base64 for iOS canvas compatibility
+	const bgBase64 = useBase64Image("/images/bg.jpg");
+	const logoBase64 = useBase64Image("/images/logo.png");
+	const sigBase64 = useBase64Image("/images/sig.png");
 
 	React.useEffect(() => {
 		const updateScale = () => {
@@ -72,6 +112,12 @@ export function BillPreview({ data }: BillPreviewProps) {
 	const month = (today.getMonth() + 1).toString().padStart(2, "0");
 	const year = today.getFullYear();
 
+	// Panels: disable backdrop-blur during capture (iOS canvas doesn't support it)
+	const panelCls = cn(
+		"bg-white/60 p-2.5 rounded-xl border border-slate-200 shadow-inner",
+		!isCapturing && "backdrop-blur-sm",
+	);
+
 	return (
 		<div
 			ref={containerRef}
@@ -104,7 +150,6 @@ export function BillPreview({ data }: BillPreviewProps) {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          /* Hide everything that shouldn't be printed */
           .no-print, [data-sonner-toaster], .sonner-toast {
             display: none !important;
           }
@@ -113,30 +158,34 @@ export function BillPreview({ data }: BillPreviewProps) {
 			<div
 				id="bill-preview-content"
 				className={cn(
-					"relative bg-white text-slate-900 shadow-2xl overflow-hidden",
+					"relative text-slate-900 shadow-2xl overflow-hidden",
 					"print:shadow-none print:m-0 print:w-[148mm] print:h-[210mm]",
 				)}
 				style={{
 					width: "559px",
 					height: "794px",
-					transform: `scale(${scale})`,
+					transform: isCapturing ? "scale(1)" : `scale(${scale})`,
 					transformOrigin: "top center",
-					marginBottom: `calc(794px * (${scale} - 1))`,
+					marginBottom: isCapturing ? "0" : `calc(794px * (${scale} - 1))`,
 					WebkitPrintColorAdjust: "exact",
+					// ✅ FIX: Background as inline style using base64 — works on iOS canvas
+					backgroundColor: "#ffffff",
+					backgroundImage: bgBase64 ? `url(${bgBase64})` : undefined,
+					backgroundSize: "cover",
+					backgroundPosition: "center",
+					backgroundRepeat: "no-repeat",
 				}}
 			>
-				{/* Background image - visible both on screen and in print for capture support */}
-				<img
-					src="/images/bg.jpg"
-					alt=""
-					className="absolute inset-0 w-full h-full object-cover -z-10"
-					aria-hidden="true"
-				/>
+				{/* ✅ Removed absolute <img> bg — replaced by backgroundImage style above */}
+
 				<div className="relative z-10 p-5 md:p-6 flex flex-col h-full overflow-hidden">
 					{/* Header */}
 					<div className="flex justify-between items-start mb-2">
 						<div className="flex items-center gap-2">
-							<img src="/images/logo.png" alt="logo" className="h-12" />
+							{/* ✅ FIX: Use base64 src for logo */}
+							{logoBase64 && (
+								<img src={logoBase64} alt="logo" className="h-12" />
+							)}
 						</div>
 						<div className="text-right">
 							<p className="text-[8px] font-semibold uppercase tracking-tight">
@@ -159,7 +208,12 @@ export function BillPreview({ data }: BillPreviewProps) {
 					</div>
 
 					{/* Studio Info Section */}
-					<div className="mb-3 grid grid-cols-[1.2fr_1fr] gap-3 bg-slate-50/40 print:bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-inner backdrop-blur-sm print:backdrop-blur-none relative overflow-hidden">
+					<div
+						className={cn(
+							"mb-3 grid grid-cols-[1.2fr_1fr] gap-3 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner relative overflow-hidden",
+							!isCapturing && "backdrop-blur-sm",
+						)}
+					>
 						<div className="space-y-1 relative z-10">
 							<h3 className="text-[8.5px] font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
 								<span className="w-3 h-0.5 bg-slate-900 inline-block"></span>
@@ -189,7 +243,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 								Thanh toán
 							</h3>
 							<div className="grid grid-cols-1 gap-1 text-[7.5px]">
-								<div className="bg-white/20 p-1 rounded border border-slate-100 flex justify-between items-center">
+								<div className="bg-white/60 p-1 rounded border border-slate-100 flex justify-between items-center">
 									<div>
 										<p className="font-bold text-slate-900 uppercase text-[6.5px]">
 											Sacombank
@@ -202,7 +256,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 										Trần Quốc Hiếu
 									</p>
 								</div>
-								<div className="bg-white/20 p-1 rounded border border-slate-100 flex justify-between items-center">
+								<div className="bg-white/60 p-1 rounded border border-slate-100 flex justify-between items-center">
 									<div>
 										<p className="font-bold text-slate-900 uppercase text-[6.5px]">
 											MBBank
@@ -220,7 +274,12 @@ export function BillPreview({ data }: BillPreviewProps) {
 					</div>
 
 					{/* Highlighted Customer Information Card */}
-					<div className="mb-4 bg-slate-50/40 print:bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-inner backdrop-blur-md print:backdrop-blur-none relative overflow-hidden">
+					<div
+						className={cn(
+							"mb-4 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner relative overflow-hidden",
+							!isCapturing && "backdrop-blur-md",
+						)}
+					>
 						<div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-500/10 rounded-full"></div>
 
 						<h3 className="text-[10px] font-semibold text-slate-900 uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -291,9 +350,9 @@ export function BillPreview({ data }: BillPreviewProps) {
 									<span className="font-semibold tracking-wider text-slate-900">
 										{data.weddingDateStart
 											? formatDate(data.weddingDateStart)
-											: "../../...."}{" "}
+											: "../../...."}
 										{data.weddingDateEnd
-											? `- ${formatDate(data.weddingDateEnd)}`
+											? ` - ${formatDate(data.weddingDateEnd)}`
 											: ""}
 									</span>
 								</div>
@@ -303,7 +362,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 											Phụ thu phí đi xa:
 										</span>
 										<span className="font-semibold text-slate-900">
-											{data.travelFee ? formatCurrency(data.travelFee) : "0"}
+											{formatCurrency(data.travelFee)}
 										</span>
 									</div>
 								) : null}
@@ -326,7 +385,9 @@ export function BillPreview({ data }: BillPreviewProps) {
 
 					{/* Payment and Signatures */}
 					<div className="grid grid-cols-7 gap-4">
-						<div className="col-span-3 space-y-1.5 bg-slate-50/40 print:bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-inner">
+						<div
+							className="col-span-3 space-y-1.5 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner"
+						>
 							<div className="flex items-center justify-between text-[8.5px]">
 								<span className="font-semibold text-slate-900">Tạm tính</span>
 								<div className="font-semibold text-slate-900">
@@ -352,9 +413,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 								</div>
 							)}
 							<div className="flex items-center justify-between text-[8.5px]">
-								<span className="font-semibold text-slate-900">
-									Tổng chi phí
-								</span>
+								<span className="font-semibold text-slate-900">Tổng chi phí</span>
 								<span className="font-semibold text-slate-900 text-xs">
 									{formatCurrency(totalPrice)}
 								</span>
@@ -398,12 +457,14 @@ export function BillPreview({ data }: BillPreviewProps) {
 								{/* Right side for Studio signature */}
 								<div className="flex flex-col items-center justify-center relative min-h-[60px]">
 									<div className="transform -rotate-6 absolute w-24 h-16 flex items-center justify-center">
-										<img
-											src="/images/sig.png"
-											alt="Signature"
-											className="max-w-full max-h-full object-contain opacity-90"
-											onError={(e) => (e.currentTarget.style.display = "none")}
-										/>
+										{/* ✅ FIX: Use base64 src for signature */}
+										{sigBase64 && (
+											<img
+												src={sigBase64}
+												alt="Signature"
+												className="max-w-full max-h-full object-contain opacity-90"
+											/>
+										)}
 									</div>
 									<div className="mt-auto pt-4 text-center">
 										<p className="font-semibold text-[10px] underline decoration-1 underline-offset-2 tracking-tight text-slate-900">
@@ -427,11 +488,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 							<li>• Quý khách sẽ mất chi phí cọc nếu hủy</li>
 						</ul>
 
-						<div
-							className={cn(
-								"text-slate-900 font-semibold text-[10px] text-center mt-0.5 normal-case",
-							)}
-						>
+						<div className="text-slate-900 font-semibold text-[10px] text-center mt-0.5 normal-case">
 							Chân thành cảm ơn quý khách!
 						</div>
 					</div>
