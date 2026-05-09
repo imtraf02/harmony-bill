@@ -87,7 +87,7 @@ export async function captureElement(
     const allChildren = clone.querySelectorAll("*") as NodeListOf<HTMLElement>;
     allChildren.forEach((child) => {
         child.style.backdropFilter = "none";
-        child.style.webkitBackdropFilter = "none";
+        child.style.setProperty("-webkit-backdrop-filter", "none");
     });
 
     // 4. Inject clone vào DOM
