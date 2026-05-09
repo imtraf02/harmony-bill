@@ -5,6 +5,7 @@ import {
 	ArrowLeft,
 	Calendar,
 	ChevronRight,
+	Download,
 	Phone,
 	Printer,
 	Receipt,
@@ -13,6 +14,7 @@ import {
 	Trash2,
 	User,
 } from "lucide-react";
+import * as htmlToImage from "html-to-image";
 import Link from "next/link";
 import * as React from "react";
 import { deleteContract, getContracts } from "@/app/actions";
@@ -59,6 +61,35 @@ export default function ContractsPage() {
 			c.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			c.phone.includes(searchTerm)
 	);
+
+	const onDownloadImage = async () => {
+		if (!selectedContract) return;
+		try {
+			const element = document.getElementById("bill-preview-content");
+			if (element) {
+				const dataUrl = await htmlToImage.toJpeg(element, {
+					quality: 0.95,
+					pixelRatio: 2,
+					style: {
+						transform: "scale(1)",
+						transformOrigin: "top left",
+						marginBottom: "0",
+					},
+				});
+				const link = document.createElement("a");
+				const safeName = (selectedContract.customer_name || "khach-hang")
+					.replace(/[^a-z0-9]/gi, "-")
+					.toLowerCase();
+				link.download = `hop-dong-${safeName}.jpg`;
+				link.href = dataUrl;
+				link.click();
+				toast.success("Đã tạo file ảnh thành công!");
+			}
+		} catch (err) {
+			console.error("Lỗi tạo ảnh:", err);
+			toast.error("Không thể tạo file ảnh.");
+		}
+	};
 
 	return (
 		<div
@@ -260,6 +291,13 @@ export default function ContractsPage() {
 							</div>
 
 							<div className="flex items-center gap-2">
+								<button
+									onClick={onDownloadImage}
+									className="flex items-center gap-1.5 text-xs font-semibold text-[#8a6820] border border-[#e0cc9a] rounded-xl px-3 py-2 bg-white hover:bg-[#faf6ea] transition-all"
+								>
+									<Download className="w-3.5 h-3.5" />
+									Tải ảnh
+								</button>
 								<button
 									onClick={() => window.print()}
 									className="flex items-center gap-1.5 text-xs font-semibold text-[#b49050] border border-[#e0cc9a] rounded-xl px-3 py-2 bg-[#faf6ea] hover:bg-[#f0e8cc] hover:border-[#c8a84b] transition-all"

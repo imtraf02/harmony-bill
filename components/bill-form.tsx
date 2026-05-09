@@ -162,36 +162,41 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 		return () => subscription.unsubscribe();
 	}, [watch, onDataChange, form]);
 
+	const onDownloadImage = async () => {
+		try {
+			const element = document.getElementById("bill-preview-content");
+			if (element) {
+				const dataUrl = await htmlToImage.toJpeg(element, {
+					quality: 0.95,
+					pixelRatio: 2,
+					style: {
+						transform: "scale(1)",
+						transformOrigin: "top left",
+						marginBottom: "0",
+					},
+				});
+				const link = document.createElement("a");
+				const safeName = (form.getValues().customerName || "khach-hang")
+					.replace(/[^a-z0-9]/gi, "-")
+					.toLowerCase();
+				link.download = `hop-dong-${safeName}.jpg`;
+				link.href = dataUrl;
+				link.click();
+				toast.success("Đã tạo file ảnh thành công!");
+			}
+		} catch (err) {
+			console.error("Lỗi tạo ảnh:", err);
+			toast.error("Không thể tạo file ảnh.");
+		}
+	};
+
 	const onSubmit = async (data: BillSchema) => {
 		setIsSubmitting(true);
 		try {
 			const result = await saveContract(data);
 			if (result.success) {
 				toast.success("Hợp đồng đã được lưu thành công!");
-				try {
-					const element = document.getElementById("bill-preview-content");
-					if (element) {
-						const dataUrl = await htmlToImage.toJpeg(element, {
-							quality: 0.95,
-							pixelRatio: 2,
-							style: {
-								transform: "scale(1)",
-								transformOrigin: "top left",
-								marginBottom: "0",
-							},
-						});
-						const link = document.createElement("a");
-						const safeName = (data.customerName || "khach-hang")
-							.replace(/[^a-z0-9]/gi, "-")
-							.toLowerCase();
-						link.download = `hop-dong-${safeName}.jpg`;
-						link.href = dataUrl;
-						link.click();
-					}
-				} catch (err) {
-					console.error("Lỗi tạo ảnh:", err);
-					toast.error("Đã lưu hợp đồng nhưng không thể tạo file ảnh.");
-				}
+				// Wait a bit for the UI to update if needed
 				setTimeout(() => {
 					window.print();
 				}, 500);
@@ -690,7 +695,14 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 			{/* ── Sticky Submit Bar ── */}
 			<div className="fixed bottom-0 left-0 right-0 z-50 print:hidden">
 				{/* Blur backdrop */}
-				<div className="backdrop-blur-md bg-white/80 border-t border-[#e8dcc8] px-4 py-3 flex justify-center md:justify-end md:px-8">
+				<div className="backdrop-blur-md bg-white/80 border-t border-[#e8dcc8] px-4 py-3 flex flex-wrap justify-center gap-3 md:justify-end md:px-8">
+					<button
+						type="button"
+						onClick={onDownloadImage}
+						className="flex items-center gap-2 h-12 px-5 rounded-xl font-semibold text-sm text-[#8a6820] bg-white border border-[#e0cc9a] hover:bg-[#faf6ea] transition-all shadow-sm"
+					>
+						TẢI FILE ẢNH
+					</button>
 					<button
 						type="submit"
 						disabled={isSubmitting}

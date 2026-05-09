@@ -86,6 +86,27 @@ export function BillPreview({ data }: BillPreviewProps) {
           body {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            background-color: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          #bill-preview-content {
+            box-shadow: none !important;
+            margin: 0 !important;
+            transform: none !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 148mm !important;
+            height: 210mm !important;
+            z-index: 99999 !important;
+            background-color: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          /* Hide everything that shouldn't be printed */
+          .no-print, [data-sonner-toaster], .sonner-toast {
+            display: none !important;
           }
         }
       `}</style>
@@ -93,7 +114,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 				id="bill-preview-content"
 				className={cn(
 					"relative bg-white text-slate-900 shadow-2xl overflow-hidden",
-					"print:shadow-none print:m-0 print:!transform-none print:w-[148mm] print:h-[210mm] print:fixed print:top-0 print:left-0 print:z-[10000]",
+					"print:shadow-none print:m-0 print:w-[148mm] print:h-[210mm]",
 				)}
 				style={{
 					width: "559px",
@@ -104,8 +125,16 @@ export function BillPreview({ data }: BillPreviewProps) {
 					backgroundSize: "cover",
 					backgroundPosition: "center",
 					marginBottom: `calc(794px * (${scale} - 1))`,
+					WebkitPrintColorAdjust: "exact",
 				}}
 			>
+				{/* Dedicated print background to ensure color/image presence */}
+				<img
+					src="/images/bg.jpg"
+					alt=""
+					className="hidden print:block absolute inset-0 w-full h-full object-cover -z-10"
+					aria-hidden="true"
+				/>
 				<div className="relative z-10 p-5 md:p-6 flex flex-col h-full overflow-hidden">
 					{/* Header */}
 					<div className="flex justify-between items-start mb-2">
@@ -133,7 +162,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 					</div>
 
 					{/* Studio Info Section */}
-					<div className="mb-3 grid grid-cols-[1.2fr_1fr] gap-3 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner backdrop-blur-sm relative overflow-hidden">
+					<div className="mb-3 grid grid-cols-[1.2fr_1fr] gap-3 bg-slate-50/40 print:bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-inner backdrop-blur-sm print:backdrop-blur-none relative overflow-hidden">
 						<div className="space-y-1 relative z-10">
 							<h3 className="text-[8.5px] font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
 								<span className="w-3 h-0.5 bg-slate-900 inline-block"></span>
@@ -194,7 +223,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 					</div>
 
 					{/* Highlighted Customer Information Card */}
-					<div className="mb-4 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner backdrop-blur-md relative overflow-hidden">
+					<div className="mb-4 bg-slate-50/40 print:bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-inner backdrop-blur-md print:backdrop-blur-none relative overflow-hidden">
 						<div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-500/10 rounded-full"></div>
 
 						<h3 className="text-[10px] font-semibold text-slate-900 uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -300,7 +329,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 
 					{/* Payment and Signatures */}
 					<div className="grid grid-cols-7 gap-4">
-						<div className="col-span-3 space-y-1.5 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner">
+						<div className="col-span-3 space-y-1.5 bg-slate-50/40 print:bg-slate-50 p-2.5 rounded-xl border border-slate-200 shadow-inner">
 							<div className="flex items-center justify-between text-[8.5px]">
 								<span className="font-semibold text-slate-900">Tạm tính</span>
 								<div className="font-semibold text-slate-900">
