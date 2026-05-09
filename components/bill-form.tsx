@@ -9,6 +9,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import * as htmlToImage from "html-to-image";
 import { CalendarIcon, Plus, Printer, Settings, Trash2 } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
@@ -113,7 +114,37 @@ export function BillForm({ onDataChange }: BillFormProps) {
 			const result = await saveContract(data);
 			if (result.success) {
 				toast.success("Hợp đồng đã được lưu thành công!");
-				window.print();
+				
+				// Generate image
+				try {
+					const element = document.getElementById("bill-preview-content");
+					if (element) {
+						// Use html-to-image with scale(1) to get full resolution
+						const dataUrl = await htmlToImage.toJpeg(element, {
+							quality: 0.95,
+							pixelRatio: 2,
+							style: {
+								transform: 'scale(1)',
+								transformOrigin: 'top left',
+								marginBottom: '0'
+							}
+						});
+						
+						const link = document.createElement("a");
+						const safeName = (data.customerName || "khach-hang").replace(/[^a-z0-9]/gi, '-').toLowerCase();
+						link.download = `hop-dong-${safeName}.jpg`;
+						link.href = dataUrl;
+						link.click();
+					}
+				} catch (err) {
+					console.error("Lỗi tạo ảnh:", err);
+					toast.error("Đã lưu hợp đồng nhưng không thể tạo file ảnh.");
+				}
+
+				// Small delay to ensure the download starts before the print dialog blocks the UI
+				setTimeout(() => {
+					window.print();
+				}, 500);
 			} else {
 				toast.error("Có lỗi xảy ra khi lưu hợp đồng: " + result.error);
 			}

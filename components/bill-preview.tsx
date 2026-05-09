@@ -90,8 +90,9 @@ export function BillPreview({ data }: BillPreviewProps) {
         }
       `}</style>
 			<div
+				id="bill-preview-content"
 				className={cn(
-					"relative bg-white text-black shadow-2xl overflow-hidden",
+					"relative bg-white text-slate-900 shadow-2xl overflow-hidden",
 					"print:shadow-none print:m-0 print:!transform-none print:w-[148mm] print:h-[210mm] print:fixed print:top-0 print:left-0 print:z-[10000]",
 				)}
 				style={{
@@ -105,25 +106,6 @@ export function BillPreview({ data }: BillPreviewProps) {
 					marginBottom: `calc(794px * (${scale} - 1))`,
 				}}
 			>
-				{/* Decorative Corners */}
-				<div
-					className="absolute top-0 left-0 w-24 h-10 bg-primary/40 z-0"
-					style={{ clipPath: "polygon(0 0, 100% 0, 80% 100%, 0 40%)" }}
-				></div>
-				<div
-					className="absolute top-0 left-0 w-8 h-24 bg-primary/40 z-0"
-					style={{ clipPath: "polygon(0 0, 100% 0, 40% 80%, 0 100%)" }}
-				></div>
-
-				<div
-					className="absolute bottom-0 right-0 w-32 h-32 bg-primary/40 z-0"
-					style={{ clipPath: "polygon(100% 100%, 0 100%, 100% 0)" }}
-				></div>
-				<div
-					className="absolute bottom-0 right-0 w-28 h-28 bg-black/40 z-0"
-					style={{ clipPath: "polygon(100% 100%, 25% 100%, 100% 25%)" }}
-				></div>
-
 				<div className="relative z-10 p-5 md:p-6 flex flex-col h-full overflow-hidden">
 					{/* Header */}
 					<div className="flex justify-between items-start mb-2">
@@ -131,7 +113,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 							<img src="/images/logo.png" alt="logo" className="h-12" />
 						</div>
 						<div className="text-right">
-							<p className="text-[8px] font-black uppercase tracking-tight">
+							<p className="text-[8px] font-semibold uppercase tracking-tight">
 								Wedding Photography
 							</p>
 							<p className="text-[8px] font-bold uppercase tracking-tighter">
@@ -143,7 +125,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 					{/* Title */}
 					<div className="mb-2 flex justify-center">
 						<div className="relative">
-							<h2 className="text-xl font-black uppercase text-gray-900 px-2 tracking-tight">
+							<h2 className="text-xl font-semibold uppercase text-gray-900 px-2 tracking-tight">
 								Hợp Đồng Chụp Ảnh Cưới
 							</h2>
 							<div className="absolute -bottom-1 left-0 w-full h-0.5 bg-black"></div>
@@ -151,23 +133,23 @@ export function BillPreview({ data }: BillPreviewProps) {
 					</div>
 
 					{/* Studio Info Section */}
-					<div className="mb-3 grid grid-cols-[1.2fr_1fr] gap-3 bg-slate-50/80 backdrop-blur-sm p-2 rounded-lg border border-slate-200 shadow-sm relative overflow-hidden">
+					<div className="mb-3 grid grid-cols-[1.2fr_1fr] gap-3 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner backdrop-blur-sm relative overflow-hidden">
 						<div className="space-y-1 relative z-10">
-							<h3 className="text-[9px] font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-								<span className="w-3 h-0.5 bg-yellow-400 inline-block"></span>
+							<h3 className="text-[8.5px] font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+								<span className="w-3 h-0.5 bg-slate-900 inline-block"></span>
 								Thông tin Studio
 							</h3>
 							<div className="space-y-0.5 text-[8.5px] text-slate-600 font-medium leading-tight">
 								<div className="flex items-center gap-2">
-									<MapPin className="w-2.5 h-2.5 text-yellow-500 shrink-0" />
+									<MapPin className="w-2.5 h-2.5 text-slate-900 shrink-0" />
 									<p>Hòa Bình, Đông Hoà, Trảng Bom, Đồng Nai.</p>
 								</div>
 								<div className="flex items-center gap-2">
-									<Mail className="w-2.5 h-2.5 text-yellow-500 shrink-0" />
+									<Mail className="w-2.5 h-2.5 text-slate-900 shrink-0" />
 									<p>Studiohieutrancanon@gmail.com</p>
 								</div>
 								<div className="flex items-center gap-2">
-									<Phone className="w-2.5 h-2.5 text-yellow-500 shrink-0" />
+									<Phone className="w-2.5 h-2.5 text-slate-900 shrink-0" />
 									<p className="font-semibold font-sans text-slate-900">
 										0388.660.678
 									</p>
@@ -176,14 +158,14 @@ export function BillPreview({ data }: BillPreviewProps) {
 						</div>
 
 						<div className="space-y-1 relative z-10 border-l border-slate-200 pl-3">
-							<h3 className="text-[9px] font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-								<Landmark className="w-2.5 h-2.5 text-yellow-500" />
+							<h3 className="text-[8.5px] font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+								<Landmark className="w-2.5 h-2.5 text-slate-900" />
 								Thanh toán
 							</h3>
 							<div className="grid grid-cols-1 gap-1 text-[7.5px]">
-								<div className="bg-white/60 p-1 rounded border border-slate-100 flex justify-between items-center">
+								<div className="bg-white/20 p-1 rounded border border-slate-100 flex justify-between items-center">
 									<div>
-										<p className="font-bold text-yellow-700 uppercase text-[6.5px]">
+										<p className="font-bold text-slate-900 uppercase text-[6.5px]">
 											Sacombank
 										</p>
 										<p className="font-semibold font-sans text-slate-900 leading-none">
@@ -194,9 +176,9 @@ export function BillPreview({ data }: BillPreviewProps) {
 										Trần Quốc Hiếu
 									</p>
 								</div>
-								<div className="bg-white/60 p-1 rounded border border-slate-100 flex justify-between items-center">
+								<div className="bg-white/20 p-1 rounded border border-slate-100 flex justify-between items-center">
 									<div>
-										<p className="font-bold text-yellow-700 uppercase text-[6.5px]">
+										<p className="font-bold text-slate-900 uppercase text-[6.5px]">
 											MBBank
 										</p>
 										<p className="font-semibold font-sans text-slate-900 leading-none">
@@ -212,19 +194,19 @@ export function BillPreview({ data }: BillPreviewProps) {
 					</div>
 
 					{/* Highlighted Customer Information Card */}
-					<div className="mb-4 bg-white/40 backdrop-blur-md p-3 rounded-xl border-2 border-yellow-500/20 shadow-lg relative overflow-hidden">
+					<div className="mb-4 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner backdrop-blur-md relative overflow-hidden">
 						<div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-500/10 rounded-full"></div>
 
-						<h3 className="text-[10px] font-black text-yellow-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+						<h3 className="text-[10px] font-semibold text-slate-900 uppercase tracking-widest mb-3 flex items-center gap-2">
 							<User className="w-3 h-3" />
 							Thông tin khách hàng & Dịch vụ
 							<div className="flex-1 h-[1px] bg-yellow-500/20"></div>
 						</h3>
 
 						<div className="space-y-2.5 text-[10px]">
-							<div className="flex justify-between items-baseline border-b border-yellow-500/10 pb-1">
+							<div className="flex justify-between items-baseline border-b border-yellow-500/10 pb-1 text-[8.5px]">
 								<div className="flex items-center gap-2">
-									<span className="uppercase font-black text-yellow-700 text-[8.5px]">
+									<span className="font-semibold text-slate-900">
 										Tên khách hàng:
 									</span>
 									<span className="font-medium text-slate-900">
@@ -232,45 +214,41 @@ export function BillPreview({ data }: BillPreviewProps) {
 											"......................................."}
 									</span>
 								</div>
-								<div className="flex items-center gap-2">
-									<span className="uppercase font-black text-yellow-700 text-[8.5px]">
-										SĐT:
-									</span>
-									<span className="font-black text-slate-900">
+								<div className="flex items-center gap-1">
+									<span className="font-semibold text-slate-900">SĐT:</span>
+									<span className="font-semibold text-slate-900">
 										{data.phone || "................"}
 									</span>
 								</div>
 							</div>
 
-							<div className="border-b border-yellow-500/10 pb-1 flex items-center gap-2">
-								<span className="uppercase font-black text-yellow-700 text-[8.5px]">
-									Địa chỉ:
-								</span>
+							<div className="border-b border-yellow-500/10 pb-1 flex items-center gap-2 text-[8.5px]">
+								<span className="font-semibold text-slate-900">Địa chỉ:</span>
 								<span className="font-bold text-slate-800 flex-1">
 									{data.address ||
 										"..........................................................................."}
 								</span>
 							</div>
 
-							<div className="space-y-2">
+							<div className="space-y-2 text-[8.5px]">
 								{(data.packages || []).map((pkg, index) => (
 									<div
 										key={index}
 										className="flex justify-between items-baseline border-b border-yellow-500/10 pb-1"
 									>
 										<div className="flex items-center gap-2">
-											<span className="uppercase font-black text-yellow-700 text-[8.5px]">
+											<span className="font-semibold text-slate-900">
 												Đặt gói {index + 1}:
 											</span>
-											<span className="font-black text-yellow-800">
+											<span className="font-semibold text-slate-900">
 												{pkg.label || "......................................."}
 											</span>
 										</div>
 										<div className="flex items-center gap-2">
-											<span className="uppercase font-black text-yellow-700 text-[8.5px]">
+											<span className="font-semibold text-slate-900">
 												Chi phí:
 											</span>
-											<span className="font-black text-slate-900">
+											<span className="font-semibold text-slate-900">
 												{pkg.price ? formatCurrency(pkg.price) : "0"}
 											</span>
 										</div>
@@ -278,13 +256,13 @@ export function BillPreview({ data }: BillPreviewProps) {
 								))}
 							</div>
 
-							<div className="flex justify-between items-baseline border-b border-yellow-500/10 pb-1">
+							<div className="flex justify-between items-baseline border-b border-yellow-500/10 pb-1 text-[8.5px]">
 								<div className="flex items-center gap-2">
-									<Calendar className="w-2.5 h-2.5 text-yellow-600" />
-									<span className="uppercase font-black text-yellow-700 text-[8.5px]">
+									<Calendar className="w-2.5 h-2.5 text-slate-900" />
+									<span className="font-semibold text-slate-900">
 										Ngày cưới:
 									</span>
-									<span className="font-black tracking-wider text-slate-900">
+									<span className="font-semibold tracking-wider text-slate-900">
 										{data.weddingDateStart
 											? formatDate(data.weddingDateStart)
 											: "../../...."}{" "}
@@ -293,23 +271,25 @@ export function BillPreview({ data }: BillPreviewProps) {
 											: ""}
 									</span>
 								</div>
-								<div className="flex items-center gap-2">
-									<span className="uppercase font-black text-yellow-700 text-[8.5px]">
-										Phụ thu phí đi xa:
-									</span>
-									<span className="font-black text-slate-900">
-										{data.travelFee ? formatCurrency(data.travelFee) : "0"}
-									</span>
-								</div>
+								{data.travelFee ? (
+									<div className="flex items-center gap-2">
+										<span className="uppercase font-semibold text-slate-900">
+											Phụ thu phí đi xa:
+										</span>
+										<span className="font-semibold text-slate-900">
+											{data.travelFee ? formatCurrency(data.travelFee) : "0"}
+										</span>
+									</div>
+								) : null}
 							</div>
 
-							<div className="flex items-start gap-2 pt-1">
-								<Info className="w-2.5 h-2.5 text-yellow-600 shrink-0 mt-0.5" />
+							<div className="flex items-start gap-2 pt-1 text-[8.5px]">
+								<Info className="size-2.5 text-slate-900 shrink-0 mt-0.5" />
 								<div>
-									<span className="uppercase font-black text-yellow-700 text-[8.5px] block mb-0.5">
-										Quyền lợi:
+									<span className="font-semibold text-slate-900 text-[8.5px] block mb-0.5">
+										Quyền lợi khách nhận được:
 									</span>
-									<p className="font-medium text-base leading-none">
+									<p className="font-medium text-[9px] leading-none">
 										{data.benefits ||
 											"..................................................."}
 									</p>
@@ -319,73 +299,69 @@ export function BillPreview({ data }: BillPreviewProps) {
 					</div>
 
 					{/* Payment and Signatures */}
-					<div className="grid grid-cols-[1.1fr_1.1fr] gap-4">
-						<div className="space-y-1.5 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner">
-							<div className="flex items-center justify-between text-[9px]">
-								<span className="uppercase font-black text-black">
-									Tạm tính
-								</span>
-								<div className="font-black text-black">
+					<div className="grid grid-cols-7 gap-4">
+						<div className="col-span-3 space-y-1.5 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner">
+							<div className="flex items-center justify-between text-[8.5px]">
+								<span className="font-semibold text-slate-900">Tạm tính</span>
+								<div className="font-semibold text-slate-900">
 									{formatCurrency(subtotalBeforeDiscount)}
 								</div>
 							</div>
 							{Number(data.discount) > 0 && (
-								<div className="flex items-center justify-between text-[9px]">
-									<span className="uppercase font-black text-green-700">
-										Giảm giá
-									</span>
-									<div className="font-black text-green-700">
+								<div className="flex items-center justify-between text-[8.5px]">
+									<span className="font-semibold text-slate-700">Giảm giá</span>
+									<div className="font-semibold text-slate-700">
 										- {formatCurrency(Number(data.discount))}
 									</div>
 								</div>
 							)}
-							<div className="flex items-center justify-between text-[9px]">
-								<span className="uppercase font-black text-black">
-									Tổng chi phí
-								</span>
-								<div className="font-black text-black text-base">
-									{formatCurrency(totalPrice)}
-								</div>
-							</div>
 							{data.includeVAT && (
-								<div className="flex items-center justify-between text-[9px]">
-									<span className="uppercase font-black text-black">
+								<div className="flex items-center justify-between text-[8.5px]">
+									<span className="font-semibold text-slate-900">
 										Thuế VAT (10%)
 									</span>
-									<div className="font-black text-black">
+									<div className="font-semibold text-slate-900">
 										{formatCurrency(vatAmount)}
 									</div>
 								</div>
 							)}
-							<div className="flex items-center justify-between text-[9px]">
-								<span className="uppercase font-black text-black">Đặt cọc</span>
-								<div className="font-black text-black">
-									{formatCurrency(Number(data.deposit))}
-								</div>
+							<div className="flex items-center justify-between text-[8.5px]">
+								<span className="font-semibold text-slate-900">
+									Tổng chi phí
+								</span>
+								<span className="font-semibold text-slate-900 text-xs">
+									{formatCurrency(totalPrice)}
+								</span>
 							</div>
-							<div className="flex items-center justify-between pt-1 border-t border-slate-200 text-[9px]">
-								<span className="uppercase font-black text-black">Còn lại</span>
-								<div className="font-black text-black text-lg">
+							<div className="flex items-center justify-between text-[8.5px]">
+								<span className="font-semibold text-slate-900">Đặt cọc</span>
+								<span className="font-semibold text-slate-900 text-xs">
+									{formatCurrency(Number(data.deposit))}
+								</span>
+							</div>
+							<div className="flex items-center justify-between pt-1 border-t border-slate-200 text-[8.5px]">
+								<span className="font-semibold text-slate-900">Còn lại</span>
+								<div className="font-semibold text-slate-900 text-xs">
 									{formatCurrency(remaining)}
 								</div>
 							</div>
-							<div className="flex items-center justify-between text-[9px]">
-								<span className="uppercase font-black text-black">
-									Ngày nhận
+							<div className="flex items-center justify-between text-[8.5px]">
+								<span className="font-semibold text-slate-900">
+									Ngày thanh toán
 								</span>
-								<div className="font-black text-black">
+								<div className="font-semibold text-slate-900">
 									{formatDate(data.pickupDate) || "../../...."}
 								</div>
 							</div>
 						</div>
 
-						<div className="flex flex-col">
+						<div className="col-span-4 flex flex-col">
 							<div className="text-right mb-1">
-								<p className="text-[8px] font-black text-slate-900 uppercase">
+								<p className="text-[8px] font-semibold text-slate-900 uppercase">
 									NGÀY {day} THÁNG {month} NĂM {year}
 								</p>
 							</div>
-							<div className="grid grid-cols-2 text-[8px] font-black text-center border-b border-slate-200/10 pb-1 mb-2">
+							<div className="grid grid-cols-2 text-[8px] font-semibold text-center border-b border-slate-200/10">
 								<span>KÍ TÊN KH</span>
 								<span>BIÊN NHẬN</span>
 							</div>
@@ -394,8 +370,8 @@ export function BillPreview({ data }: BillPreviewProps) {
 								<div className="border-r border-slate-100/10"></div>
 
 								{/* Right side for Studio signature */}
-								<div className="flex flex-col items-center justify-center relative min-h-[50px]">
-									<div className="transform -rotate-6 absolute w-20 h-10">
+								<div className="flex flex-col items-center justify-center relative min-h-10">
+									<div className="transform -rotate-6 absolute">
 										<img
 											src="/images/sig.png"
 											alt="Signature"
@@ -404,7 +380,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 										/>
 									</div>
 									<div className="mt-auto pt-4 text-center">
-										<p className="font-black text-[10px] underline decoration-1 underline-offset-2 tracking-tight text-slate-900">
+										<p className="font-semibold text-[10px] underline decoration-1 underline-offset-2 tracking-tight text-slate-900">
 											Trần Quốc Hiếu
 										</p>
 									</div>
@@ -415,7 +391,9 @@ export function BillPreview({ data }: BillPreviewProps) {
 
 					{/* Footer Notes */}
 					<div className="mt-auto text-[7.5px] leading-tight font-medium text-slate-600 border-t border-slate-100/50 pt-2">
-						<p className="text-red-600 font-black mb-0.5 text-[8px]">LƯU Ý:</p>
+						<p className="text-red-600 font-semibold mb-0.5 text-[8px]">
+							LƯU Ý:
+						</p>
 
 						<ul className="space-y-0.5 uppercase tracking-tighter">
 							<li>• Đọc kỹ quyền lợi khách hàng rồi hãy kí tên</li>
@@ -425,7 +403,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 
 						<div
 							className={cn(
-								"text-black font-black text-[10px] text-center mt-0.5 normal-case",
+								"text-slate-900 font-semibold text-[10px] text-center mt-0.5 normal-case",
 							)}
 						>
 							Chân thành cảm ơn quý khách!
