@@ -161,7 +161,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 					{/* Studio Info Section */}
 					<div
 						className={cn(
-							"mb-3 grid grid-cols-[1.2fr_1fr] gap-3 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner relative overflow-hidden backdrop-blur-sm",
+							"mb-3 grid grid-cols-[1.2fr_1fr] gap-3 bg-white/40 p-2.5 rounded-xl border border-white/50 relative overflow-hidden backdrop-blur-sm",
 						)}
 					>
 						<div className="space-y-1 relative z-10">
@@ -193,7 +193,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 								Thanh toán
 							</h3>
 							<div className="grid grid-cols-1 gap-1 text-[7.5px]">
-								<div className="bg-white/60 p-1 rounded border border-slate-100 flex justify-between items-center">
+								<div className="bg-white/40 p-1 rounded border border-slate-100 flex justify-between items-center">
 									<div>
 										<p className="font-bold text-slate-900 uppercase text-[6.5px]">
 											Sacombank
@@ -206,7 +206,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 										Trần Quốc Hiếu
 									</p>
 								</div>
-								<div className="bg-white/60 p-1 rounded border border-slate-100 flex justify-between items-center">
+								<div className="bg-white/40 p-1 rounded border border-slate-100 flex justify-between items-center">
 									<div>
 										<p className="font-bold text-slate-900 uppercase text-[6.5px]">
 											MBBank
@@ -226,7 +226,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 					{/* Highlighted Customer Information Card */}
 					<div
 						className={cn(
-							"mb-4 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner relative overflow-hidden backdrop-blur-md",
+							"mb-4 bg-white/40 p-2.5 rounded-xl border border-white/50 relative overflow-hidden backdrop-blur-md",
 						)}
 					>
 						<div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-500/10 rounded-full"></div>
@@ -335,7 +335,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 					{/* Payment and Signatures */}
 					<div className="grid grid-cols-7 gap-4">
 						<div
-							className="col-span-3 space-y-1.5 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner"
+							className="col-span-3 space-y-1.5 bg-white/40 p-2.5 rounded-xl border border-white/50 backdrop-blur-sm"
 						>
 							<div className="flex items-center justify-between text-[8.5px]">
 								<span className="font-semibold text-slate-900">Tạm tính</span>
