@@ -99,7 +99,8 @@ export default function ContractsPage() {
 			const safeName = (selectedContract.customer_name || "khach-hang")
 				.replace(/[^a-z0-9]/gi, "-")
 				.toLowerCase();
-			link.download = `hop-dong-${safeName}.jpg`;
+			const todayStr = format(new Date(), "dd-MM-yyyy");
+			link.download = `hop-dong-${todayStr}-${safeName}.jpg`;
 			link.href = dataUrl;
 			link.click();
 			toast.success("Đã tạo file ảnh thành công!");

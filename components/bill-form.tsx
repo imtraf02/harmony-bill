@@ -204,7 +204,8 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 			const safeName = (form.getValues().customerName || "khach-hang")
 				.replace(/[^a-z0-9]/gi, "-")
 				.toLowerCase();
-			link.download = `hop-dong-${safeName}.jpg`;
+			const todayStr = format(new Date(), "dd-MM-yyyy");
+			link.download = `hop-dong-${todayStr}-${safeName}.jpg`;
 			link.href = dataUrl;
 			link.click();
 			toast.success("Đã tạo file ảnh thành công!");
