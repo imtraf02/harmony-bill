@@ -27,7 +27,7 @@ function HomeContent() {
 			getContractById(editId).then((contract) => {
 				if (contract) {
 					const mapped = mapToBillSchema(contract);
-					setInitialData(mapped as any);
+					setInitialData(mapped);
 				}
 			});
 		}
