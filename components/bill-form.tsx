@@ -4,7 +4,7 @@
  * Updated to support dynamic packages and simplified event details.
  * UI redesigned: luxury / refined aesthetic — gold accents, serif typography, soft shadows.
  *
- * iOS Fix: isCapturing state passed to BillPreview to disable backdrop-blur,
+ * Uses html2canvas for better iOS capture support.
  * and waits for base64 images to be ready before triggering html-to-image capture.
  */
 
@@ -13,7 +13,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import * as htmlToImage from "html-to-image";
+import { captureElement } from "@/lib/capture";
 import { CalendarIcon, Plus, Printer, Settings, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
@@ -120,8 +120,7 @@ const inputCls =
 export function BillForm({ onDataChange, initialData }: BillFormProps) {
 	const [masterPackages, setMasterPackages] = React.useState<any[]>([]);
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
-	// ✅ FIX: Track capture state to pass to BillPreview (disables backdrop-blur)
-	const [isCapturing, setIsCapturing] = React.useState(false);
+	const [isDownloading, setIsDownloading] = React.useState(false);
 
 	const form = useForm<BillSchema>({
 		resolver: zodResolver(billSchema),
@@ -169,52 +168,20 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 	}, [watch, onDataChange, form]);
 
 	const onDownloadImage = async () => {
-		const element = document.getElementById("bill-preview-content");
-		if (!element) return;
-
 		try {
-			// ✅ FIX: Set isCapturing=true so BillPreview removes backdrop-blur and
-			// renders at scale(1) — then wait a frame for React to re-render
-			setIsCapturing(true);
-			await new Promise((resolve) => requestAnimationFrame(resolve));
-			await new Promise((resolve) => requestAnimationFrame(resolve));
-			// Extra wait for iOS to finish layout recalc
-			await new Promise((resolve) => setTimeout(resolve, 300));
-
-			// ✅ FIX: Use toJpeg with explicit backgroundColor.
-			// JPEG has no alpha channel so background is always opaque.
-			// Run twice: first call "warms up" font/image cache on iOS.
-			await htmlToImage.toJpeg(element, {
-				quality: 0.01,
-				pixelRatio: 1,
-				backgroundColor: "#ffffff",
-				cacheBust: true,
-			});
-
-			// Second call is the real one
-			const dataUrl = await htmlToImage.toJpeg(element, {
-				quality: 0.95,
-				pixelRatio: 2,
-				backgroundColor: "#ffffff",
-				cacheBust: true,
-				// Do NOT set style.transform here — isCapturing already set scale(1)
-			});
-
-			const link = document.createElement("a");
+			setIsDownloading(true);
 			const safeName = (form.getValues().customerName || "khach-hang")
 				.replace(/[^a-z0-9]/gi, "-")
 				.toLowerCase();
 			const todayStr = format(new Date(), "dd-MM-yyyy");
-			link.download = `hop-dong-${todayStr}-${safeName}.jpg`;
-			link.href = dataUrl;
-			link.click();
+			
+			await captureElement("bill-preview-content", `${todayStr}-${safeName}`);
 			toast.success("Đã tạo file ảnh thành công!");
 		} catch (err) {
 			console.error("Lỗi tạo ảnh:", err);
 			toast.error("Không thể tạo file ảnh.");
 		} finally {
-			// ✅ Restore normal scale display after capture
-			setIsCapturing(false);
+			setIsDownloading(false);
 		}
 	};
 
@@ -724,10 +691,10 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					<button
 						type="button"
 						onClick={onDownloadImage}
-						disabled={isCapturing}
+						disabled={isDownloading}
 						className="flex items-center gap-2 h-12 px-5 rounded-xl font-semibold text-sm text-[#8a6820] bg-white border border-[#e0cc9a] hover:bg-[#faf6ea] transition-all shadow-sm disabled:opacity-60"
 					>
-						{isCapturing ? "Đang tạo ảnh..." : "TẢI FILE ẢNH"}
+						{isDownloading ? "Đang tạo ảnh..." : "TẢI FILE ẢNH"}
 					</button>
 					<button
 						type="submit"

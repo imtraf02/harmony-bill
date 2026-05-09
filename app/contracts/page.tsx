@@ -14,7 +14,7 @@ import {
 	Trash2,
 	User,
 } from "lucide-react";
-import * as htmlToImage from "html-to-image";
+import { captureElement } from "@/lib/capture";
 import Link from "next/link";
 import * as React from "react";
 import { deleteContract, getContracts } from "@/app/actions";
@@ -26,8 +26,7 @@ export default function ContractsPage() {
 	const [contracts, setContracts] = React.useState<any[]>([]);
 	const [searchTerm, setSearchTerm] = React.useState("");
 	const [selectedContract, setSelectedContract] = React.useState<any | null>(null);
-	// ✅ FIX: isCapturing state để pass vào BillPreview (tắt backdrop-blur khi capture)
-	const [isCapturing, setIsCapturing] = React.useState(false);
+	const [isDownloading, setIsDownloading] = React.useState(false);
 
 	const loadContracts = async () => {
 		const data = await getContracts();
@@ -66,50 +65,20 @@ export default function ContractsPage() {
 	const onDownloadImage = async () => {
 		if (!selectedContract) return;
 
-		const element = document.getElementById("bill-preview-content");
-		if (!element) return;
-
 		try {
-			// ✅ FIX: Bật isCapturing để BillPreview tắt backdrop-blur + reset scale(1)
-			setIsCapturing(true);
-
-			// Đợi React re-render xong trước khi capture
-			await new Promise((resolve) => requestAnimationFrame(resolve));
-			await new Promise((resolve) => requestAnimationFrame(resolve));
-			// Thêm delay cho iOS layout recalc
-			await new Promise((resolve) => setTimeout(resolve, 300));
-
-			// ✅ FIX: Warm-up call — iOS cần lần đầu để cache font/image vào canvas
-			await htmlToImage.toJpeg(element, {
-				quality: 0.01,
-				pixelRatio: 1,
-				backgroundColor: "#ffffff",
-				cacheBust: true,
-			});
-
-			// Lần thật — đủ chất lượng
-			const dataUrl = await htmlToImage.toJpeg(element, {
-				quality: 0.95,
-				pixelRatio: 2,
-				backgroundColor: "#ffffff",
-				cacheBust: true,
-			});
-
-			const link = document.createElement("a");
+			setIsDownloading(true);
 			const safeName = (selectedContract.customer_name || "khach-hang")
 				.replace(/[^a-z0-9]/gi, "-")
 				.toLowerCase();
 			const todayStr = format(new Date(), "dd-MM-yyyy");
-			link.download = `hop-dong-${todayStr}-${safeName}.jpg`;
-			link.href = dataUrl;
-			link.click();
+			
+			await captureElement("bill-preview-content", `${todayStr}-${safeName}`);
 			toast.success("Đã tạo file ảnh thành công!");
 		} catch (err) {
 			console.error("Lỗi tạo ảnh:", err);
 			toast.error("Không thể tạo file ảnh.");
 		} finally {
-			// ✅ Khôi phục lại giao diện bình thường sau khi capture
-			setIsCapturing(false);
+			setIsDownloading(false);
 		}
 	};
 
@@ -315,11 +284,11 @@ export default function ContractsPage() {
 							<div className="flex items-center gap-2">
 								<button
 									onClick={onDownloadImage}
-									disabled={isCapturing}
+									disabled={isDownloading}
 									className="flex items-center gap-1.5 text-xs font-semibold text-[#8a6820] border border-[#e0cc9a] rounded-xl px-3 py-2 bg-white hover:bg-[#faf6ea] transition-all disabled:opacity-60"
 								>
 									<Download className="w-3.5 h-3.5" />
-									{isCapturing ? "Đang tạo..." : "Tải ảnh"}
+									{isDownloading ? "Đang tạo..." : "Tải ảnh"}
 								</button>
 								<button
 									onClick={() => window.print()}
@@ -342,10 +311,8 @@ export default function ContractsPage() {
 							className="flex-1 overflow-auto p-4 md:p-10 flex justify-center"
 							style={{ background: "linear-gradient(160deg, #fdfaf3 0%, #f5f0e8 100%)" }}
 						>
-							{/* ✅ FIX: Truyền isCapturing vào BillPreview */}
 							<BillPreview
 								data={mapToBillSchema(selectedContract)}
-								isCapturing={isCapturing}
 							/>
 						</div>
 					</div>

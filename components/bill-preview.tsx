@@ -23,51 +23,11 @@ import { cn } from "@/lib/utils";
 
 interface BillPreviewProps {
 	data: Partial<BillSchema>;
-	/** Set to true during image capture to disable effects unsupported by iOS canvas */
-	isCapturing?: boolean;
 }
 
-/**
- * Preloads an image URL and returns a base64 data URL.
- * This is required for html-to-image on iOS Safari, which cannot
- * capture <img> tags with relative/external src paths via canvas.
- */
-function useBase64Image(src: string): string {
-	const [base64, setBase64] = React.useState<string>("");
-
-	React.useEffect(() => {
-		if (!src) return;
-		const img = new window.Image();
-		img.crossOrigin = "anonymous";
-		img.onload = () => {
-			try {
-				const canvas = document.createElement("canvas");
-				canvas.width = img.naturalWidth || img.width;
-				canvas.height = img.naturalHeight || img.height;
-				const ctx = canvas.getContext("2d");
-				if (!ctx) return;
-				ctx.drawImage(img, 0, 0);
-				setBase64(canvas.toDataURL("image/png"));
-			} catch {
-				// Fallback: keep original src (CORS issue)
-				setBase64(src);
-			}
-		};
-		img.onerror = () => setBase64(src);
-		img.src = src;
-	}, [src]);
-
-	return base64;
-}
-
-export function BillPreview({ data, isCapturing = false }: BillPreviewProps) {
+export function BillPreview({ data }: BillPreviewProps) {
 	const [scale, setScale] = React.useState(1);
 	const containerRef = React.useRef<HTMLDivElement>(null);
-
-	// Preload all images as base64 for iOS canvas compatibility
-	const bgBase64 = useBase64Image("/images/bg.jpg");
-	const logoBase64 = useBase64Image("/images/logo.png");
-	const sigBase64 = useBase64Image("/images/sig.png");
 
 	React.useEffect(() => {
 		const updateScale = () => {
@@ -111,12 +71,6 @@ export function BillPreview({ data, isCapturing = false }: BillPreviewProps) {
 	const day = today.getDate().toString().padStart(2, "0");
 	const month = (today.getMonth() + 1).toString().padStart(2, "0");
 	const year = today.getFullYear();
-
-	// Panels: disable backdrop-blur during capture (iOS canvas doesn't support it)
-	const panelCls = cn(
-		"bg-white/60 p-2.5 rounded-xl border border-slate-200 shadow-inner",
-		!isCapturing && "backdrop-blur-sm",
-	);
 
 	return (
 		<div
@@ -164,28 +118,25 @@ export function BillPreview({ data, isCapturing = false }: BillPreviewProps) {
 				style={{
 					width: "559px",
 					height: "794px",
-					transform: isCapturing ? "scale(1)" : `scale(${scale})`,
+					transform: `scale(${scale})`,
 					transformOrigin: "top center",
-					marginBottom: isCapturing ? "0" : `calc(794px * (${scale} - 1))`,
+					marginBottom: `calc(794px * (${scale} - 1))`,
 					WebkitPrintColorAdjust: "exact",
-					// ✅ FIX: Background as inline style using base64 — works on iOS canvas
-					backgroundColor: "#ffffff",
-					backgroundImage: bgBase64 ? `url(${bgBase64})` : undefined,
-					backgroundSize: "cover",
-					backgroundPosition: "center",
-					backgroundRepeat: "no-repeat",
 				}}
 			>
-				{/* ✅ Removed absolute <img> bg — replaced by backgroundImage style above */}
+				{/* Background image - visible both on screen and in print for capture support */}
+				<img
+					src="/images/bg.jpg"
+					alt=""
+					className="absolute inset-0 w-full h-full object-cover -z-10"
+					aria-hidden="true"
+				/>
 
 				<div className="relative z-10 p-5 md:p-6 flex flex-col h-full overflow-hidden">
 					{/* Header */}
 					<div className="flex justify-between items-start mb-2">
 						<div className="flex items-center gap-2">
-							{/* ✅ FIX: Use base64 src for logo */}
-							{logoBase64 && (
-								<img src={logoBase64} alt="logo" className="h-12" />
-							)}
+							<img src="/images/logo.png" alt="logo" className="h-12" />
 						</div>
 						<div className="text-right">
 							<p className="text-[8px] font-semibold uppercase tracking-tight">
@@ -210,8 +161,7 @@ export function BillPreview({ data, isCapturing = false }: BillPreviewProps) {
 					{/* Studio Info Section */}
 					<div
 						className={cn(
-							"mb-3 grid grid-cols-[1.2fr_1fr] gap-3 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner relative overflow-hidden",
-							!isCapturing && "backdrop-blur-sm",
+							"mb-3 grid grid-cols-[1.2fr_1fr] gap-3 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner relative overflow-hidden backdrop-blur-sm",
 						)}
 					>
 						<div className="space-y-1 relative z-10">
@@ -276,8 +226,7 @@ export function BillPreview({ data, isCapturing = false }: BillPreviewProps) {
 					{/* Highlighted Customer Information Card */}
 					<div
 						className={cn(
-							"mb-4 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner relative overflow-hidden",
-							!isCapturing && "backdrop-blur-md",
+							"mb-4 bg-slate-50/40 p-2.5 rounded-xl border border-slate-200 shadow-inner relative overflow-hidden backdrop-blur-md",
 						)}
 					>
 						<div className="absolute -top-4 -right-4 w-12 h-12 bg-yellow-500/10 rounded-full"></div>
@@ -457,14 +406,12 @@ export function BillPreview({ data, isCapturing = false }: BillPreviewProps) {
 								{/* Right side for Studio signature */}
 								<div className="flex flex-col items-center justify-center relative min-h-[60px]">
 									<div className="transform -rotate-6 absolute w-24 h-16 flex items-center justify-center">
-										{/* ✅ FIX: Use base64 src for signature */}
-										{sigBase64 && (
-											<img
-												src={sigBase64}
-												alt="Signature"
-												className="max-w-full max-h-full object-contain opacity-90"
-											/>
-										)}
+										<img
+											src="/images/sig.png"
+											alt="Signature"
+											className="max-w-full max-h-full object-contain opacity-90"
+											onError={(e) => (e.currentTarget.style.display = "none")}
+										/>
 									</div>
 									<div className="mt-auto pt-4 text-center">
 										<p className="font-semibold text-[10px] underline decoration-1 underline-offset-2 tracking-tight text-slate-900">
