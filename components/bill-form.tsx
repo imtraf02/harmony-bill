@@ -169,6 +169,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 				const dataUrl = await htmlToImage.toJpeg(element, {
 					quality: 0.95,
 					pixelRatio: 2,
+					backgroundColor: "#ffffff",
 					style: {
 						transform: "scale(1)",
 						transformOrigin: "top left",
