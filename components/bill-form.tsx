@@ -166,10 +166,14 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 		try {
 			const element = document.getElementById("bill-preview-content");
 			if (element) {
+				// Wait a moment for images to be fully rendered
+				await new Promise((resolve) => setTimeout(resolve, 500));
+
 				const dataUrl = await htmlToImage.toJpeg(element, {
 					quality: 0.95,
 					pixelRatio: 2,
 					backgroundColor: "#ffffff",
+					cacheBust: true,
 					style: {
 						transform: "scale(1)",
 						transformOrigin: "top left",

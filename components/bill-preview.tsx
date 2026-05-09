@@ -121,18 +121,15 @@ export function BillPreview({ data }: BillPreviewProps) {
 					height: "794px",
 					transform: `scale(${scale})`,
 					transformOrigin: "top center",
-					backgroundImage: 'url("/images/bg.jpg")',
-					backgroundSize: "cover",
-					backgroundPosition: "center",
 					marginBottom: `calc(794px * (${scale} - 1))`,
 					WebkitPrintColorAdjust: "exact",
 				}}
 			>
-				{/* Dedicated print background to ensure color/image presence */}
+				{/* Background image - visible both on screen and in print for capture support */}
 				<img
 					src="/images/bg.jpg"
 					alt=""
-					className="hidden print:block absolute inset-0 w-full h-full object-cover -z-10"
+					className="absolute inset-0 w-full h-full object-cover -z-10"
 					aria-hidden="true"
 				/>
 				<div className="relative z-10 p-5 md:p-6 flex flex-col h-full overflow-hidden">
@@ -399,12 +396,12 @@ export function BillPreview({ data }: BillPreviewProps) {
 								<div className="border-r border-slate-100/10"></div>
 
 								{/* Right side for Studio signature */}
-								<div className="flex flex-col items-center justify-center relative min-h-10">
-									<div className="transform -rotate-6 absolute">
+								<div className="flex flex-col items-center justify-center relative min-h-[60px]">
+									<div className="transform -rotate-6 absolute w-24 h-16 flex items-center justify-center">
 										<img
 											src="/images/sig.png"
 											alt="Signature"
-											className="w-full h-full object-contain opacity-80"
+											className="max-w-full max-h-full object-contain opacity-90"
 											onError={(e) => (e.currentTarget.style.display = "none")}
 										/>
 									</div>
