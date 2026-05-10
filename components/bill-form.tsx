@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { captureElement } from "@/lib/capture";
-import { CalendarIcon, Plus, Printer, Settings, X } from "lucide-react";
+import { CalendarIcon, Plus, Printer, X } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
@@ -71,10 +71,10 @@ function Section({
 	action?: React.ReactNode;
 }) {
 	return (
-		<div className="rounded-2xl border border-[#e8dcc8] bg-white shadow-[0_2px_16px_0_rgba(180,150,80,0.07)] overflow-hidden">
+		<div className="rounded-2xl border border-theme-border bg-white shadow-[0_2px_16px_0_rgba(180,150,80,0.07)] overflow-hidden">
 			{/* Section header */}
-			<div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
-				<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[#b49050] font-sans">
+			<div className="flex items-center justify-between p-2 bg-gradient-to-r from-theme-bg-muted to-white border-b border-theme-border">
+				<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-theme-text-muted font-sans">
 					{title}
 				</span>
 				{action}
@@ -97,7 +97,7 @@ function ElegantLabel({
 	return (
 		<label
 			htmlFor={htmlFor}
-			className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a8060] mb-1.5"
+			className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-theme-text-muted mb-1.5"
 		>
 			{children}
 		</label>
@@ -108,7 +108,7 @@ function ElegantLabel({
    Styled input wrapper
  ───────────────────────────────────────── */
 const inputCls =
-	"w-full h-11 rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-2 text-sm text-[#2d2418] placeholder:text-[#c0aa88] focus:outline-none focus:ring-2 focus:ring-[#c8a84b]/40 focus:border-[#c8a84b] transition-all duration-200";
+	"w-full h-11 rounded-xl border border-theme-border-muted bg-theme-bg-body px-2 text-sm text-theme-text-dark placeholder:text-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-gold-primary/40 focus:border-theme-gold-primary transition-all duration-200";
 
 export function BillForm({ onDataChange, initialData }: BillFormProps) {
 	const [masterPackages, setMasterPackages] = React.useState<any[]>([]);
@@ -235,22 +235,22 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 								<button
 									type="button"
 									className={cn(
-										"w-full h-11 flex items-center rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-2 text-sm text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#c8a84b]/40 focus:border-[#c8a84b]",
-										!field.value && "text-[#c0aa88]",
+										"w-full h-11 flex items-center rounded-xl border border-theme-border-muted bg-theme-bg-body px-2 text-sm text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-theme-gold-primary/40 focus:border-theme-gold-primary",
+										!field.value && "text-theme-text-muted",
 									)}
 								/>
 							}
 						>
-							<CalendarIcon className="mr-2 h-4 w-4 text-[#c8a84b]" />
+							<CalendarIcon className="mr-2 h-4 w-4 text-theme-gold-primary" />
 							{field.value ? (
-								<span className="text-[#2d2418]">
+								<span className="text-theme-text-dark">
 									{format(field.value, "dd/MM/yyyy")}
 								</span>
 							) : (
 								<span>Chọn ngày</span>
 							)}
 						</PopoverTrigger>
-						<PopoverContent className="w-auto p-0 shadow-xl border-[#e8dcc8] rounded-2xl overflow-hidden">
+						<PopoverContent className="w-auto p-0 shadow-xl border-theme-border rounded-2xl overflow-hidden">
 							<Calendar
 								mode="single"
 								selected={field.value}
@@ -268,41 +268,33 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 	return (
 		<form
 			onSubmit={form.handleSubmit(onSubmit)}
-			className="space-y-5 pb-28 max-w-2xl mx-auto"
+			className="space-y-2 pb-20 max-w-2xl mx-auto px-2"
 		>
 			{/* ── Studio Header ── */}
-			<div className="rounded-2xl overflow-hidden shadow-[0_4px_24px_0_rgba(180,150,80,0.13)] border border-[#e0cc9a]">
+			<div className="rounded-2xl overflow-hidden shadow-[0_4px_24px_0_rgba(180,150,80,0.13)] border border-theme-border-muted">
 				{/* Gold gradient banner */}
-				<div className="h-1 w-full bg-gradient-to-r from-[#c8a84b] via-[#e8d07a] to-[#c8a84b]" />
-				<div className="bg-gradient-to-br from-[#fdfaf3] to-white px-4 pt-4 pb-4 text-center relative">
-					<Link
-						href="/settings"
-						className="absolute top-1 right-3 p-2 rounded-xl hover:bg-[#f5edd8] text-[#c8a84b] transition-colors print:hidden"
-						title="Cài đặt Studio"
-					>
-						<Settings className="w-4 h-4" />
-					</Link>
-
+				<div className="h-1 w-full bg-gradient-to-r from-theme-gold-primary via-theme-gold-light to-theme-gold-primary" />
+				<div className="bg-gradient-to-br from-theme-bg-body to-white p-2 text-center relative">
 					{/* Studio name */}
 					<div className="flex items-center justify-center gap-1 mb-1">
-						<div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#c8a84b]/50" />
+						<div className="h-px flex-1 bg-gradient-to-r from-transparent to-theme-gold-primary/50" />
 						<h1
-							className="text-2xl md:text-3xl font-bold tracking-[0.15em] text-[#8a6820]"
+							className="text-2xl md:text-3xl font-bold tracking-[0.15em] text-theme-gold-hover"
 						>
 							{settings?.studioName || "HARMONY MEDIA"}
 						</h1>
-						<div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#c8a84b]/50" />
+						<div className="h-px flex-1 bg-gradient-to-l from-transparent to-theme-gold-primary/50" />
 					</div>
 
-					<p className="text-[11px] tracking-[0.2em] uppercase text-[#b49050] mb-3">
+					<p className="text-[11px] tracking-[0.2em] uppercase text-theme-text-muted mb-3">
 						Wedding Photography Studio
 					</p>
 
-					<div className="text-xs text-[#8a7550] space-y-1 mb-3">
+					<div className="text-xs text-theme-text-muted space-y-1 mb-3">
 						<p>{settings?.address || "Hòa Bình, Đông Hoà, Trảng Bom, Đồng Nai."}</p>
 						<p>
 							{settings?.email || "Studiohieutrancanon@gmail.com"}
-							<span className="mx-2 text-[#c8a84b]">·</span>
+							<span className="mx-2 text-theme-gold-primary">·</span>
 							{settings?.phone || "0388.660.678"}
 						</p>
 					</div>
@@ -314,10 +306,10 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 						]).map((acc: any, i: number) => (
 							<div
 								key={i}
-								className="flex items-center gap-1.5 bg-[#faf6ea] border border-[#e0cc9a] rounded-lg px-3 py-1 text-[11px] text-[#6b5530]"
+								className="flex items-center gap-1.5 bg-theme-bg-muted border border-theme-border-muted rounded-lg px-3 py-1 text-[11px] text-theme-text-dark"
 							>
-								<span className="font-semibold text-[#b49050]">{acc.bank}</span>
-								<span className="text-[#c8a84b]">·</span>
+								<span className="font-semibold text-theme-text-muted">{acc.bank}</span>
+								<span className="text-theme-gold-primary">·</span>
 								<span className="font-sans tracking-wide">{acc.account}</span>
 							</div>
 						))}
@@ -342,7 +334,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					)}
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 					<div>
 						<ElegantLabel htmlFor="phone">Số điện thoại</ElegantLabel>
 						<input
@@ -381,7 +373,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					<button
 						type="button"
 						onClick={() => append({ label: "", price: 0 })}
-						className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#b49050] hover:text-[#8a6820] border border-[#e0cc9a] hover:border-[#c8a84b] rounded-lg px-3 py-1 bg-white hover:bg-[#faf6ea] transition-all duration-200"
+						className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-theme-text-muted hover:text-theme-gold-hover border border-theme-border-muted hover:border-theme-gold-primary rounded-lg px-3 py-1 bg-white hover:bg-theme-bg-muted transition-all duration-200"
 					>
 						<Plus className="w-3.5 h-3.5" /> Thêm gói
 					</button>
@@ -429,7 +421,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 													}
 												}}
 											>
-												<SelectTrigger className="w-full !h-[52px] rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-2 text-sm text-[#2d2418] focus:ring-[#c8a84b]/40 focus:border-[#c8a84b] transition-all">
+												<SelectTrigger className="w-full !h-[52px] rounded-xl border border-theme-border-muted bg-theme-bg-body px-2 text-sm text-theme-text-dark focus:ring-theme-gold-primary/40 focus:border-theme-gold-primary transition-all">
 													<SelectValue placeholder="Bấm để chọn gói...">
 														{(val: string) => {
 															if (!val) return "Bấm để chọn gói...";
@@ -442,7 +434,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 																	<span className="font-bold text-sm leading-tight">
 																		{pkg.label}
 																	</span>
-																	<span className="text-[10px] text-[#9a8060] font-semibold">
+																	<span className="text-[10px] text-theme-text-muted font-semibold">
 																		{formatCurrency(pkg.price)}
 																	</span>
 																</span>
@@ -450,7 +442,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 														}}
 													</SelectValue>
 												</SelectTrigger>
-												<SelectContent className="rounded-xl border-[#e8dcc8] shadow-xl">
+												<SelectContent className="rounded-xl border-theme-border shadow-xl">
 													<SelectGroup>
 														{masterPackages.map((p) => (
 															<SelectItem key={p.id} value={p.label}>
@@ -478,7 +470,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 
 			{/* ── Wedding Details & Fees ── */}
 			<Section title="Chi tiết ngày cưới & Phí">
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 					<div>
 						<ElegantLabel>Ngày bắt đầu</ElegantLabel>
 						<DatePicker
@@ -492,7 +484,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 					<div>
 						<ElegantLabel htmlFor="travelFee">Phí di chuyển (₫)</ElegantLabel>
 						<input
@@ -524,7 +516,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					<Textarea
 						id="benefits"
 						placeholder="Album + 100 ảnh rửa 13x18..."
-						className="min-h-[90px] rounded-xl border-[#ddd0b8] bg-[#fdfbf8] text-sm text-[#2d2418] placeholder:text-[#c0aa88] focus:ring-[#c8a84b]/40 focus:border-[#c8a84b] resize-none"
+						className="min-h-[90px] rounded-xl border-theme-border-muted bg-theme-bg-body text-sm text-theme-text-dark placeholder:text-theme-text-muted focus:ring-theme-gold-primary/40 focus:border-theme-gold-primary resize-none"
 						{...register("benefits")}
 					/>
 					<div className="flex flex-wrap gap-1.5 mt-2">
@@ -544,7 +536,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 										currentVal ? `${currentVal}\n${val}` : val,
 									);
 								}}
-								className="text-[10px] border border-[#e0cc9a] rounded-lg px-2 py-1 bg-[#faf6ea] text-[#8a6820] hover:bg-[#f0e8cc] hover:border-[#c8a84b] transition-colors leading-tight"
+								className="text-[10px] border border-theme-border-muted rounded-lg px-2 py-1 bg-theme-bg-muted text-theme-gold-hover hover:bg-theme-border-muted hover:border-theme-gold-primary transition-colors leading-tight"
 							>
 								{val}
 							</button>
@@ -554,17 +546,17 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 			</Section>
 
 			{/* ── Payment Summary ── */}
-			<div className="rounded-2xl overflow-hidden border border-[#e0cc9a] shadow-[0_4px_24px_0_rgba(180,150,80,0.10)]">
+			<div className="rounded-2xl overflow-hidden border border-theme-border-muted shadow-[0_4px_24px_0_rgba(180,150,80,0.10)]">
 				{/* Header */}
-				<div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
-					<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[#b49050]">
+				<div className="flex items-center justify-between p-2 bg-gradient-to-r from-theme-bg-muted to-white border-b border-theme-border">
+					<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-theme-text-muted">
 						Thanh toán & Lịch hẹn
 					</span>
-					<label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#8a7550] font-medium">
+					<label className="flex items-center gap-2 cursor-pointer select-none text-xs text-theme-text-muted font-medium">
 						<input
 							type="checkbox"
 							id="includeVAT"
-							className="w-4 h-4 rounded border-[#ddd0b8] accent-[#c8a84b]"
+							className="w-4 h-4 rounded border-theme-border-muted accent-theme-gold-primary"
 							{...register("includeVAT")}
 						/>
 						Tính VAT 10%
@@ -578,7 +570,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 							{
 								label: "Tạm tính",
 								value: formatCurrency(subtotalBeforeDiscount),
-								color: "text-[#2d2418]",
+								color: "text-theme-text-dark",
 							},
 							{
 								label: "Giảm giá",
@@ -588,14 +580,14 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 							{
 								label: `Thuế ${values.includeVAT ? "10%" : "0%"}`,
 								value: formatCurrency(vatAmount),
-								color: "text-[#2d2418]",
+								color: "text-theme-text-dark",
 							},
 						].map((item) => (
 							<div
 								key={item.label}
-								className="bg-[#fdfbf8] border border-[#e8dcc8] rounded-xl p-1 text-center"
+								className="bg-theme-bg-body border border-theme-border rounded-xl p-1 text-center"
 							>
-								<p className="text-[10px] uppercase tracking-wider text-[#9a8060] mb-1">
+								<p className="text-[10px] uppercase tracking-wider text-theme-text-muted mb-1">
 									{item.label}
 								</p>
 								<p className={`text-xs font-bold ${item.color} leading-tight`}>
@@ -606,19 +598,19 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					</div>
 
 					{/* Total */}
-					<div className="rounded-xl bg-gradient-to-r from-[#faf6ea] via-[#fdf9f0] to-[#faf6ea] border border-[#e0cc9a] px-5 py-4 flex items-center justify-between">
-						<span className="text-[11px] uppercase tracking-[0.18em] font-bold text-[#b49050]">
+					<div className="rounded-xl bg-gradient-to-r from-theme-bg-muted via-[#fdf9f0] to-theme-bg-muted border border-theme-border-muted p-2 flex items-center justify-between">
+						<span className="text-[11px] uppercase tracking-[0.18em] font-bold text-theme-text-muted">
 							Tổng cộng
 						</span>
 						<span
-							className="text-2xl md:text-3xl font-black text-[#c8a84b]"
+							className="text-2xl md:text-3xl font-black text-theme-gold-primary"
 						>
 							{formatCurrency(totalPrice)}
 						</span>
 					</div>
 
 					{/* Deposit */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 						<div>
 							<ElegantLabel htmlFor="deposit">Tiền đặt cọc (₫)</ElegantLabel>
 							<input
@@ -637,7 +629,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 										key={val}
 										type="button"
 										onClick={() => setValue("deposit", val)}
-										className="text-[10px] border border-[#e0cc9a] rounded-lg px-2 py-1 bg-[#faf6ea] text-[#8a6820] hover:bg-[#f0e8cc] hover:border-[#c8a84b] transition-colors font-medium"
+										className="text-[10px] border border-theme-border-muted rounded-lg px-2 py-1 bg-theme-bg-muted text-theme-gold-hover hover:bg-theme-border-muted hover:border-theme-gold-primary transition-colors font-medium"
 									>
 										{new Intl.NumberFormat("vi-VN").format(val)}
 									</button>
@@ -645,8 +637,8 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 							</div>
 						</div>
 
-						<div className="flex flex-col justify-center bg-[#fdfbf8] border border-[#e8dcc8] rounded-xl px-4 py-3">
-							<p className="text-[10px] uppercase tracking-[0.18em] text-[#9a8060] mb-1">
+						<div className="flex flex-col justify-center bg-theme-bg-body border border-theme-border rounded-xl p-2">
+							<p className="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted mb-1">
 								Còn lại phải thu
 							</p>
 							<p className="text-2xl font-black text-red-500">
@@ -656,7 +648,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					</div>
 
 					{/* Date pickers */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 						<div>
 							<ElegantLabel>Ngày hẹn thanh toán</ElegantLabel>
 							<DatePicker name="pickupDate" error={errors.pickupDate} />
@@ -672,23 +664,23 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 			{/* ── Sticky Submit Bar ── */}
 			<div className="fixed bottom-0 left-0 right-0 z-50 print:hidden">
 				{/* Blur backdrop */}
-				<div className="backdrop-blur-md bg-white/80 border-t border-[#e8dcc8] px-4 py-3 flex flex-wrap justify-center gap-3 md:justify-end md:px-8">
+				<div className="backdrop-blur-md bg-white/80 border-t border-theme-border p-2 flex gap-2 justify-center md:justify-end">
 					<button
 						type="button"
 						onClick={onDownloadImage}
 						disabled={isDownloading}
-						className="flex items-center gap-2 h-12 px-5 rounded-xl font-semibold text-sm text-[#8a6820] bg-white border border-[#e0cc9a] hover:bg-[#faf6ea] transition-all shadow-sm disabled:opacity-60"
+						className="flex-1 md:flex-none flex justify-center items-center gap-2 h-10 px-3 rounded-xl font-semibold text-[11px] md:text-sm text-theme-gold-hover bg-white border border-theme-border-muted hover:bg-theme-bg-muted transition-all shadow-sm disabled:opacity-60"
 					>
-						{isDownloading ? "Đang tạo ảnh..." : "TẢI FILE ẢNH"}
+						{isDownloading ? "Đang tạo..." : "TẢI ẢNH"}
 					</button>
 					<button
 						type="submit"
 						disabled={isSubmitting}
 						className={cn(
-							"flex items-center gap-2.5 h-12 px-8 rounded-xl font-bold text-sm tracking-wide text-white transition-all duration-200 shadow-lg",
+							"flex-1 md:flex-none flex justify-center items-center gap-2 h-10 px-4 rounded-xl font-bold text-[11px] md:text-sm tracking-wide text-white transition-all duration-200 shadow-lg",
 							isSubmitting
-								? "bg-[#c8a84b]/60 cursor-not-allowed"
-								: "bg-gradient-to-r from-[#c8a84b] to-[#e8c84b] hover:from-[#b49040] hover:to-[#d8b83b] shadow-[#c8a84b]/30 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0",
+								? "bg-theme-gold-primary/60 cursor-not-allowed"
+								: "bg-gradient-to-r from-theme-gold-primary to-theme-gold-light hover:from-theme-gold-hover hover:to-theme-gold-hover shadow-theme-gold-primary/30 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0",
 						)}
 					>
 						{isSubmitting ? (
@@ -717,7 +709,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 						) : (
 							<>
 								<Printer className="w-4 h-4" />
-								LƯU & IN HỢP ĐỒNG
+								LƯU & IN
 							</>
 						)}
 					</button>

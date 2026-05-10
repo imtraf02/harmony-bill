@@ -18,17 +18,17 @@ import type { BillSchema, WeddingContractSchema } from "@/lib/schema";
 import { cn, mapToBillSchema } from "@/lib/utils";
 import { getContractById, getSettings } from "@/app/actions";
 import type { SettingsSchema } from "@/lib/schema";
-import { Camera, Heart } from "lucide-react";
+import { Camera, Heart, Settings } from "lucide-react";
 
 function HomeContent() {
 	const searchParams = useSearchParams();
 	const editId = searchParams.get("edit");
 	const tabParam = searchParams.get("tab") || "photo";
-	
+
 	const [activeTab, setActiveTab] = React.useState<"photo" | "wedding">(tabParam as any);
 	const [billData, setBillData] = React.useState<Partial<BillSchema>>({});
 	const [weddingData, setWeddingData] = React.useState<Partial<WeddingContractSchema>>({});
-	
+
 	const [initialData, setInitialData] = React.useState<Partial<BillSchema> | undefined>();
 	const [settings, setSettings] = React.useState<SettingsSchema | undefined>();
 
@@ -60,11 +60,11 @@ function HomeContent() {
 	};
 
 	return (
-		<main className="min-h-screen bg-slate-50/50 pb-16">
-			<div className="container mx-auto py-6 px-2 md:px-8">
+		<main className="min-h-screen bg-theme-bg-body pb-16">
+			<div className="container mx-auto p-2">
 				<header className="mb-6 no-print flex flex-col md:flex-row md:items-center justify-between gap-4">
 					<div>
-						<h1 className="text-3xl font-extrabold tracking-tight text-[#5a3e1b]">
+						<h1 className="text-3xl font-extrabold tracking-tight text-theme-text-dark">
 							Harmony Bill
 						</h1>
 						<div className="flex gap-1 mt-3">
@@ -72,9 +72,9 @@ function HomeContent() {
 								onClick={() => updateTab("photo")}
 								className={cn(
 									"flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
-									activeTab === "photo" 
-										? "bg-[#c8a84b] text-white shadow-lg shadow-[#c8a84b]/20" 
-										: "bg-white border border-[#e0cc9a] text-[#b49050] hover:bg-[#faf6ea]"
+									activeTab === "photo"
+										? "bg-theme-gold-primary text-white shadow-lg shadow-theme-gold-primary/20"
+										: "bg-theme-bg-card border border-theme-border-muted text-theme-text-muted hover:bg-theme-bg-muted"
 								)}
 							>
 								<Camera className="w-4 h-4" />
@@ -84,17 +84,17 @@ function HomeContent() {
 								onClick={() => updateTab("wedding")}
 								className={cn(
 									"flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
-									activeTab === "wedding" 
-										? "bg-[#c8a84b] text-white shadow-lg shadow-[#c8a84b]/20" 
-										: "bg-white border border-[#e0cc9a] text-[#b49050] hover:bg-[#faf6ea]"
+									activeTab === "wedding"
+										? "bg-theme-gold-primary text-white shadow-lg shadow-theme-gold-primary/20"
+										: "bg-theme-bg-card border border-theme-border-muted text-theme-text-muted hover:bg-theme-bg-muted"
 								)}
 							>
 								<Heart className="w-4 h-4" />
-								Hợp đồng Cưới
+								Dịch vụ cưới
 							</button>
 						</div>
 					</div>
-					<div className="flex gap-2">
+					<div className="flex flex-wrap gap-2">
 						{editId && (
 							<Button variant="ghost" onClick={() => window.location.href = "/"}>
 								Tạo mới
@@ -102,17 +102,26 @@ function HomeContent() {
 						)}
 						<Button
 							variant="outline"
-							className="gap-2 rounded-xl border-[#e0cc9a] text-[#b49050]"
+							className="gap-2 rounded-xl border-theme-border-muted text-theme-text-muted"
+							nativeButton={false}
+							render={<Link href="/settings" />}
+						>
+							<Settings className="w-4 h-4" />
+							<span className="hidden md:inline">Cài đặt</span>
+						</Button>
+						<Button
+							variant="outline"
+							className="gap-2 rounded-xl border-theme-border-muted text-theme-text-muted"
 							nativeButton={false}
 							render={<Link href="/contracts" />}
 						>
 							<History className="w-4 h-4" />
-							Lịch sử hợp đồng
+							<span className="hidden md:inline">Lịch sử</span>
 						</Button>
 					</div>
 				</header>
 
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 					{/* Left: Form */}
 					<div className="no-print">
 						{activeTab === "photo" ? (

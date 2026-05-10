@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, Package, Layers } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -71,65 +71,66 @@ export default function SettingsPage() {
 		>
 			{/* ── Sticky Header ── */}
 			<div
-				className="sticky top-0 z-10"
-				style={{
-					background: "rgba(253, 250, 243, 0.92)",
-					backdropFilter: "blur(12px)",
-					borderBottom: "1px solid #e8dcc8",
-				}}
+				className="sticky top-0 z-10 bg-theme-bg-body/90 backdrop-blur-md border-b border-theme-border"
 			>
-				<div className="flex items-center gap-3 px-4 py-4 max-w-2xl mx-auto">
+				<div className="flex items-center gap-1.5 md:gap-3 p-2 max-w-2xl mx-auto">
 					<Link href="/">
-						<button className="w-9 h-9 rounded-xl flex items-center justify-center border border-[#e0cc9a] bg-[#faf6ea] hover:bg-[#f0e8cc] text-[#b49050] transition-colors -ml-1">
+						<button className="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center border border-theme-border-muted bg-theme-bg-muted hover:bg-theme-border-muted text-theme-text-muted transition-colors -ml-1">
 							<ArrowLeft className="w-4 h-4" />
 						</button>
 					</Link>
 
-					<div className="flex items-center gap-2.5 ml-1">
-						<div className="h-5 w-px bg-[#e0cc9a]" />
-						<h1 className="text-lg font-bold tracking-wide text-[#5a3e1b]">
-							Cài đặt Studio
+					<div className="flex items-center gap-1.5 md:gap-2.5 ml-0.5 md:ml-1 min-w-0">
+						<div className="h-5 w-px bg-theme-border-muted shrink-0" />
+						<h1 className="text-[15px] md:text-lg font-bold tracking-wide text-theme-text-dark truncate">
+							Cài đặt
 						</h1>
 					</div>
 
-					<div className="ml-auto flex items-center gap-2">
+					<div className="ml-auto flex items-center gap-1.5 md:gap-2">
 						<Button
 							variant="outline"
 							size="sm"
-							className="rounded-xl border-[#e0cc9a] text-[#b49050] h-9"
+							className="rounded-xl border-theme-border-muted text-theme-text-muted h-9 px-2 md:px-3 gap-0 md:gap-2"
 							nativeButton={false}
 							render={<Link href="/packages" />}
+							title="Quản lý gói"
 						>
-							Quản lý gói
+							<Package className="w-4 h-4" />
+							<span className="hidden md:inline">Gói chụp</span>
 						</Button>
 						<Button
 							variant="outline"
 							size="sm"
-							className="rounded-xl border-[#e0cc9a] text-[#b49050] h-9"
+							className="rounded-xl border-theme-border-muted text-theme-text-muted h-9 px-2 md:px-3 gap-0 md:gap-2"
 							nativeButton={false}
 							render={<Link href="/wedding-combos" />}
+							title="Quản lý combo cưới"
 						>
-							Quản lý combo cưới
+							<Layers className="w-4 h-4" />
+							<span className="hidden md:inline">Combo cưới</span>
 						</Button>
 						<Button
 							onClick={form.handleSubmit(onSubmit)}
-							className="h-9 rounded-xl bg-gradient-to-r from-[#c8a84b] to-[#e8c84b] text-white font-bold px-4"
+							className="h-9 rounded-xl bg-gradient-to-r from-theme-gold-primary to-theme-gold-light text-white font-bold px-3 md:px-4 gap-1.5 md:gap-2"
+							title="Lưu"
 						>
-							<Save className="w-4 h-4 mr-2" /> Lưu
+							<Save className="w-4 h-4" />
+							<span className="hidden md:inline">Lưu</span>
 						</Button>
 					</div>
 				</div>
 			</div>
 
-			<div className="px-4 py-8 max-w-2xl mx-auto space-y-8">
+			<div className="p-2 max-w-2xl mx-auto space-y-8">
 				{/* ── Studio Info Section ── */}
-				<div className="rounded-2xl border border-[#e0cc9a] bg-white shadow-[0_4px_20px_0_rgba(200,168,75,0.08)] overflow-hidden">
-					<div className="px-5 py-3.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
-						<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[#b49050]">
+				<div className="rounded-2xl border border-theme-border-muted bg-white shadow-[0_4px_20px_0_rgba(200,168,75,0.08)] overflow-hidden">
+					<div className="p-2 bg-gradient-to-r from-theme-bg-muted to-white border-b border-theme-border">
+						<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-theme-text-muted">
 							Thông tin cơ bản
 						</span>
 					</div>
-					<div className="p-6 space-y-6">
+					<div className="p-2 space-y-4">
 						<FieldGroup>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<Field>
@@ -156,9 +157,9 @@ export default function SettingsPage() {
 				</div>
 
 				{/* ── Bank Accounts Section ── */}
-				<div className="rounded-2xl border border-[#e0cc9a] bg-white shadow-[0_4px_20px_0_rgba(200,168,75,0.08)] overflow-hidden">
-					<div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
-						<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[#b49050]">
+				<div className="rounded-2xl border border-theme-border-muted bg-white shadow-[0_4px_20px_0_rgba(200,168,75,0.08)] overflow-hidden">
+					<div className="flex items-center justify-between p-2 bg-gradient-to-r from-theme-bg-muted to-white border-b border-theme-border">
+						<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-theme-text-muted">
 							Tài khoản ngân hàng
 						</span>
 						<Button
@@ -166,16 +167,16 @@ export default function SettingsPage() {
 							variant="outline"
 							size="sm"
 							onClick={() => append({ bank: "", account: "", owner: "" })}
-							className="h-7 rounded-lg border-[#e0cc9a] text-[#b49050] text-[10px]"
+							className="h-7 rounded-lg border-theme-border-muted text-theme-text-muted text-[10px]"
 						>
 							<Plus className="w-3 h-3 mr-1" /> Thêm mới
 						</Button>
 					</div>
-					<div className="p-6 space-y-4">
+					<div className="p-2 space-y-2">
 						{fields.map((field, index) => (
 							<div
 								key={field.id}
-								className="p-4 rounded-2xl border border-[#e8dcc8] bg-[#fdfbf8] relative group transition-all hover:border-[#c8a84b] hover:bg-[#fff]"
+								className="p-2 rounded-2xl border border-theme-border bg-theme-bg-body relative group transition-all hover:border-theme-gold-primary hover:bg-[#fff]"
 							>
 								<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 									<Field>
@@ -213,7 +214,7 @@ export default function SettingsPage() {
 							</div>
 						))}
 						{fields.length === 0 && (
-							<div className="text-center py-6 text-[#9a8060] italic text-xs">
+							<div className="text-center py-6 text-theme-text-muted italic text-xs">
 								Chưa có tài khoản ngân hàng nào.
 							</div>
 						)}
@@ -222,13 +223,13 @@ export default function SettingsPage() {
 
 				{/* ── Images Section ── */}
 				<div className="grid grid-cols-1 gap-6">
-					<div className="rounded-2xl border border-[#e0cc9a] bg-white shadow-[0_4px_20px_0_rgba(200,168,75,0.08)] overflow-hidden">
-						<div className="px-5 py-3.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
-							<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[#b49050]">
+					<div className="rounded-2xl border border-theme-border-muted bg-white shadow-[0_4px_20px_0_rgba(200,168,75,0.08)] overflow-hidden">
+						<div className="p-2 bg-gradient-to-r from-theme-bg-muted to-white border-b border-theme-border">
+							<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-theme-text-muted">
 								Hình ảnh Studio
 							</span>
 						</div>
-						<div className="p-6 space-y-6">
+						<div className="p-2 space-y-4">
 							<Field>
 								<FieldLabel>URL Hình nền (Background)</FieldLabel>
 								<div className="flex gap-4 items-start">
@@ -238,12 +239,12 @@ export default function SettingsPage() {
 											placeholder="https://example.com/background.jpg" 
 											className="h-10"
 										/>
-										<p className="mt-1.5 text-[10px] text-[#9a8060] italic">
+										<p className="mt-1.5 text-[10px] text-theme-text-muted italic">
 											Nhập đường dẫn URL của hình nền sẽ hiển thị phía sau hợp đồng.
 										</p>
 									</div>
 									{form.watch("backgroundUrl") && (
-										<div className="w-20 h-20 rounded-xl border border-[#e0cc9a] overflow-hidden bg-[#faf6ea] flex-shrink-0">
+										<div className="w-20 h-20 rounded-xl border border-theme-border-muted overflow-hidden bg-theme-bg-muted flex-shrink-0">
 											<img
 												src={form.watch("backgroundUrl")}
 												className="w-full h-full object-cover"
@@ -257,7 +258,7 @@ export default function SettingsPage() {
 								</div>
 							</Field>
 
-							<Separator className="bg-[#f0e8cc]" />
+							<Separator className="bg-theme-border-muted" />
 
 							<Field>
 								<FieldLabel>URL Chữ ký (Signature)</FieldLabel>
@@ -268,12 +269,12 @@ export default function SettingsPage() {
 											placeholder="https://example.com/signature.png" 
 											className="h-10"
 										/>
-										<p className="mt-1.5 text-[10px] text-[#9a8060] italic">
+										<p className="mt-1.5 text-[10px] text-theme-text-muted italic">
 											Nhập đường dẫn URL của chữ ký (nên sử dụng ảnh PNG trong suốt).
 										</p>
 									</div>
 									{form.watch("signatureUrl") && (
-										<div className="w-20 h-20 rounded-xl border border-[#e0cc9a] overflow-hidden bg-[#faf6ea] flex items-center justify-center p-2 flex-shrink-0">
+										<div className="w-20 h-20 rounded-xl border border-theme-border-muted overflow-hidden bg-theme-bg-muted flex items-center justify-center p-2 flex-shrink-0">
 											<img
 												src={form.watch("signatureUrl")}
 												className="max-w-full max-h-full object-contain"
@@ -293,7 +294,7 @@ export default function SettingsPage() {
 				<div className="flex justify-center pt-6">
 					<Button
 						onClick={form.handleSubmit(onSubmit)}
-						className="h-12 w-full max-w-sm rounded-2xl bg-gradient-to-r from-[#c8a84b] to-[#e8c84b] hover:from-[#b49040] hover:to-[#d8b83b] text-white font-bold tracking-wide shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+						className="h-12 w-full max-w-sm rounded-2xl bg-gradient-to-r from-theme-gold-primary to-theme-gold-light hover:from-theme-gold-hover hover:to-theme-gold-hover text-white font-bold tracking-wide shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
 					>
 						<Save className="w-5 h-5 mr-2" /> LƯU TẤT CẢ CÀI ĐẶT
 					</Button>

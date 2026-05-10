@@ -113,7 +113,7 @@ export default function WeddingCombosPage() {
 							form.reset({ name: "", description: "", basePrice: 0, services: [] });
 						}}
 						size="sm"
-						className="ml-auto rounded-xl bg-[#c8a84b] text-white"
+						className="ml-auto rounded-xl bg-theme-gold-primary text-white"
 					>
 						<Plus className="w-4 h-4 mr-1" /> Thêm mới
 					</Button>
@@ -175,7 +175,7 @@ export default function WeddingCombosPage() {
 
 							<div className="flex gap-3 pt-6">
 								<Button type="button" variant="ghost" className="flex-1 rounded-xl" onClick={() => setEditingCombo(null)}>Huỷ</Button>
-								<Button type="submit" className="flex-1 rounded-xl bg-[#c8a84b] text-white">Lưu Combo</Button>
+								<Button type="submit" className="flex-1 rounded-xl bg-theme-gold-primary text-white">Lưu Combo</Button>
 							</div>
 						</form>
 					</div>
@@ -188,7 +188,7 @@ export default function WeddingCombosPage() {
 										<h3 className="font-bold text-[#5a3e1b]">{combo.name}</h3>
 										<p className="text-xs text-[#9a8060]">{combo.description}</p>
 									</div>
-									<p className="font-black text-[#c8a84b]">{formatCurrency(combo.base_price)}</p>
+									<p className="font-black text-theme-gold-primary">{formatCurrency(combo.base_price)}</p>
 								</div>
 								<div className="space-y-1 my-3">
 									{combo.wedding_combo_services?.map((s: any) => (

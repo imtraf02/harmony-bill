@@ -45,28 +45,28 @@ function Section({
 	action?: React.ReactNode;
 }) {
 	return (
-		<div className="rounded-2xl border border-[#e8dcc8] bg-white shadow-[0_2px_16px_0_rgba(180,150,80,0.07)] overflow-hidden">
-			<div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
-				<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[#b49050]">
+		<div className="rounded-2xl border border-theme-border bg-white shadow-[0_2px_16px_0_rgba(180,150,80,0.07)] overflow-hidden">
+			<div className="flex items-center justify-between p-2 bg-gradient-to-r from-theme-bg-muted to-white border-b border-theme-border">
+				<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-theme-text-muted">
 					{title}
 				</span>
 				{action}
 			</div>
-			<div className="p-4 space-y-4">{children}</div>
+			<div className="p-2 space-y-2">{children}</div>
 		</div>
 	);
 }
 
 function ElegantLabel({ children }: { children: React.ReactNode }) {
 	return (
-		<label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a8060] mb-1.5">
+		<label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-theme-text-muted mb-1.5">
 			{children}
 		</label>
 	);
 }
 
 const inputCls =
-	"w-full h-11 rounded-xl border border-[#ddd0b8] bg-[#fdfbf8] px-3 text-sm text-[#2d2418] placeholder:text-[#c0aa88] focus:outline-none focus:ring-2 focus:ring-[#c8a84b]/40 focus:border-[#c8a84b] transition-all duration-200";
+	"w-full h-11 rounded-xl border border-theme-border-muted bg-theme-bg-body px-3 text-sm text-theme-text-dark placeholder:text-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-gold-primary/40 focus:border-theme-gold-primary transition-all duration-200";
 
 export function WeddingContractForm({ onDataChange, initialData }: WeddingContractFormProps) {
 	const [masterCombos, setMasterCombos] = React.useState<any[]>([]);
@@ -189,20 +189,53 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 		}).format(amount);
 
 	return (
-		<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 pb-28 max-w-2xl mx-auto">
+		<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 pb-20 max-w-2xl mx-auto px-2">
 			{/* Studio Header (Reusable) */}
-			<div className="rounded-2xl overflow-hidden shadow-[0_4px_24px_0_rgba(180,150,80,0.13)] border border-[#e0cc9a]">
-				<div className="h-1 w-full bg-gradient-to-r from-[#c8a84b] via-[#e8d07a] to-[#c8a84b]" />
-				<div className="bg-gradient-to-br from-[#fdfaf3] to-white p-6 text-center relative">
-					<h1 className="text-2xl md:text-3xl font-bold tracking-[0.15em] text-[#8a6820]">
-						{settings?.studioName || "HARMONY MEDIA"}
-					</h1>
-					<p className="text-[10px] tracking-[0.2em] uppercase text-[#b49050] mt-1">Wedding Photography & Services</p>
+			<div className="rounded-2xl overflow-hidden shadow-[0_4px_24px_0_rgba(180,150,80,0.13)] border border-theme-border-muted">
+				<div className="h-1 w-full bg-gradient-to-r from-theme-gold-primary via-theme-gold-light to-theme-gold-primary" />
+				<div className="bg-gradient-to-br from-theme-bg-body to-white p-2 text-center relative">
+					{/* Studio name */}
+					<div className="flex items-center justify-center gap-1 mb-1">
+						<div className="h-px flex-1 bg-gradient-to-r from-transparent to-theme-gold-primary/50" />
+						<h1 className="text-2xl md:text-3xl font-bold tracking-[0.15em] text-theme-gold-hover">
+							{settings?.studioName || "HARMONY MEDIA"}
+						</h1>
+						<div className="h-px flex-1 bg-gradient-to-l from-transparent to-theme-gold-primary/50" />
+					</div>
+
+					<p className="text-[11px] tracking-[0.2em] uppercase text-theme-text-muted mb-3">
+						Wedding Photography & Services
+					</p>
+
+					<div className="text-xs text-theme-text-muted space-y-1 mb-3">
+						<p>{settings?.address || "Hòa Bình, Đông Hoà, Trảng Bom, Đồng Nai."}</p>
+						<p>
+							{settings?.email || "Studiohieutrancanon@gmail.com"}
+							<span className="mx-2 text-theme-gold-primary">·</span>
+							{settings?.phone || "0388.660.678"}
+						</p>
+					</div>
+
+					<div className="flex flex-wrap justify-center gap-2">
+						{(settings?.bankAccounts || [
+							{ bank: "Sacombank", account: "050096596674", owner: "TRẦN QUỐC HIẾU" },
+							{ bank: "MBBank", account: "0388660678", owner: "TRẦN QUỐC HIẾU" },
+						]).map((acc: any, i: number) => (
+							<div
+								key={i}
+								className="flex items-center gap-1.5 bg-theme-bg-muted border border-theme-border-muted rounded-lg px-3 py-1 text-[11px] text-theme-text-dark"
+							>
+								<span className="font-semibold text-theme-text-muted">{acc.bank}</span>
+								<span className="text-theme-gold-primary">·</span>
+								<span className="font-sans tracking-wide">{acc.account}</span>
+							</div>
+						))}
+					</div>
 				</div>
 			</div>
 
 			<Section title="Thông tin khách hàng">
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 					<Field>
 						<ElegantLabel>Tên khách hàng (Người đặt)</ElegantLabel>
 						<Input {...register("customerName")} placeholder="Nguyễn Văn A" className={inputCls} />
@@ -220,7 +253,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 			</Section>
 
 			<Section title="Thông tin đám cưới">
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 					<Field>
 						<ElegantLabel>Ngày cưới</ElegantLabel>
 						<Controller
@@ -233,7 +266,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 											<Button
 												variant="outline"
 												className={cn(
-													"w-full h-11 justify-start text-left font-normal rounded-xl border-[#ddd0b8] bg-[#fdfbf8]",
+													"w-full h-11 justify-start text-left font-normal rounded-xl border-theme-border-muted bg-theme-bg-body",
 													!field.value && "text-muted-foreground",
 												)}
 											>
@@ -257,7 +290,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 				</div>
 				<Field>
 					<ElegantLabel>Ghi chú thêm</ElegantLabel>
-					<Textarea {...register("notes")} placeholder="Ghi chú về yêu cầu đặc biệt..." className="rounded-xl border-[#ddd0b8] bg-[#fdfbf8]" />
+					<Textarea {...register("notes")} placeholder="Ghi chú về yêu cầu đặc biệt..." className="rounded-xl border-theme-border-muted bg-theme-bg-body" />
 				</Field>
 			</Section>
 
@@ -271,23 +304,23 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 									<Button
 										size="sm"
 										variant="outline"
-										className="h-8 rounded-xl border-[#e0cc9a] text-[#b49050]"
+										className="h-8 rounded-xl border-theme-border-muted text-theme-text-muted"
 									>
 										<Plus className="w-3.5 h-3.5 mr-1" /> Thêm combo mẫu
 									</Button>
 								}
 							/>
-							<PopoverContent className="w-64 p-2 shadow-xl border-[#e8dcc8] rounded-2xl">
+							<PopoverContent className="w-64 p-2 shadow-xl border-theme-border rounded-2xl">
 								<div className="space-y-1">
 									{masterCombos.map(template => (
 										<button
 											key={template.id}
 											type="button"
 											onClick={() => addComboFromTemplate(template)}
-											className="w-full text-left px-3 py-2 text-sm hover:bg-[#faf6ea] rounded-xl transition-colors flex flex-col"
+											className="w-full text-left px-3 py-2 text-sm hover:bg-theme-bg-muted rounded-xl transition-colors flex flex-col"
 										>
-											<span className="font-bold text-[#5a3e1b]">{template.name}</span>
-											<span className="text-[10px] text-[#9a8060]">{formatCurrency(template.base_price || 0)}</span>
+											<span className="font-bold text-theme-text-dark">{template.name}</span>
+											<span className="text-[10px] text-theme-text-muted">{formatCurrency(template.base_price || 0)}</span>
 										</button>
 									))}
 								</div>
@@ -297,7 +330,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 							type="button" 
 							size="sm" 
 							variant="outline" 
-							className="h-8 rounded-xl border-[#e0cc9a] text-[#b49050]"
+							className="h-8 rounded-xl border-theme-border-muted text-theme-text-muted"
 							onClick={() => appendCombo({ comboName: "Combo mới", services: [{ name: "", price: 0, isRemoved: false }] })}
 						>
 							<Plus className="w-3.5 h-3.5 mr-1" /> Combo thủ công
@@ -307,11 +340,11 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 			>
 				<div className="space-y-4">
 					{comboFields.map((combo, comboIdx) => (
-						<div key={combo.id} className="p-4 rounded-2xl border border-[#e8dcc8] bg-[#fdfbf8] relative group">
+						<div key={combo.id} className="p-2 rounded-2xl border border-theme-border bg-theme-bg-body relative group">
 							<div className="flex items-center justify-between mb-3">
 								<Input 
 									{...register(`combos.${comboIdx}.comboName`)} 
-									className="h-8 font-bold text-[#5a3e1b] bg-transparent border-none p-0 focus:ring-0 w-2/3" 
+									className="h-8 font-bold text-theme-text-dark bg-transparent border-none p-0 focus:ring-0 w-2/3" 
 								/>
 								<Button 
 									type="button" 
@@ -326,12 +359,12 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 
 							<div className="space-y-2">
 								{values.combos?.[comboIdx]?.services?.map((service, serviceIdx) => (
-									<div key={serviceIdx} className={cn("flex items-center gap-3 p-2 rounded-xl transition-all", service.isRemoved ? "opacity-40 bg-slate-100" : "bg-white border border-[#f0e8cc]")}>
+									<div key={serviceIdx} className={cn("flex items-center gap-3 p-2 rounded-xl transition-all", service.isRemoved ? "opacity-40 bg-slate-100" : "bg-white border border-theme-border-muted")}>
 										<input 
 											type="checkbox" 
 											checked={!service.isRemoved} 
 											onChange={(e) => setValue(`combos.${comboIdx}.services.${serviceIdx}.isRemoved`, !e.target.checked)}
-											className="w-4 h-4 rounded border-[#ddd0b8] accent-[#c8a84b]"
+											className="w-4 h-4 rounded border-theme-border-muted accent-theme-gold-primary"
 										/>
 										<Input 
 											{...register(`combos.${comboIdx}.services.${serviceIdx}.name`)} 
@@ -349,7 +382,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 									type="button" 
 									variant="ghost" 
 									size="sm" 
-									className="text-[10px] text-[#b49050] hover:text-[#8a6820]"
+									className="text-[10px] text-theme-text-muted hover:text-theme-gold-hover"
 									onClick={() => {
 										const currentServices = form.getValues(`combos.${comboIdx}.services`);
 										setValue(`combos.${comboIdx}.services`, [...currentServices, { name: "", price: 0, isRemoved: false }]);
@@ -359,14 +392,14 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 								</Button>
 							</div>
 
-							<div className="mt-4 pt-3 border-t border-dashed border-[#e8dcc8] flex justify-between items-center">
-								<span className="text-[10px] uppercase font-bold text-[#9a8060]">Tổng combo</span>
-								<span className="font-bold text-[#c8a84b]">{formatCurrency(calculateComboTotal(values.combos?.[comboIdx] || { services: [] }))}</span>
+							<div className="mt-4 pt-3 border-t border-dashed border-theme-border flex justify-between items-center">
+								<span className="text-[10px] uppercase font-bold text-theme-text-muted">Tổng combo</span>
+								<span className="font-bold text-theme-gold-primary">{formatCurrency(calculateComboTotal(values.combos?.[comboIdx] || { services: [] }))}</span>
 							</div>
 						</div>
 					))}
 					{comboFields.length === 0 && (
-						<div className="text-center py-8 border-2 border-dashed border-[#e8dcc8] rounded-2xl text-[#9a8060] italic text-sm">
+						<div className="text-center py-8 border-2 border-dashed border-theme-border rounded-2xl text-theme-text-muted italic text-sm">
 							Chưa có combo nào. Bấm "Thêm combo mẫu" để bắt đầu.
 						</div>
 					)}
@@ -374,7 +407,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 			</Section>
 
 			<Section title="Thanh toán & Phí">
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 					<Field>
 						<ElegantLabel>Phí di chuyển (₫)</ElegantLabel>
 						<Input type="number" {...register("travelFee", { valueAsNumber: true })} className={inputCls} />
@@ -384,27 +417,42 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 						<Input type="number" {...register("discount", { valueAsNumber: true })} className={inputCls} />
 					</Field>
 				</div>
-				<div className="flex items-center justify-between p-4 bg-[#faf6ea] border border-[#e0cc9a] rounded-2xl">
+				<div className="flex items-center justify-between p-2 bg-theme-bg-muted border border-theme-border-muted rounded-2xl">
 					<div className="flex flex-col">
-						<span className="text-[10px] uppercase font-bold text-[#9a8060]">Tổng cộng</span>
-						<span className="text-2xl font-black text-[#c8a84b]">{formatCurrency(totalPrice)}</span>
+						<span className="text-[10px] uppercase font-bold text-theme-text-muted">Tổng cộng</span>
+						<span className="text-2xl font-black text-theme-gold-primary">{formatCurrency(totalPrice)}</span>
 					</div>
-					<label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-[#8a6820]">
-						<input type="checkbox" {...register("includeVAT")} className="w-4 h-4 accent-[#c8a84b]" />
+					<label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-theme-gold-hover">
+						<input type="checkbox" {...register("includeVAT")} className="w-4 h-4 accent-theme-gold-primary" />
 						VAT 10%
 					</label>
 				</div>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<Field>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+					<div>
 						<ElegantLabel>Đặt cọc (₫)</ElegantLabel>
 						<Input type="number" {...register("deposit", { valueAsNumber: true })} className={inputCls} />
-					</Field>
-					<div className="flex flex-col justify-center bg-[#fdfbf8] border border-[#e8dcc8] rounded-xl px-4 py-3">
-						<span className="text-[10px] uppercase font-bold text-[#9a8060]">Còn lại</span>
+						<div className="flex flex-wrap gap-1.5 mt-2">
+							{[
+								1_000_000, 2_000_000, 3_000_000, 4_000_000, 5_000_000,
+								6_000_000, 7_000_000, 8_000_000, 9_000_000
+							].map((val) => (
+								<button
+									key={val}
+									type="button"
+									onClick={() => setValue("deposit", val)}
+									className="text-[10px] border border-theme-border-muted rounded-lg px-2 py-1 bg-theme-bg-muted text-theme-gold-hover hover:bg-theme-border-muted hover:border-theme-gold-primary transition-colors font-medium"
+								>
+									{new Intl.NumberFormat("vi-VN").format(val)}
+								</button>
+							))}
+						</div>
+					</div>
+					<div className="flex flex-col justify-center bg-theme-bg-body border border-theme-border rounded-xl p-2">
+						<span className="text-[10px] uppercase font-bold text-theme-text-muted">Còn lại</span>
 						<span className="text-xl font-black text-red-500">{formatCurrency(remaining)}</span>
 					</div>
 				</div>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 					<Field>
 						<ElegantLabel>Ngày hẹn thanh toán</ElegantLabel>
 						<Controller
@@ -417,7 +465,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 											<Button
 												variant="outline"
 												className={cn(
-													"w-full h-11 justify-start text-left font-normal rounded-xl border-[#ddd0b8] bg-[#fdfbf8]",
+													"w-full h-11 justify-start text-left font-normal rounded-xl border-theme-border-muted bg-theme-bg-body",
 													!field.value && "text-muted-foreground",
 												)}
 											>
@@ -449,7 +497,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 											<Button
 												variant="outline"
 												className={cn(
-													"w-full h-11 justify-start text-left font-normal rounded-xl border-[#ddd0b8] bg-[#fdfbf8]",
+													"w-full h-11 justify-start text-left font-normal rounded-xl border-theme-border-muted bg-theme-bg-body",
 													!field.value && "text-muted-foreground",
 												)}
 											>
@@ -473,18 +521,18 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 			</Section>
 
 			<div className="fixed bottom-0 left-0 right-0 z-50 no-print">
-				<div className="backdrop-blur-md bg-white/80 border-t border-[#e8dcc8] px-4 py-3 flex justify-center gap-3 md:justify-end md:px-8">
+				<div className="backdrop-blur-md bg-white/80 border-t border-theme-border p-2 flex gap-2 justify-center md:justify-end">
 					<Button 
 						type="button"
 						variant="outline"
 						onClick={onDownloadImage}
 						disabled={isDownloading}
-						className="h-12 px-6 rounded-xl border-[#e0cc9a] text-[#8a6820] bg-white hover:bg-[#faf6ea] transition-all shadow-sm font-bold"
+						className="flex-1 md:flex-none flex justify-center items-center gap-2 h-10 px-3 rounded-xl font-semibold text-[11px] md:text-sm text-theme-gold-hover bg-white border border-theme-border-muted hover:bg-theme-bg-muted transition-all shadow-sm disabled:opacity-60"
 					>
-						<Download className="w-4 h-4 mr-2" /> {isDownloading ? "Đang tạo..." : "TẢI FILE ẢNH"}
+						<Download className="w-4 h-4" /> {isDownloading ? "Đang tạo..." : "TẢI ẢNH"}
 					</Button>
-					<Button type="submit" disabled={isSubmitting} className="h-12 px-10 rounded-xl bg-gradient-to-r from-[#c8a84b] to-[#e8c84b] font-bold text-white shadow-lg">
-						<Printer className="w-4 h-4 mr-2" /> {isSubmitting ? "Đang lưu..." : "LƯU & IN HỢP ĐỒNG CƯỚI"}
+					<Button type="submit" disabled={isSubmitting} className="flex-1 md:flex-none flex justify-center items-center gap-2 h-10 px-4 rounded-xl bg-gradient-to-r from-theme-gold-primary to-theme-gold-light font-bold text-[11px] md:text-sm text-white shadow-lg hover:shadow-xl transition-all duration-200">
+						<Printer className="w-4 h-4" /> {isSubmitting ? "Đang lưu..." : "LƯU & IN"}
 					</Button>
 				</div>
 			</div>
