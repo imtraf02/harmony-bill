@@ -184,7 +184,7 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 												<p className="text-[6.5px] font-black uppercase text-black">{acc.bank}</p>
 												<p className="text-[8px] font-bold font-mono text-black leading-none">{acc.account}</p>
 											</div>
-											<p className="text-[6.5px] font-semibold uppercase text-black/70 max-w-[55px] text-right truncate">
+											<p className="text-[6.5px] font-semibold uppercase text-black/70 text-right">
 												{acc.owner}
 											</p>
 										</div>
