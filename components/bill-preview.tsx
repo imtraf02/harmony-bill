@@ -18,14 +18,16 @@ import {
 	User,
 } from "lucide-react";
 import * as React from "react";
-import type { BillSchema } from "@/lib/schema";
+import type { BillSchema, SettingsSchema } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 
 interface BillPreviewProps {
 	data: Partial<BillSchema>;
+	settings?: SettingsSchema;
 }
 
-export function BillPreview({ data }: BillPreviewProps) {
+export function BillPreview({ data, settings }: BillPreviewProps) {
+
 	const [scale, setScale] = React.useState(1);
 	const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -126,7 +128,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 			>
 				{/* Background image - visible both on screen and in print for capture support */}
 				<img
-					src="/images/bg.jpg"
+					src={settings?.backgroundUrl || "/images/bg.jpg"}
 					alt=""
 					className="absolute inset-0 w-full h-full object-cover -z-10"
 					aria-hidden="true"
@@ -172,16 +174,16 @@ export function BillPreview({ data }: BillPreviewProps) {
 							<div className="space-y-0.5 text-[8.5px] text-slate-600 font-medium leading-tight">
 								<div className="flex items-center gap-2">
 									<MapPin className="w-2.5 h-2.5 text-slate-900 shrink-0" />
-									<p>Hòa Bình, Đông Hoà, Trảng Bom, Đồng Nai.</p>
+									<p>{settings?.address || "Hòa Bình, Đông Hoà, Trảng Bom, Đồng Nai."}</p>
 								</div>
 								<div className="flex items-center gap-2">
 									<Mail className="w-2.5 h-2.5 text-slate-900 shrink-0" />
-									<p>Studiohieutrancanon@gmail.com</p>
+									<p>{settings?.email || "Studiohieutrancanon@gmail.com"}</p>
 								</div>
 								<div className="flex items-center gap-2">
 									<Phone className="w-2.5 h-2.5 text-slate-900 shrink-0" />
 									<p className="font-semibold font-sans text-slate-900">
-										0388.660.678
+										{settings?.phone || "0388.660.678"}
 									</p>
 								</div>
 							</div>
@@ -193,32 +195,24 @@ export function BillPreview({ data }: BillPreviewProps) {
 								Thanh toán
 							</h3>
 							<div className="grid grid-cols-1 gap-1 text-[7.5px]">
-								<div className="bg-white/40 p-1 rounded border border-slate-100 flex justify-between items-center">
-									<div>
-										<p className="font-bold text-slate-900 uppercase text-[6.5px]">
-											Sacombank
-										</p>
-										<p className="font-semibold font-sans text-slate-900 leading-none">
-											050096596674
-										</p>
-									</div>
-									<p className="text-[6.5px] text-slate-600 font-semibold uppercase">
-										Trần Quốc Hiếu
-									</p>
-								</div>
-								<div className="bg-white/40 p-1 rounded border border-slate-100 flex justify-between items-center">
-									<div>
-										<p className="font-bold text-slate-900 uppercase text-[6.5px]">
-											MBBank
-										</p>
-										<p className="font-semibold font-sans text-slate-900 leading-none">
-											0388660678
+								{(settings?.bankAccounts || [
+									{ bank: "Sacombank", account: "050096596674", owner: "TRẦN QUỐC HIẾU" },
+									{ bank: "MBBank", account: "0388660678", owner: "TRẦN QUỐC HIẾU" },
+								]).map((acc, idx) => (
+									<div key={idx} className="bg-white/40 p-1 rounded border border-slate-100 flex justify-between items-center">
+										<div>
+											<p className="font-bold text-slate-900 uppercase text-[6.5px]">
+												{acc.bank}
+											</p>
+											<p className="font-semibold font-sans text-slate-900 leading-none">
+												{acc.account}
+											</p>
+										</div>
+										<p className="text-[6.5px] text-slate-600 font-semibold uppercase">
+											{acc.owner}
 										</p>
 									</div>
-									<p className="text-[6.5px] text-slate-600 font-semibold uppercase">
-										Trần Quốc Hiếu
-									</p>
-								</div>
+								))}
 							</div>
 						</div>
 					</div>
@@ -407,7 +401,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 								<div className="flex flex-col items-center justify-center relative min-h-[60px]">
 									<div className="transform -rotate-6 absolute w-24 h-16 flex items-center justify-center">
 										<img
-											src="/images/sig.png"
+											src={settings?.signatureUrl || "/images/sig.png"}
 											alt="Signature"
 											className="max-w-full max-h-full object-contain opacity-90"
 											onError={(e) => (e.currentTarget.style.display = "none")}
@@ -415,7 +409,7 @@ export function BillPreview({ data }: BillPreviewProps) {
 									</div>
 									<div className="mt-auto pt-4 text-center">
 										<p className="font-semibold text-[10px] underline decoration-1 underline-offset-2 tracking-tight text-slate-900">
-											Trần Quốc Hiếu
+											{settings?.bankAccounts?.[0]?.owner || "Trần Quốc Hiếu"}
 										</p>
 									</div>
 								</div>

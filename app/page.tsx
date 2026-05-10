@@ -11,52 +11,98 @@ import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { BillForm } from "@/components/bill-form";
 import { BillPreview } from "@/components/bill-preview";
+import { WeddingContractForm } from "@/components/wedding-contract-form";
+import { WeddingContractPreview } from "@/components/wedding-contract-preview";
 import { Button } from "@/components/ui/button";
-import type { BillSchema } from "@/lib/schema";
+import type { BillSchema, WeddingContractSchema } from "@/lib/schema";
 import { cn, mapToBillSchema } from "@/lib/utils";
-import { getContractById } from "@/app/actions";
+import { getContractById, getSettings } from "@/app/actions";
+import type { SettingsSchema } from "@/lib/schema";
+import { Camera, Heart } from "lucide-react";
 
 function HomeContent() {
 	const searchParams = useSearchParams();
 	const editId = searchParams.get("edit");
+	const tabParam = searchParams.get("tab") || "photo";
+	
+	const [activeTab, setActiveTab] = React.useState<"photo" | "wedding">(tabParam as any);
 	const [billData, setBillData] = React.useState<Partial<BillSchema>>({});
+	const [weddingData, setWeddingData] = React.useState<Partial<WeddingContractSchema>>({});
+	
 	const [initialData, setInitialData] = React.useState<Partial<BillSchema> | undefined>();
+	const [settings, setSettings] = React.useState<SettingsSchema | undefined>();
 
 	React.useEffect(() => {
+		getSettings().then((s) => setSettings(s || undefined));
 		if (editId) {
 			getContractById(editId).then((contract) => {
 				if (contract) {
 					const mapped = mapToBillSchema(contract);
 					setInitialData(mapped);
+					setActiveTab("photo");
 				}
 			});
 		}
 	}, [editId]);
+
+	// Sync active tab with search param
+	React.useEffect(() => {
+		if (tabParam === "wedding" || tabParam === "photo") {
+			setActiveTab(tabParam as any);
+		}
+	}, [tabParam]);
+
+	const updateTab = (tab: "photo" | "wedding") => {
+		setActiveTab(tab);
+		const url = new URL(window.location.href);
+		url.searchParams.set("tab", tab);
+		window.history.pushState({}, "", url);
+	};
 
 	return (
 		<main className="min-h-screen bg-slate-50/50 pb-16">
 			<div className="container mx-auto py-6 px-2 md:px-8">
 				<header className="mb-6 no-print flex flex-col md:flex-row md:items-center justify-between gap-4">
 					<div>
-						<h1 className="text-3xl font-extrabold tracking-tight">
-							Hợp đồng Quay phim & Chụp ảnh
+						<h1 className="text-3xl font-extrabold tracking-tight text-[#5a3e1b]">
+							Harmony Bill
 						</h1>
-						<p className="text-muted-foreground mt-2">
-							{editId ? "Đang chỉnh sửa hợp đồng cũ." : "Điền thông tin bên dưới để tạo và in hợp đồng cho khách hàng."}
-						</p>
+						<div className="flex gap-1 mt-3">
+							<button
+								onClick={() => updateTab("photo")}
+								className={cn(
+									"flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
+									activeTab === "photo" 
+										? "bg-[#c8a84b] text-white shadow-lg shadow-[#c8a84b]/20" 
+										: "bg-white border border-[#e0cc9a] text-[#b49050] hover:bg-[#faf6ea]"
+								)}
+							>
+								<Camera className="w-4 h-4" />
+								Quay phim & Chụp ảnh
+							</button>
+							<button
+								onClick={() => updateTab("wedding")}
+								className={cn(
+									"flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
+									activeTab === "wedding" 
+										? "bg-[#c8a84b] text-white shadow-lg shadow-[#c8a84b]/20" 
+										: "bg-white border border-[#e0cc9a] text-[#b49050] hover:bg-[#faf6ea]"
+								)}
+							>
+								<Heart className="w-4 h-4" />
+								Hợp đồng Cưới
+							</button>
+						</div>
 					</div>
 					<div className="flex gap-2">
 						{editId && (
-							<Button
-								variant="ghost"
-								render={<Link href="/" />}
-							>
+							<Button variant="ghost" onClick={() => window.location.href = "/"}>
 								Tạo mới
 							</Button>
 						)}
 						<Button
 							variant="outline"
-							className="gap-2"
+							className="gap-2 rounded-xl border-[#e0cc9a] text-[#b49050]"
 							nativeButton={false}
 							render={<Link href="/contracts" />}
 						>
@@ -69,16 +115,24 @@ function HomeContent() {
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 					{/* Left: Form */}
 					<div className="no-print">
-						<BillForm onDataChange={setBillData} initialData={initialData} />
+						{activeTab === "photo" ? (
+							<BillForm onDataChange={setBillData} initialData={initialData} />
+						) : (
+							<WeddingContractForm onDataChange={setWeddingData} />
+						)}
 					</div>
 
-					{/* Right: Preview (Visible on screen and print) */}
+					{/* Right: Preview */}
 					<div className="relative">
 						<div className="lg:sticky lg:top-10">
 							<div className="hidden lg:block no-print text-sm font-medium text-muted-foreground mb-4 text-center italic">
-								Xem trước hợp đồng (Sẽ được in)
+								Xem trước hợp đồng
 							</div>
-							<BillPreview data={billData} />
+							{activeTab === "photo" ? (
+								<BillPreview data={billData} settings={settings} />
+							) : (
+								<WeddingContractPreview data={weddingData} settings={settings} />
+							)}
 						</div>
 					</div>
 				</div>

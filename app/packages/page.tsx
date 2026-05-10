@@ -82,7 +82,6 @@ export default function PackagesPage() {
 		<div
 			className="min-h-screen"
 			style={{
-				fontFamily: "'Outfit', 'Be Vietnam Pro', sans-serif",
 				background: "linear-gradient(160deg, #fdfaf3 0%, #f5f0e8 100%)",
 			}}
 		>
@@ -106,7 +105,6 @@ export default function PackagesPage() {
 						<div className="h-5 w-px bg-[#e0cc9a]" />
 						<h1
 							className="text-lg font-bold tracking-wide text-[#5a3e1b]"
-							style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
 						>
 							Gói dịch vụ
 						</h1>
@@ -255,7 +253,6 @@ export default function PackagesPage() {
 									<div className="ml-3 flex-1 min-w-0">
 										<p
 											className="font-semibold text-sm text-[#2d2418] truncate"
-											style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
 										>
 											{pkg.label}
 										</p>

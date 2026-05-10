@@ -14,12 +14,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { captureElement } from "@/lib/capture";
-import { CalendarIcon, Plus, Printer, Settings, Trash2, X } from "lucide-react";
+import { CalendarIcon, Plus, Printer, Settings, X } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { getMasterPackages, saveContract } from "@/app/actions";
+import { getMasterPackages, getSettings, saveContract } from "@/app/actions";
+
+
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -54,16 +56,7 @@ interface BillFormProps {
 	initialData?: Partial<BillSchema>;
 }
 
-const studioInfo = {
-	name: "HARMONY MEDIA",
-	address: "Hòa Bình, Đông Hoà, Trảng Bom, Đồng Nai.",
-	email: "Studiohieutrancanon@gmail.com",
-	phone: "0388.660.678",
-	bankAccounts: [
-		{ bank: "Sacombank", account: "050096596674", owner: "TRẦN QUỐC HIẾU" },
-		{ bank: "MBBank", account: "0388660678", owner: "TRẦN QUỐC HIẾU" },
-	],
-};
+// Removed hardcoded studioInfo - now fetched from settings
 
 /* ─────────────────────────────────────────
    Reusable section wrapper with gold rule
@@ -119,6 +112,7 @@ const inputCls =
 
 export function BillForm({ onDataChange, initialData }: BillFormProps) {
 	const [masterPackages, setMasterPackages] = React.useState<any[]>([]);
+	const [settings, setSettings] = React.useState<any>(null);
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 	const [isDownloading, setIsDownloading] = React.useState(false);
 
@@ -157,6 +151,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 
 	React.useEffect(() => {
 		getMasterPackages().then(setMasterPackages);
+		getSettings().then(setSettings);
 	}, []);
 
 	React.useEffect(() => {
@@ -174,7 +169,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 				.replace(/[^a-z0-9]/gi, "-")
 				.toLowerCase();
 			const todayStr = format(new Date(), "dd-MM-yyyy");
-			
+
 			await captureElement("bill-preview-content", `${todayStr}-${safeName}`);
 			toast.success("Đã tạo file ảnh thành công!");
 		} catch (err) {
@@ -274,7 +269,6 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 		<form
 			onSubmit={form.handleSubmit(onSubmit)}
 			className="space-y-5 pb-28 max-w-2xl mx-auto"
-			style={{ fontFamily: "'Outfit', 'Be Vietnam Pro', sans-serif" }}
 		>
 			{/* ── Studio Header ── */}
 			<div className="rounded-2xl overflow-hidden shadow-[0_4px_24px_0_rgba(180,150,80,0.13)] border border-[#e0cc9a]">
@@ -282,9 +276,9 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 				<div className="h-1 w-full bg-gradient-to-r from-[#c8a84b] via-[#e8d07a] to-[#c8a84b]" />
 				<div className="bg-gradient-to-br from-[#fdfaf3] to-white px-4 pt-4 pb-4 text-center relative">
 					<Link
-						href="/packages"
+						href="/settings"
 						className="absolute top-1 right-3 p-2 rounded-xl hover:bg-[#f5edd8] text-[#c8a84b] transition-colors print:hidden"
-						title="Quản lý gói"
+						title="Cài đặt Studio"
 					>
 						<Settings className="w-4 h-4" />
 					</Link>
@@ -294,9 +288,8 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 						<div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#c8a84b]/50" />
 						<h1
 							className="text-2xl md:text-3xl font-bold tracking-[0.15em] text-[#8a6820]"
-							style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
 						>
-							{studioInfo.name}
+							{settings?.studioName || "HARMONY MEDIA"}
 						</h1>
 						<div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#c8a84b]/50" />
 					</div>
@@ -306,23 +299,26 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					</p>
 
 					<div className="text-xs text-[#8a7550] space-y-1 mb-3">
-						<p>{studioInfo.address}</p>
+						<p>{settings?.address || "Hòa Bình, Đông Hoà, Trảng Bom, Đồng Nai."}</p>
 						<p>
-							{studioInfo.email}
+							{settings?.email || "Studiohieutrancanon@gmail.com"}
 							<span className="mx-2 text-[#c8a84b]">·</span>
-							{studioInfo.phone}
+							{settings?.phone || "0388.660.678"}
 						</p>
 					</div>
 
 					<div className="flex flex-wrap justify-center gap-2">
-						{studioInfo.bankAccounts.map((acc, i) => (
+						{(settings?.bankAccounts || [
+							{ bank: "Sacombank", account: "050096596674", owner: "TRẦN QUỐC HIẾU" },
+							{ bank: "MBBank", account: "0388660678", owner: "TRẦN QUỐC HIẾU" },
+						]).map((acc: any, i: number) => (
 							<div
 								key={i}
 								className="flex items-center gap-1.5 bg-[#faf6ea] border border-[#e0cc9a] rounded-lg px-3 py-1 text-[11px] text-[#6b5530]"
 							>
 								<span className="font-semibold text-[#b49050]">{acc.bank}</span>
 								<span className="text-[#c8a84b]">·</span>
-								<span className="font-mono tracking-wide">{acc.account}</span>
+								<span className="font-sans tracking-wide">{acc.account}</span>
 							</div>
 						))}
 					</div>
@@ -475,16 +471,6 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 									/>
 								</div>
 							</div>
-
-							{fields.length > 1 && (
-								<button
-									type="button"
-									onClick={() => remove(index)}
-									className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-md transition-colors opacity-0 group-hover:opacity-100"
-								>
-									<Trash2 className="w-3 h-3" />
-								</button>
-							)}
 						</div>
 					))}
 				</div>
@@ -626,7 +612,6 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 						</span>
 						<span
 							className="text-2xl md:text-3xl font-black text-[#c8a84b]"
-							style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
 						>
 							{formatCurrency(totalPrice)}
 						</span>
@@ -646,7 +631,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 							<div className="flex flex-wrap gap-1.5 mt-2">
 								{[
 									1_000_000, 2_000_000, 3_000_000, 4_000_000, 5_000_000,
-									6_000_000, 7_000_000,
+									6_000_000, 7_000_000, 8_000_000, 9_000_000
 								].map((val) => (
 									<button
 										key={val}

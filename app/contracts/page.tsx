@@ -8,39 +8,65 @@ import {
 	Download,
 	Phone,
 	Printer,
-	Receipt,
 	Search,
-	Settings,
 	Trash2,
 	User,
+	Camera,
+	Heart,
+	Receipt,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { captureElement } from "@/lib/capture";
 import Link from "next/link";
 import * as React from "react";
-import { deleteContract, getContracts } from "@/app/actions";
+import { 
+	deleteContract, 
+	deleteWeddingContract,
+	getContracts, 
+	getSettings, 
+	getWeddingContracts 
+} from "@/app/actions";
+import type { SettingsSchema } from "@/lib/schema";
 import { toast } from "sonner";
 import { BillPreview } from "@/components/bill-preview";
-import { mapToBillSchema } from "@/lib/utils";
+import { WeddingContractPreview } from "@/components/wedding-contract-preview";
+import { mapToBillSchema, mapToWeddingSchema } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export default function ContractsPage() {
 	const [contracts, setContracts] = React.useState<any[]>([]);
 	const [searchTerm, setSearchTerm] = React.useState("");
 	const [selectedContract, setSelectedContract] = React.useState<any | null>(null);
 	const [isDownloading, setIsDownloading] = React.useState(false);
+	const [settings, setSettings] = React.useState<SettingsSchema | undefined>();
 
 	const loadContracts = async () => {
-		const data = await getContracts();
-		setContracts(data);
+		const [photoData, weddingData] = await Promise.all([
+			getContracts(),
+			getWeddingContracts()
+		]);
+		
+		// Add type tag to each
+		const photoContracts = photoData.map(c => ({ ...c, type: 'photo' }));
+		const weddingContracts = weddingData.map(c => ({ ...c, type: 'wedding' }));
+		
+		// Combine and sort by date
+		const combined = [...photoContracts, ...weddingContracts].sort((a, b) => 
+			new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+		);
+		
+		setContracts(combined);
 	};
 
 	React.useEffect(() => {
 		loadContracts();
+		getSettings().then((s) => setSettings(s || undefined));
 	}, []);
 
-	const handleDelete = async (id: string, e: React.MouseEvent) => {
+	const handleDelete = async (id: string, type: 'photo' | 'wedding', e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (confirm("Bạn có chắc chắn muốn xoá hợp đồng này?")) {
-			const res = await deleteContract(id);
+			const res = type === 'photo' ? await deleteContract(id) : await deleteWeddingContract(id);
 			if (res.success) {
 				toast.success("Đã xoá hợp đồng");
 				loadContracts();
@@ -71,8 +97,11 @@ export default function ContractsPage() {
 				.replace(/[^a-z0-9]/gi, "-")
 				.toLowerCase();
 			const todayStr = format(new Date(), "dd-MM-yyyy");
-			
-			await captureElement("bill-preview-content", `${todayStr}-${safeName}`);
+
+			await captureElement(
+				selectedContract.type === 'photo' ? "bill-preview-content" : "wedding-preview-content", 
+				`${todayStr}-${safeName}`
+			);
 			toast.success("Đã tạo file ảnh thành công!");
 		} catch (err) {
 			console.error("Lỗi tạo ảnh:", err);
@@ -86,7 +115,6 @@ export default function ContractsPage() {
 		<div
 			className="min-h-screen pb-20"
 			style={{
-				fontFamily: "'Outfit', 'Be Vietnam Pro', sans-serif",
 				background: "linear-gradient(160deg, #fdfaf3 0%, #f5f0e8 100%)",
 			}}
 		>
@@ -101,17 +129,20 @@ export default function ContractsPage() {
 			>
 				{/* Top bar */}
 				<div className="flex items-center gap-3 px-4 pt-4 pb-3 max-w-2xl mx-auto">
-					<Link href="/">
-						<button className="w-9 h-9 rounded-xl flex items-center justify-center border border-[#e0cc9a] bg-[#faf6ea] hover:bg-[#f0e8cc] text-[#b49050] transition-colors -ml-1">
-							<ArrowLeft className="w-4 h-4" />
-						</button>
-					</Link>
+					<Button
+						variant="outline"
+						size="sm"
+						className="w-9 h-9 p-0 rounded-xl flex items-center justify-center border border-[#e0cc9a] bg-[#faf6ea] hover:bg-[#f0e8cc] text-[#b49050] transition-colors -ml-1"
+						nativeButton={false}
+						render={<Link href="/" />}
+					>
+						<ArrowLeft className="w-4 h-4" />
+					</Button>
 
 					<div className="flex items-center gap-2.5 ml-1">
 						<div className="h-5 w-px bg-[#e0cc9a]" />
 						<h1
 							className="text-lg font-bold tracking-wide text-[#5a3e1b]"
-							style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
 						>
 							Lịch sử hợp đồng
 						</h1>
@@ -149,19 +180,23 @@ export default function ContractsPage() {
 					</div>
 				) : (
 					filteredContracts.map((contract, i) => {
-						const pkgTotal =
-							contract.contract_packages?.reduce(
-								(acc: number, p: any) => acc + Number(p.price),
-								0
-							) || 0;
-						const subtotalBeforeDiscount = pkgTotal + Number(contract.travel_fee);
-						const subtotal = subtotalBeforeDiscount - (Number(contract.discount) || 0);
-						const total = contract.include_vat ? subtotal * 1.1 : subtotal;
+						let total = 0;
+						if (contract.type === 'photo') {
+							const pkgTotal = contract.contract_packages?.reduce((acc: number, p: any) => acc + Number(p.price), 0) || 0;
+							const subtotal = pkgTotal + Number(contract.travel_fee) - (Number(contract.discount) || 0);
+							total = contract.include_vat ? subtotal * 1.1 : subtotal;
+						} else {
+							const comboTotal = contract.wedding_contract_combos?.reduce((acc: number, c: any) => {
+								return acc + c.wedding_contract_combo_services?.reduce((accS: number, s: any) => accS + (s.is_removed ? 0 : Number(s.price)), 0);
+							}, 0) || 0;
+							const subtotal = comboTotal + Number(contract.travel_fee) - (Number(contract.discount) || 0);
+							total = contract.include_vat ? subtotal * 1.1 : subtotal;
+						}
 						const remaining = total - Number(contract.deposit || 0);
 
 						return (
 							<div
-								key={contract.id}
+								key={`${contract.type}-${contract.id}`}
 								className="rounded-2xl border border-[#e8dcc8] bg-white overflow-hidden cursor-pointer group transition-all duration-200 hover:border-[#c8a84b] hover:shadow-[0_4px_20px_0_rgba(200,168,75,0.15)]"
 								style={{ animationDelay: `${i * 40}ms` }}
 								onClick={() => setSelectedContract(contract)}
@@ -173,16 +208,24 @@ export default function ContractsPage() {
 								<div className="flex items-start justify-between px-4 pt-4 pb-3">
 									{/* Left: avatar + info */}
 									<div className="flex items-center gap-3 min-w-0">
-										<div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#faf6ea] to-[#f0e8cc] border border-[#e0cc9a] flex items-center justify-center shrink-0">
-											<User className="w-4 h-4 text-[#c8a84b]" />
+										<div className={cn(
+											"w-10 h-10 rounded-full border flex items-center justify-center shrink-0",
+											contract.type === 'photo' ? "bg-blue-50 border-blue-100 text-blue-500" : "bg-red-50 border-red-100 text-red-500"
+										)}>
+											{contract.type === 'photo' ? <Camera className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
 										</div>
 										<div className="min-w-0">
-											<p
-												className="font-semibold text-[#2d2418] text-sm leading-tight truncate"
-												style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-											>
-												{contract.customer_name}
-											</p>
+											<div className="flex items-center gap-1.5">
+												<p className="font-semibold text-[#2d2418] text-sm leading-tight truncate">
+													{contract.customer_name}
+												</p>
+												<span className={cn(
+													"text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase",
+													contract.type === 'photo' ? "bg-blue-100 text-blue-600" : "bg-red-100 text-red-600"
+												)}>
+													{contract.type === 'photo' ? "Chụp ảnh" : "Hợp đồng cưới"}
+												</span>
+											</div>
 											<p className="text-[11px] text-[#9a8060] mt-0.5 flex items-center gap-1">
 												<Phone className="w-3 h-3 text-[#c8a84b]" />
 												{contract.phone}
@@ -216,7 +259,7 @@ export default function ContractsPage() {
 										</span>
 										<span className="flex items-center gap-1">
 											<Calendar className="w-3 h-3 text-[#e8a84b]" />
-											Cưới: {format(new Date(contract.wedding_date_start), "dd/MM/yy")}
+											Sự kiện: {format(new Date(contract.type === 'photo' ? contract.wedding_date_start : contract.wedding_date), "dd/MM/yy")}
 										</span>
 									</div>
 
@@ -233,19 +276,9 @@ export default function ContractsPage() {
 											<ChevronRight className="w-3 h-3" />
 										</button>
 
-										<Link href={`/?edit=${contract.id}`}>
-											<button
-												className="w-7 h-7 rounded-lg flex items-center justify-center text-[#7090c8] hover:bg-blue-50 transition-colors"
-												onClick={(e) => e.stopPropagation()}
-												title="Chỉnh sửa"
-											>
-												<Settings className="w-3.5 h-3.5" />
-											</button>
-										</Link>
-
 										<button
 											className="w-7 h-7 rounded-lg flex items-center justify-center text-[#b0a0a0] hover:text-red-500 hover:bg-red-50 transition-colors"
-											onClick={(e) => handleDelete(contract.id, e)}
+											onClick={(e) => handleDelete(contract.id, contract.type, e)}
 											title="Xoá"
 										>
 											<Trash2 className="w-3.5 h-3.5" />
@@ -273,12 +306,7 @@ export default function ContractsPage() {
 						<div className="flex items-center justify-between px-5 py-4 border-b border-[#e8dcc8] bg-gradient-to-r from-[#faf6ef] to-white">
 							<div className="flex items-center gap-2">
 								<div className="h-4 w-px bg-[#c8a84b]" />
-								<h2
-									className="font-bold text-[#5a3e1b]"
-									style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-								>
-									Xem lại hợp đồng
-								</h2>
+								<h2 className="font-bold text-[#5a3e1b]">Xem lại hợp đồng</h2>
 							</div>
 
 							<div className="flex items-center gap-2">
@@ -311,15 +339,21 @@ export default function ContractsPage() {
 							className="flex-1 overflow-auto p-4 md:p-10 flex justify-center"
 							style={{ background: "linear-gradient(160deg, #fdfaf3 0%, #f5f0e8 100%)" }}
 						>
-							<BillPreview
-								data={mapToBillSchema(selectedContract)}
-							/>
+							{selectedContract.type === 'photo' ? (
+								<BillPreview data={mapToBillSchema(selectedContract)} settings={settings} />
+							) : (
+								<WeddingContractPreview data={mapToWeddingSchema(selectedContract)} settings={settings} />
+							)}
 						</div>
 					</div>
 
 					{/* Print only */}
 					<div className="hidden print:block fixed inset-0 bg-white z-[10000]">
-						<BillPreview data={mapToBillSchema(selectedContract)} />
+						{selectedContract.type === 'photo' ? (
+							<BillPreview data={mapToBillSchema(selectedContract)} settings={settings} />
+						) : (
+							<WeddingContractPreview data={mapToWeddingSchema(selectedContract)} settings={settings} />
+						)}
 					</div>
 				</div>
 			)}

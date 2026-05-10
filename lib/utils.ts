@@ -28,3 +28,31 @@ export function mapToBillSchema(contract: any): Partial<BillSchema> {
 		contractDate: new Date(contract.contract_date),
 	};
 }
+import type { WeddingContractSchema } from "./schema"
+
+export function mapToWeddingSchema(contract: any): Partial<WeddingContractSchema> {
+	if (!contract) return {};
+	return {
+		customerName: contract.customer_name,
+		phone: contract.phone,
+		address: contract.address,
+		weddingDate: new Date(contract.wedding_date),
+		combos: contract.wedding_contract_combos?.map((c: any) => ({
+			id: c.combo_id,
+			comboName: c.combo_name,
+			services: c.wedding_contract_combo_services?.map((s: any) => ({
+				name: s.service_name,
+				price: Number(s.price),
+				isRemoved: s.is_removed,
+				note: s.note,
+			})) || [],
+		})) || [],
+		travelFee: Number(contract.travel_fee),
+		discount: Number(contract.discount),
+		includeVAT: contract.include_vat,
+		deposit: Number(contract.deposit),
+		pickupDate: new Date(contract.pickup_date),
+		contractDate: new Date(contract.contract_date),
+		notes: contract.notes,
+	};
+}
