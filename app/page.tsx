@@ -19,6 +19,7 @@ import { cn, mapToBillSchema } from "@/lib/utils";
 import { getContractById, getSettings } from "@/app/actions";
 import type { SettingsSchema } from "@/lib/schema";
 import { Camera, Heart, Settings } from "lucide-react";
+import { LogoutButton } from "@/components/logout-button";
 
 function HomeContent() {
 	const searchParams = useSearchParams();
@@ -118,6 +119,7 @@ function HomeContent() {
 							<History className="w-4 h-4" />
 							<span className="hidden md:inline">Lịch sử</span>
 						</Button>
+						<LogoutButton />
 					</div>
 				</header>
 

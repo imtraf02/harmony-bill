@@ -32,6 +32,7 @@ import { BillPreview } from "@/components/bill-preview";
 import { WeddingContractPreview } from "@/components/wedding-contract-preview";
 import { mapToBillSchema, mapToWeddingSchema } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { LogoutButton } from "@/components/logout-button";
 
 export default function ContractsPage() {
 	const [contracts, setContracts] = React.useState<any[]>([]);
@@ -143,9 +144,12 @@ export default function ContractsPage() {
 						</h1>
 					</div>
 
-					<div className="ml-auto flex items-center gap-1.5 bg-gradient-to-r from-theme-gold-primary to-theme-gold-light text-white rounded-full px-3 py-1 shadow-sm">
-						<span className="text-xs font-bold">{filteredContracts.length}</span>
-						<span className="text-[10px] opacity-80">hợp đồng</span>
+					<div className="ml-auto flex items-center gap-1.5">
+						<div className="bg-gradient-to-r from-theme-gold-primary to-theme-gold-light text-white rounded-full px-3 py-1 shadow-sm flex items-center gap-1">
+							<span className="text-xs font-bold">{filteredContracts.length}</span>
+							<span className="text-[10px] opacity-80">hợp đồng</span>
+						</div>
+						<LogoutButton />
 					</div>
 				</div>
 
