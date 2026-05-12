@@ -27,6 +27,8 @@ export const billSchema = z.object({
   }),
   travelFee: z.coerce.number().min(0),
   discount: z.coerce.number().min(0).default(0),
+  incurredCost: z.coerce.number().min(0).default(0),
+  incurredCostReason: z.string().optional(),
   includeVAT: z.boolean().default(true),
   benefits: z.string().optional(),
 
@@ -77,6 +79,8 @@ export const weddingContractSchema = z.object({
   })).min(1, "Vui lòng thêm ít nhất một combo dịch vụ"),
   travelFee: z.coerce.number().min(0).default(0),
   discount: z.coerce.number().min(0).default(0),
+  incurredCost: z.coerce.number().min(0).default(0),
+  incurredCostReason: z.string().optional(),
   includeVAT: z.boolean().default(false),
   deposit: z.coerce.number().min(0).default(0),
   pickupDate: z.date({

@@ -49,7 +49,8 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 
 	const subtotalBeforeDiscount =
 		(data.combos || []).reduce((acc, combo) => acc + calculateComboTotal(combo), 0) +
-		(Number(data.travelFee) || 0);
+		(Number(data.travelFee) || 0) +
+		(Number(data.incurredCost) || 0);
 	const subtotal = subtotalBeforeDiscount - (Number(data.discount) || 0);
 	const vatAmount = data.includeVAT ? subtotal * 0.1 : 0;
 	const totalPrice = subtotal + vatAmount;
@@ -124,7 +125,7 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 							<p className="text-[8px] font-semibold uppercase tracking-wide text-black">
 								Wedding Photography
 							</p>
-							<p className="text-[9px] font-extrabold uppercase tracking-tight text-black">
+							<p className="text-[8px] font-extrabold uppercase tracking-tight text-black">
 								Dịch vụ cưới
 							</p>
 						</div>
@@ -133,7 +134,7 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 					{/* ── Title ── */}
 					<div className="flex justify-center">
 						<div className="relative">
-							<h2 className="text-[15px] font-bold uppercase text-black px-2 tracking-widest">
+							<h2 className="text-lg font-bold uppercase text-black px-2 tracking-widest">
 								Hợp Đồng Dịch Vụ Cưới
 							</h2>
 							<div className="absolute -bottom-0.5 left-0 w-full h-[1.5px] bg-black/70" />
@@ -148,11 +149,11 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 
 							{/* Studio */}
 							<div className="space-y-1">
-								<p className="text-[7px] font-black uppercase tracking-widest text-black flex items-center gap-1">
+								<p className="text-[8.5px] font-black uppercase tracking-widest text-black flex items-center gap-1">
 									<span className="w-2.5 h-[1.5px] bg-black inline-block" />
 									Thông tin Studio
 								</p>
-								<div className="space-y-0.5 text-[8px] text-black font-medium leading-snug">
+								<div className="space-y-0.5 text-[8.5px] text-black font-medium leading-snug">
 									<div className="flex items-start gap-1.5">
 										<MapPin className="w-2.5 h-2.5 shrink-0 mt-px" />
 										<span>{settings?.address || "..."}</span>
@@ -170,7 +171,7 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 
 							{/* Bank accounts */}
 							<div className="pl-3 space-y-1">
-								<p className="text-[7px] font-black uppercase tracking-widest text-black flex items-center gap-1">
+								<p className="text-[8.5px] font-black uppercase tracking-widest text-black flex items-center gap-1">
 									<Landmark className="w-2.5 h-2.5" />
 									Thanh toán
 								</p>
@@ -182,7 +183,7 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 										>
 											<div>
 												<p className="text-[6.5px] font-black uppercase text-black">{acc.bank}</p>
-												<p className="text-[8px] font-bold font-mono text-black leading-none">{acc.account}</p>
+												<p className="text-[7.5px] font-bold font-mono text-black leading-none">{acc.account}</p>
 											</div>
 											<p className="text-[6.5px] font-semibold uppercase text-black/70 text-right">
 												{acc.owner}
@@ -195,28 +196,28 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 
 						{/* Row 2: Customer info */}
 						<div className="space-y-1.5">
-							<p className="text-[7px] font-black uppercase tracking-widest text-black flex items-center gap-1">
+							<p className="text-[8.5px] font-black uppercase tracking-widest text-black flex items-center gap-1">
 								<User className="w-2.5 h-2.5" />
 								Thông tin khách hàng
 							</p>
 
 							<div className="grid grid-cols-[2fr_1fr] gap-x-4 gap-y-1 text-[8.5px] text-black">
 								<div className="flex items-baseline gap-1.5 border-b border-black/10 pb-0.5">
-									<span className="font-bold shrink-0 text-[7px] uppercase">Khách hàng:</span>
+									<span className="font-bold shrink-0 text-[8.5px]">Khách hàng:</span>
 									<span className="font-semibold truncate">{data.customerName || "............................................................................"}</span>
 								</div>
 								<div className="flex items-baseline gap-1.5 border-b border-black/10 pb-0.5">
-									<span className="font-bold shrink-0 text-[7px] uppercase">SĐT:</span>
+									<span className="font-bold shrink-0 text-[8.5px]">SĐT:</span>
 									<span className="font-bold">{data.phone || "....................................."}</span>
 								</div>
 								{/* Address – full width */}
 								<div className="flex items-baseline gap-1.5 text-[8.5px] text-black border-b border-black/10 pb-0.5">
-									<span className="font-bold shrink-0 text-[7px] uppercase">Địa chỉ:</span>
+									<span className="font-bold shrink-0 text-[8.5px]">Địa chỉ:</span>
 									<span className="font-semibold">{data.address || "...................................................................................."}</span>
 								</div>
 
 								<div className="flex items-baseline gap-1.5 border-b border-black/10 pb-0.5">
-									<span className="font-bold shrink-0 text-[7px] uppercase">Ngày cưới:</span>
+									<span className="font-bold shrink-0 text-[8.5px]">Ngày cưới:</span>
 									<span className="font-bold">{data.weddingDate ? formatDate(data.weddingDate) : "............................"}</span>
 								</div>
 							</div>
@@ -228,7 +229,7 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 					{/* ── Services / Combos ── */}
 					<div className="bg-white/40 rounded-xl border border-white/50 backdrop-blur-sm p-2.5 overflow-hidden">
 						{/* Table header */}
-						<div className="flex justify-between text-[8px] font-black uppercase tracking-wide text-black border-b-2 border-black/20 pb-1 mb-1.5">
+						<div className="flex justify-between text-[8.5px] font-black uppercase tracking-wide text-black border-b-2 border-black/20 pb-1 mb-1.5">
 							<span>Nội dung combo / dịch vụ</span>
 							<span>Thành tiền</span>
 						</div>
@@ -270,9 +271,16 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 							))}
 
 							{Number(data.travelFee) > 0 && (
-								<div className="flex justify-between text-[8px] text-black border-t border-black/10 pt-1 mt-1">
+								<div className="flex justify-between text-[8.5px] text-black border-t border-black/10 pt-1 mt-1">
 									<span className="font-semibold italic">• Phụ thu phí đi xa</span>
 									<span className="font-bold">{formatCurrency(Number(data.travelFee))}</span>
+								</div>
+							)}
+
+							{Number(data.incurredCost) > 0 && (
+								<div className="flex justify-between text-[8.5px] text-black border-t border-black/10 pt-1 mt-1">
+									<span className="font-semibold italic">• Chi phí phát sinh {data.incurredCostReason ? `(${data.incurredCostReason})` : ''}</span>
+									<span className="font-bold">{formatCurrency(Number(data.incurredCost))}</span>
 								</div>
 							)}
 						</div>
@@ -281,11 +289,11 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 					{/* ── Notes ── */}
 					{data.notes && (
 						<div className="bg-white/40 rounded-xl border border-white/50 backdrop-blur-sm p-2 space-y-1">
-							<p className="text-[7px] font-black uppercase tracking-widest text-black flex items-center gap-1">
+							<p className="text-[8.5px] font-black uppercase tracking-widest text-black flex items-center gap-1">
 								<MessageSquare className="w-2.5 h-2.5" />
 								Ghi chú
 							</p>
-							<p className="text-[8px] text-black font-medium leading-relaxed whitespace-pre-wrap">
+							<p className="text-[8.5px] text-black font-medium leading-relaxed whitespace-pre-wrap">
 								{data.notes}
 							</p>
 						</div>
@@ -296,18 +304,18 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 
 						{/* Payment summary */}
 						<div className="col-span-3 bg-white/40 rounded-xl border border-white/50 backdrop-blur-sm p-2 space-y-1">
-							<div className="flex justify-between text-[8px] text-black">
+							<div className="flex justify-between text-[8.5px] text-black">
 								<span className="font-semibold">Tạm tính</span>
 								<span className="font-bold">{formatCurrency(subtotalBeforeDiscount)}</span>
 							</div>
 							{Number(data.discount) > 0 && (
-								<div className="flex justify-between text-[8px] text-black">
+								<div className="flex justify-between text-[8.5px] text-black">
 									<span className="font-semibold">Giảm giá</span>
 									<span className="font-bold">- {formatCurrency(Number(data.discount))}</span>
 								</div>
 							)}
 							{data.includeVAT && (
-								<div className="flex justify-between text-[8px] text-black">
+								<div className="flex justify-between text-[8.5px] text-black">
 									<span className="font-semibold">Thuế VAT (10%)</span>
 									<span className="font-bold">{formatCurrency(vatAmount)}</span>
 								</div>
@@ -316,15 +324,15 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 								<span>Tổng chi phí</span>
 								<span>{formatCurrency(totalPrice)}</span>
 							</div>
-							<div className="flex justify-between text-[8px] text-black">
+							<div className="flex justify-between text-[8.5px] text-black">
 								<span className="font-semibold">Đặt cọc</span>
 								<span className="font-bold">{formatCurrency(Number(data.deposit))}</span>
 							</div>
-							<div className="flex justify-between text-[9px] text-black font-black border-t border-black/20 pt-1">
+							<div className="flex justify-between text-[8.5px] text-black font-black border-t border-black/20 pt-1">
 								<span>Còn lại</span>
-								<span className="text-[10px]">{formatCurrency(remaining)}</span>
+								<span className="text-xs">{formatCurrency(remaining)}</span>
 							</div>
-							<div className="flex justify-between text-[7.5px] text-black">
+							<div className="flex justify-between text-[8.5px] text-black">
 								<span className="font-semibold">Ngày hẹn:</span>
 								<span className="font-bold">
 									{data.pickupDate ? formatDate(data.pickupDate) : "../../...."}
@@ -334,7 +342,7 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 
 						{/* Signature */}
 						<div className="col-span-4 flex flex-col">
-							<p className="text-right text-[7.5px] font-bold uppercase text-black mb-1">
+							<p className="text-right text-[8px] font-bold uppercase text-black mb-1">
 								Ngày {day} tháng {month} năm {year}
 							</p>
 							<div className="grid grid-cols-2 text-[8px] font-black text-center text-black border-b border-black/20 pb-0.5">
@@ -355,7 +363,7 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 										)}
 									</div>
 									<div className="mt-auto pt-2 text-center">
-										<p className="font-black text-[9px] underline underline-offset-2 tracking-tight text-black uppercase">
+										<p className="font-black text-[10px] underline underline-offset-2 tracking-tight text-black uppercase">
 											{settings?.bankAccounts?.[0]?.owner || "BIÊN NHẬN"}
 										</p>
 									</div>
@@ -365,14 +373,14 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 					</div>
 
 					{/* ── Footer notes ── */}
-					<div className="text-[7px] leading-snug text-black pt-1.5 mt-auto">
-						<p className="text-red-600 font-bold uppercase text-[7.5px] mb-0.5">* Lưu ý:</p>
+					<div className="text-[7.5px] leading-snug text-black pt-1.5 mt-auto">
+						<p className="text-red-600 font-bold uppercase text-[8px] mb-0.5">* Lưu ý:</p>
 						<ul className="space-y-0.5 uppercase tracking-tight font-medium">
 							<li>• Đồ thuê hư hỏng khách hàng phải đền bù (SIGNATURE: 8tr, RUBY: 6tr, DIAMOND: 4tr)</li>
 							<li>• Thay đổi ngày đột xuất chúng tôi không chịu trách nhiệm</li>
 							<li>• Quý khách sẽ mất chi phí cọc nếu hủy hợp đồng</li>
 						</ul>
-						<p className="text-black font-bold text-[9px] text-center mt-1 normal-case">
+						<p className="text-black font-bold text-[10px] text-center mt-1 normal-case">
 							Chân thành cảm ơn quý khách!
 						</p>
 					</div>

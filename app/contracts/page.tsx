@@ -178,13 +178,13 @@ export default function ContractsPage() {
 						let total = 0;
 						if (contract.type === 'photo') {
 							const pkgTotal = contract.contract_packages?.reduce((acc: number, p: any) => acc + Number(p.price), 0) || 0;
-							const subtotal = pkgTotal + Number(contract.travel_fee) - (Number(contract.discount) || 0);
+							const subtotal = pkgTotal + Number(contract.travel_fee) + Number(contract.incurred_cost || 0) - (Number(contract.discount) || 0);
 							total = contract.include_vat ? subtotal * 1.1 : subtotal;
 						} else {
 							const comboTotal = contract.wedding_contract_combos?.reduce((acc: number, c: any) => {
 								return acc + c.wedding_contract_combo_services?.reduce((accS: number, s: any) => accS + (s.is_removed ? 0 : Number(s.price)), 0);
 							}, 0) || 0;
-							const subtotal = comboTotal + Number(contract.travel_fee) - (Number(contract.discount) || 0);
+							const subtotal = comboTotal + Number(contract.travel_fee) + Number(contract.incurred_cost || 0) - (Number(contract.discount) || 0);
 							total = contract.include_vat ? subtotal * 1.1 : subtotal;
 						}
 						const remaining = total - Number(contract.deposit || 0);

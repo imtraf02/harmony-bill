@@ -63,7 +63,7 @@ export function BillPreview({ data, settings }: BillPreviewProps) {
 		(acc, curr) => acc + (Number(curr.price) || 0),
 		0,
 	);
-	const subtotalBeforeDiscount = packageTotal + (Number(data.travelFee) || 0);
+	const subtotalBeforeDiscount = packageTotal + (Number(data.travelFee) || 0) + (Number(data.incurredCost) || 0);
 	const subtotal = subtotalBeforeDiscount - (Number(data.discount) || 0);
 	const vatAmount = data.includeVAT ? subtotal * 0.1 : 0;
 	const totalPrice = subtotal + vatAmount;
@@ -310,6 +310,22 @@ export function BillPreview({ data, settings }: BillPreviewProps) {
 									</div>
 								) : null}
 							</div>
+
+							{data.incurredCost ? (
+								<div className="flex items-center gap-2 border-b border-yellow-500/10 pb-1 pt-1 text-[8.5px]">
+									<span className="uppercase font-semibold text-slate-900">
+										Phát sinh:
+									</span>
+									<span className="font-semibold text-slate-900">
+										{formatCurrency(data.incurredCost)}
+									</span>
+									{data.incurredCostReason && (
+										<span className="font-medium text-slate-800 italic">
+											- {data.incurredCostReason}
+										</span>
+									)}
+								</div>
+							) : null}
 
 							<div className="flex items-start gap-2 pt-1 text-[8.5px]">
 								<Info className="size-2.5 text-slate-900 shrink-0 mt-0.5" />

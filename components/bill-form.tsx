@@ -122,6 +122,8 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 			packages: [{ label: "", price: 0 }],
 			travelFee: 0,
 			discount: 0,
+			incurredCost: 0,
+			incurredCostReason: "",
 			deposit: 0,
 			includeVAT: false,
 			contractDate: new Date(),
@@ -204,7 +206,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 		(acc, curr) => acc + (Number(curr.price) || 0),
 		0,
 	);
-	const subtotalBeforeDiscount = packageTotal + (Number(values.travelFee) || 0);
+	const subtotalBeforeDiscount = packageTotal + (Number(values.travelFee) || 0) + (Number(values.incurredCost) || 0);
 	const subtotal = subtotalBeforeDiscount - (Number(values.discount) || 0);
 	const vatAmount = values.includeVAT ? subtotal * 0.1 : 0;
 	const totalPrice = subtotal + vatAmount;
@@ -386,23 +388,13 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 								<div className="flex-1 space-y-2">
 									<div className="flex items-center justify-between">
 										<ElegantLabel>Chọn gói {index + 1}</ElegantLabel>
-										{values.packages?.[index]?.label && (
-											<button
-												type="button"
-												onClick={() => {
-													if (fields.length > 1) {
-														remove(index);
-													} else {
-														setValue(`packages.${index}.label`, "");
-														setValue(`packages.${index}.price`, 0);
-														setValue(`packages.${index}.id`, undefined);
-													}
-												}}
-												className="text-[10px] font-bold text-red-500 hover:text-red-600 transition-colors flex items-center gap-1"
-											>
-												<X className="w-3 h-3" /> Bỏ chọn
-											</button>
-										)}
+										<button
+											type="button"
+											onClick={() => remove(index)}
+											className="text-[10px] font-bold text-red-500 hover:text-red-600 transition-colors flex items-center gap-1"
+										>
+											<X className="w-3 h-3" /> Bỏ chọn
+										</button>
 									</div>
 									<Controller
 										control={control}
@@ -465,6 +457,11 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 							</div>
 						</div>
 					))}
+					{fields.length === 0 && (
+						<div className="text-center py-8 border-2 border-dashed border-theme-border rounded-2xl text-theme-text-muted italic text-sm">
+							Chưa có gói nào. Bấm "Thêm gói" để bắt đầu.
+						</div>
+					)}
 				</div>
 			</Section>
 
@@ -505,6 +502,29 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 							placeholder="0"
 							className={inputCls}
 							{...register("discount")}
+						/>
+					</div>
+				</div>
+
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+					<div>
+						<ElegantLabel htmlFor="incurredCost">Chi phí phát sinh (₫)</ElegantLabel>
+						<input
+							id="incurredCost"
+							type="number"
+							inputMode="numeric"
+							placeholder="0"
+							className={inputCls}
+							{...register("incurredCost")}
+						/>
+					</div>
+					<div>
+						<ElegantLabel htmlFor="incurredCostReason">Lý do phát sinh</ElegantLabel>
+						<input
+							id="incurredCostReason"
+							placeholder="Lý do phát sinh..."
+							className={inputCls}
+							{...register("incurredCostReason")}
 						/>
 					</div>
 				</div>
@@ -610,7 +630,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					</div>
 
 					{/* Deposit */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+					<div className="grid grid-cols-1 gap-4">
 						<div>
 							<ElegantLabel htmlFor="deposit">Tiền đặt cọc (₫)</ElegantLabel>
 							<input
@@ -637,13 +657,13 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 							</div>
 						</div>
 
-						<div className="flex flex-col justify-center bg-theme-bg-body border border-theme-border rounded-xl p-2">
-							<p className="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted mb-1">
+						<div className="rounded-xl bg-theme-bg-body border border-theme-border p-3 flex items-center justify-between">
+							<span className="text-[11px] uppercase tracking-[0.18em] font-bold text-theme-text-muted">
 								Còn lại phải thu
-							</p>
-							<p className="text-2xl font-black text-red-500">
+							</span>
+							<span className="text-2xl md:text-3xl font-black text-red-500">
 								{formatCurrency(remaining)}
-							</p>
+							</span>
 						</div>
 					</div>
 

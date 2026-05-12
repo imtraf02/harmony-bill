@@ -80,6 +80,8 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 			combos: [],
 			travelFee: 0,
 			discount: 0,
+			incurredCost: 0,
+			incurredCostReason: "",
 			deposit: 0,
 			includeVAT: false,
 			contractDate: new Date(),
@@ -175,7 +177,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 
 	const subtotalBeforeDiscount = (values.combos || []).reduce((acc, combo) => {
 		return acc + calculateComboTotal(combo);
-	}, 0) + (Number(values.travelFee) || 0);
+	}, 0) + (Number(values.travelFee) || 0) + (Number(values.incurredCost) || 0);
 
 	const subtotal = subtotalBeforeDiscount - (Number(values.discount) || 0);
 	const vatAmount = values.includeVAT ? subtotal * 0.1 : 0;
@@ -417,6 +419,16 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 						<Input type="number" {...register("discount", { valueAsNumber: true })} className={inputCls} />
 					</Field>
 				</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+					<Field>
+						<ElegantLabel>Chi phí phát sinh (₫)</ElegantLabel>
+						<Input type="number" {...register("incurredCost", { valueAsNumber: true })} className={inputCls} />
+					</Field>
+					<Field>
+						<ElegantLabel>Lý do phát sinh</ElegantLabel>
+						<Input {...register("incurredCostReason")} placeholder="Lý do phát sinh..." className={inputCls} />
+					</Field>
+				</div>
 				<div className="flex items-center justify-between p-2 bg-theme-bg-muted border border-theme-border-muted rounded-2xl">
 					<div className="flex flex-col">
 						<span className="text-[10px] uppercase font-bold text-theme-text-muted">Tổng cộng</span>
@@ -427,7 +439,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 						VAT 10%
 					</label>
 				</div>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+				<div className="grid grid-cols-1 gap-4">
 					<div>
 						<ElegantLabel>Đặt cọc (₫)</ElegantLabel>
 						<Input type="number" {...register("deposit", { valueAsNumber: true })} className={inputCls} />
@@ -447,9 +459,13 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 							))}
 						</div>
 					</div>
-					<div className="flex flex-col justify-center bg-theme-bg-body border border-theme-border rounded-xl p-2">
-						<span className="text-[10px] uppercase font-bold text-theme-text-muted">Còn lại</span>
-						<span className="text-xl font-black text-red-500">{formatCurrency(remaining)}</span>
+					<div className="rounded-xl bg-theme-bg-body border border-theme-border p-3 flex items-center justify-between">
+						<span className="text-[11px] uppercase tracking-[0.18em] font-bold text-theme-text-muted">
+							Còn lại phải thu
+						</span>
+						<span className="text-2xl md:text-3xl font-black text-red-500">
+							{formatCurrency(remaining)}
+						</span>
 					</div>
 				</div>
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
