@@ -72,7 +72,7 @@ function HomeContent() {
 							<button
 								onClick={() => updateTab("photo")}
 								className={cn(
-									"flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
+									"flex items-center gap-2 p-2 rounded-xl text-sm font-bold transition-all",
 									activeTab === "photo"
 										? "bg-theme-gold-primary text-white shadow-lg shadow-theme-gold-primary/20"
 										: "bg-theme-bg-card border border-theme-border-muted text-theme-text-muted hover:bg-theme-bg-muted"
@@ -84,7 +84,7 @@ function HomeContent() {
 							<button
 								onClick={() => updateTab("wedding")}
 								className={cn(
-									"flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
+									"flex items-center gap-2 p-2 rounded-xl text-sm font-bold transition-all",
 									activeTab === "wedding"
 										? "bg-theme-gold-primary text-white shadow-lg shadow-theme-gold-primary/20"
 										: "bg-theme-bg-card border border-theme-border-muted text-theme-text-muted hover:bg-theme-bg-muted"
@@ -108,7 +108,7 @@ function HomeContent() {
 							render={<Link href="/settings" />}
 						>
 							<Settings className="w-4 h-4" />
-							<span className="hidden md:inline">Cài đặt</span>
+							<span className="text-[10px] md:text-sm">Cài đặt</span>
 						</Button>
 						<Button
 							variant="outline"
@@ -117,7 +117,7 @@ function HomeContent() {
 							render={<Link href="/contracts" />}
 						>
 							<History className="w-4 h-4" />
-							<span className="hidden md:inline">Lịch sử</span>
+							<span className="text-[10px] md:text-sm">Lịch sử</span>
 						</Button>
 						<LogoutButton />
 					</div>

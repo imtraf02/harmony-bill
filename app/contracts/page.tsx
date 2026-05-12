@@ -14,17 +14,18 @@ import {
 	Camera,
 	Heart,
 	Receipt,
+	X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { captureElement } from "@/lib/capture";
 import Link from "next/link";
 import * as React from "react";
-import { 
-	deleteContract, 
+import {
+	deleteContract,
 	deleteWeddingContract,
-	getContracts, 
-	getSettings, 
-	getWeddingContracts 
+	getContracts,
+	getSettings,
+	getWeddingContracts
 } from "@/app/actions";
 import type { SettingsSchema } from "@/lib/schema";
 import { toast } from "sonner";
@@ -40,23 +41,28 @@ export default function ContractsPage() {
 	const [selectedContract, setSelectedContract] = React.useState<any | null>(null);
 	const [isDownloading, setIsDownloading] = React.useState(false);
 	const [settings, setSettings] = React.useState<SettingsSchema | undefined>();
+	const [isLoading, setIsLoading] = React.useState(true);
 
 	const loadContracts = async () => {
-		const [photoData, weddingData] = await Promise.all([
+		setIsLoading(true);
+		try {
+			const [photoData, weddingData] = await Promise.all([
 			getContracts(),
 			getWeddingContracts()
 		]);
-		
+
 		// Add type tag to each
 		const photoContracts = photoData.map(c => ({ ...c, type: 'photo' }));
 		const weddingContracts = weddingData.map(c => ({ ...c, type: 'wedding' }));
-		
+
 		// Combine and sort by date
-		const combined = [...photoContracts, ...weddingContracts].sort((a, b) => 
+		const combined = [...photoContracts, ...weddingContracts].sort((a, b) =>
 			new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
 		);
-		
-		setContracts(combined);
+			setContracts(combined);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	React.useEffect(() => {
@@ -100,7 +106,7 @@ export default function ContractsPage() {
 			const todayStr = format(new Date(), "dd-MM-yyyy");
 
 			await captureElement(
-				selectedContract.type === 'photo' ? "bill-preview-content" : "wedding-preview-content", 
+				selectedContract.type === 'photo' ? "bill-preview-content" : "wedding-preview-content",
 				`${todayStr}-${safeName}`
 			);
 			toast.success("Đã tạo file ảnh thành công!");
@@ -145,7 +151,7 @@ export default function ContractsPage() {
 					</div>
 
 					<div className="ml-auto flex items-center gap-1.5">
-						<div className="bg-gradient-to-r from-theme-gold-primary to-theme-gold-light text-white rounded-full px-3 py-1 shadow-sm flex items-center gap-1">
+						<div className="bg-gradient-to-r from-theme-gold-primary to-theme-gold-light text-white rounded-full px-2 py-1 shadow-sm flex items-center gap-1">
 							<span className="text-xs font-bold">{filteredContracts.length}</span>
 							<span className="text-[10px] opacity-80">hợp đồng</span>
 						</div>
@@ -169,7 +175,25 @@ export default function ContractsPage() {
 
 			{/* ── Contract list ── */}
 			<div className="p-2 max-w-2xl mx-auto space-y-3 no-print">
-				{filteredContracts.length === 0 ? (
+				{isLoading ? (
+					Array.from({ length: 4 }).map((_, i) => (
+						<div key={i} className="rounded-2xl border border-theme-border bg-white overflow-hidden p-2 animate-pulse">
+							<div className="flex items-start justify-between">
+								<div className="flex items-center gap-3">
+									<div className="w-10 h-10 rounded-full bg-slate-100" />
+									<div className="space-y-2">
+										<div className="h-4 bg-slate-100 rounded w-32" />
+										<div className="h-3 bg-slate-50 rounded w-24" />
+									</div>
+								</div>
+								<div className="space-y-2 text-right">
+									<div className="h-4 bg-slate-100 rounded w-20 ml-auto" />
+									<div className="h-3 bg-slate-50 rounded w-16 ml-auto" />
+								</div>
+							</div>
+						</div>
+					))
+				) : filteredContracts.length === 0 ? (
 					<div className="text-center py-20">
 						<div className="w-16 h-16 rounded-2xl bg-theme-bg-muted border border-theme-border flex items-center justify-center mx-auto mb-4">
 							<Receipt className="w-7 h-7 text-theme-gold-primary opacity-50" />
@@ -328,7 +352,7 @@ export default function ContractsPage() {
 									onClick={() => setSelectedContract(null)}
 									className="w-8 h-8 rounded-xl flex items-center justify-center border border-theme-border-muted bg-theme-bg-muted hover:bg-theme-border-muted text-theme-text-muted transition-colors"
 								>
-									<ArrowLeft className="w-4 h-4 rotate-[270deg]" />
+									<X className="w-4 h-4 rotate-[270deg]" />
 								</button>
 							</div>
 						</div>

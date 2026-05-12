@@ -266,6 +266,7 @@ export async function saveWeddingContract(data: WeddingContractSchema) {
 				contract_id: contract.id,
 				combo_id: combo.id || null,
 				combo_name: combo.comboName,
+				base_price: combo.basePrice,
 			})
 			.select()
 			.single();
@@ -278,7 +279,6 @@ export async function saveWeddingContract(data: WeddingContractSchema) {
 		const services = combo.services.map((s, idx) => ({
 			contract_combo_id: insertedCombo.id,
 			service_name: s.name,
-			price: s.price,
 			is_removed: s.isRemoved,
 			note: s.note,
 			sort_order: idx,
@@ -350,7 +350,7 @@ export async function deleteWeddingContract(id: string) {
 	return { success: true };
 }
 
-export async function addWeddingCombo(data: { name: string, description?: string, basePrice: number, services: { name: string, price: number }[] }) {
+export async function addWeddingCombo(data: { name: string, description?: string, basePrice: number, services: { name: string }[] }) {
 	const supabase = await createClient();
 	const { data: combo, error: comboError } = await supabase
 		.from("wedding_combos")
@@ -367,7 +367,6 @@ export async function addWeddingCombo(data: { name: string, description?: string
 	const services = data.services.map((s, idx) => ({
 		combo_id: combo.id,
 		name: s.name,
-		price: s.price,
 		sort_order: idx,
 	}));
 
@@ -381,7 +380,7 @@ export async function addWeddingCombo(data: { name: string, description?: string
 	return { success: true };
 }
 
-export async function updateWeddingCombo(id: string, data: { name: string, description?: string, basePrice: number, services: { name: string, price: number }[] }) {
+export async function updateWeddingCombo(id: string, data: { name: string, description?: string, basePrice: number, services: { name: string }[] }) {
 	const supabase = await createClient();
 
 	// Update combo info
@@ -403,7 +402,6 @@ export async function updateWeddingCombo(id: string, data: { name: string, descr
 	const services = data.services.map((s, idx) => ({
 		combo_id: id,
 		name: s.name,
-		price: s.price,
 		sort_order: idx,
 	}));
 

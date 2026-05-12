@@ -26,10 +26,16 @@ export default function PackagesPage() {
 	const [editLabel, setEditLabel] = React.useState("");
 	const [editPrice, setEditPrice] = React.useState<number>(0);
 	const [showAddForm, setShowAddForm] = React.useState(false);
+	const [isLoading, setIsLoading] = React.useState(true);
 
 	const loadPackages = async () => {
-		const data = await getMasterPackages();
-		setPackages(data);
+		setIsLoading(true);
+		try {
+			const data = await getMasterPackages();
+			setPackages(data);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	React.useEffect(() => {
@@ -94,8 +100,8 @@ export default function PackagesPage() {
 					borderBottom: "1px solid #e8dcc8",
 				}}
 			>
-				<div className="flex items-center gap-3 px-4 py-4 max-w-2xl mx-auto">
-					<Link href="/">
+				<div className="flex items-center gap-3 p-2 max-w-2xl mx-auto">
+					<Link href="/settings">
 						<button className="w-9 h-9 rounded-xl flex items-center justify-center border border-[#e0cc9a] bg-[#faf6ea] hover:bg-theme-border-muted text-[#b49050] transition-colors -ml-1">
 							<ArrowLeft className="w-4 h-4" />
 						</button>
@@ -117,7 +123,7 @@ export default function PackagesPage() {
 				</div>
 			</div>
 
-			<div className="px-4 py-5 max-w-2xl mx-auto space-y-3">
+			<div className="p-2 max-w-2xl mx-auto space-y-3">
 
 				{/* ── Add form toggle ── */}
 				{!showAddForm ? (
@@ -133,7 +139,7 @@ export default function PackagesPage() {
 				) : (
 					<div className="rounded-2xl border border-[#e0cc9a] bg-white shadow-[0_4px_20px_0_rgba(200,168,75,0.12)] overflow-hidden">
 						{/* Form header */}
-						<div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
+						<div className="flex items-center justify-between p-2 bg-gradient-to-r from-[#faf6ef] to-white border-b border-[#e8dcc8]">
 							<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[#b49050]">
 								Gói mới
 							</span>
@@ -145,7 +151,7 @@ export default function PackagesPage() {
 							</button>
 						</div>
 
-						<form onSubmit={handleAdd} className="px-5 py-5 space-y-4">
+						<form onSubmit={handleAdd} className="p-2 space-y-4">
 							<div>
 								<label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a8060] mb-1.5">
 									Tên gói
@@ -181,7 +187,21 @@ export default function PackagesPage() {
 				)}
 
 				{/* ── Package list ── */}
-				{packages.length === 0 ? (
+				{isLoading ? (
+					Array.from({ length: 3 }).map((_, i) => (
+						<div key={i} className="rounded-2xl border border-[#e8dcc8] bg-white overflow-hidden p-4 animate-pulse flex items-center">
+							<div className="w-10 h-10 rounded-full bg-[#faf6ea]" />
+							<div className="ml-3 flex-1 space-y-2">
+								<div className="h-4 bg-[#faf6ea] rounded w-1/2" />
+								<div className="h-3 bg-[#faf6ea] rounded w-1/3" />
+							</div>
+							<div className="flex gap-1.5 ml-4">
+								<div className="w-8 h-8 rounded-lg bg-[#faf6ea]" />
+								<div className="w-8 h-8 rounded-lg bg-[#faf6ea]" />
+							</div>
+						</div>
+					))
+				) : packages.length === 0 ? (
 					<div className="text-center py-20">
 						<div className="w-16 h-16 rounded-2xl bg-[#faf6ea] border border-[#e8dcc8] flex items-center justify-center mx-auto mb-4">
 							<Package className="w-7 h-7 text-theme-gold-primary opacity-50" />
@@ -200,7 +220,7 @@ export default function PackagesPage() {
 
 							{editingId === pkg.id ? (
 								/* ── Edit mode ── */
-								<div className="px-5 py-5 space-y-4">
+								<div className="p-2 space-y-4">
 									<div>
 										<label className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9a8060] mb-1.5">
 											Tên gói
@@ -240,7 +260,7 @@ export default function PackagesPage() {
 								</div>
 							) : (
 								/* ── View mode ── */
-								<div className="flex items-center px-4 py-3.5">
+								<div className="flex items-center p-2">
 									{/* Index + icon */}
 									<div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#faf6ea] to-theme-border-muted border border-[#e0cc9a] flex items-center justify-center shrink-0 relative">
 										<Package className="w-4 h-4 text-theme-gold-primary" />

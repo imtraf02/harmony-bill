@@ -96,8 +96,7 @@ export default function SettingsPage() {
 							render={<Link href="/packages" />}
 							title="Quản lý gói"
 						>
-							<Package className="w-4 h-4" />
-							<span className="hidden md:inline">Gói chụp</span>
+							<span className="text-[10px] md:text-sm">Gói chụp</span>
 						</Button>
 						<Button
 							variant="outline"
@@ -107,8 +106,7 @@ export default function SettingsPage() {
 							render={<Link href="/wedding-combos" />}
 							title="Quản lý combo cưới"
 						>
-							<Layers className="w-4 h-4" />
-							<span className="hidden md:inline">Combo cưới</span>
+							<span className="text-[10px] md:text-sm">Combo cưới</span>
 						</Button>
 						<Button
 							onClick={form.handleSubmit(onSubmit)}
@@ -116,7 +114,7 @@ export default function SettingsPage() {
 							title="Lưu"
 						>
 							<Save className="w-4 h-4" />
-							<span className="hidden md:inline">Lưu</span>
+							<span className="text-[10px] md:text-sm">Lưu</span>
 						</Button>
 					</div>
 				</div>
@@ -234,9 +232,9 @@ export default function SettingsPage() {
 								<FieldLabel>URL Hình nền (Background)</FieldLabel>
 								<div className="flex gap-4 items-start">
 									<div className="flex-1">
-										<Input 
-											{...form.register("backgroundUrl")} 
-											placeholder="https://example.com/background.jpg" 
+										<Input
+											{...form.register("backgroundUrl")}
+											placeholder="https://example.com/background.jpg"
 											className="h-10"
 										/>
 										<p className="mt-1.5 text-[10px] text-theme-text-muted italic">
@@ -264,9 +262,9 @@ export default function SettingsPage() {
 								<FieldLabel>URL Chữ ký (Signature)</FieldLabel>
 								<div className="flex gap-4 items-start">
 									<div className="flex-1">
-										<Input 
-											{...form.register("signatureUrl")} 
-											placeholder="https://example.com/signature.png" 
+										<Input
+											{...form.register("signatureUrl")}
+											placeholder="https://example.com/signature.png"
 											className="h-10"
 										/>
 										<p className="mt-1.5 text-[10px] text-theme-text-muted italic">

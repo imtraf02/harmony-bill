@@ -20,7 +20,7 @@ export function LogoutButton() {
       disabled={isPending}
     >
       <LogOut className="w-4 h-4" />
-      <span className="hidden md:inline">{isPending ? "Đang thoát..." : "Đăng xuất"}</span>
+      <span className="text-[10px] md:text-sm">{isPending ? "..." : "Thoát"}</span>
     </Button>
   );
 }

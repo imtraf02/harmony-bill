@@ -42,10 +42,7 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 	};
 
 	const calculateComboTotal = (combo: any) =>
-		(combo.services || []).reduce(
-			(acc: number, s: any) => acc + (s.isRemoved ? 0 : Number(s.price) || 0),
-			0,
-		);
+		Number(combo.basePrice) || 0;
 
 	const subtotalBeforeDiscount =
 		(data.combos || []).reduce((acc, combo) => acc + calculateComboTotal(combo), 0) +
@@ -257,9 +254,6 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 												<span className="font-medium italic">
 													{s.isRemoved ? "✗" : "•"} {s.name}
 													{s.note && ` (${s.note})`}
-												</span>
-												<span className="font-bold">
-													{s.isRemoved ? "0" : formatCurrency(s.price)}
 												</span>
 											</div>
 										))}

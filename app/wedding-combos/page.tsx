@@ -23,7 +23,7 @@ const comboTemplateSchema = z.object({
 	basePrice: z.number().min(0),
 	services: z.array(z.object({
 		name: z.string().min(1, "Tên dịch vụ không được để trống"),
-		price: z.number().min(0),
+		price: z.number().min(0).default(0),
 	})),
 });
 
@@ -94,18 +94,26 @@ export default function WeddingCombosPage() {
 		new Intl.NumberFormat("vi-VN").format(amount);
 
 	return (
-		<div className="min-h-screen pb-20 bg-slate-50/50">
-			<div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-[#e8dcc8]">
-				<div className="flex items-center gap-3 px-4 py-4 max-w-2xl mx-auto">
-					<Button
-						variant="outline"
-						size="sm"
-						className="w-9 h-9 p-0 rounded-xl flex items-center justify-center border border-[#e0cc9a] bg-[#faf6ea] text-[#b49050]"
-						nativeButton={false}
-						render={<Link href="/settings" />}
-					>
-						<ArrowLeft className="w-4 h-4" />
-					</Button>
+		<div
+			className="min-h-screen pb-20"
+			style={{
+				background: "linear-gradient(160deg, #fdfaf3 0%, #f5f0e8 100%)",
+			}}
+		>
+			<div
+				className="sticky top-0 z-10"
+				style={{
+					background: "rgba(253, 250, 243, 0.92)",
+					backdropFilter: "blur(12px)",
+					borderBottom: "1px solid #e8dcc8",
+				}}
+			>
+				<div className="flex items-center gap-3 p-2 max-w-2xl mx-auto">
+					<Link href="/settings">
+						<button className="w-9 h-9 rounded-xl flex items-center justify-center border border-[#e0cc9a] bg-[#faf6ea] hover:bg-theme-border-muted text-[#b49050] transition-colors -ml-1">
+							<ArrowLeft className="w-4 h-4" />
+						</button>
+					</Link>
 					<h1 className="text-lg font-bold text-[#5a3e1b]">Quản lý Combo Cưới</h1>
 					<Button 
 						onClick={() => {
@@ -120,9 +128,9 @@ export default function WeddingCombosPage() {
 				</div>
 			</div>
 
-			<div className="px-4 py-8 max-w-2xl mx-auto space-y-6">
+			<div className="p-2 max-w-2xl mx-auto space-y-6">
 				{editingCombo ? (
-					<div className="bg-white rounded-2xl border border-[#e8dcc8] p-6 shadow-sm">
+					<div className="bg-white rounded-2xl border border-[#e8dcc8] p-2 shadow-[0_4px_20px_0_rgba(200,168,75,0.12)] overflow-hidden">
 						<h2 className="text-lg font-bold text-[#5a3e1b] mb-6">
 							{editingCombo.isNew ? "Thêm Combo Mẫu Mới" : "Chỉnh sửa Combo Mẫu"}
 						</h2>
@@ -143,7 +151,7 @@ export default function WeddingCombosPage() {
 							<Separator />
 
 							<div className="space-y-4">
-								<div className="flex items-center justify-between">
+								<div className="flex items-center justify-between p-2">
 									<h3 className="text-sm font-bold text-[#9a8060] uppercase tracking-wider">Dịch vụ trong combo</h3>
 									<Button 
 										type="button" 
@@ -157,32 +165,59 @@ export default function WeddingCombosPage() {
 								</div>
 
 								{fields.map((field, index) => (
-									<div key={field.id} className="flex gap-3 items-start">
-										<Input {...form.register(`services.${index}.name`)} placeholder="Tên dịch vụ" className="flex-1" />
-										<Input type="number" {...form.register(`services.${index}.price`, { valueAsNumber: true })} placeholder="Giá" className="w-32" />
-										<Button 
-											type="button" 
-											variant="ghost" 
-											size="sm" 
-											className="h-10 w-10 text-red-500 hover:bg-red-50"
-											onClick={() => remove(index)}
-										>
-											<Trash2 className="w-4 h-4" />
-										</Button>
+									<div key={field.id} className="p-3 rounded-2xl border border-theme-border-muted bg-theme-bg-body/50 space-y-3 relative group">
+										<div className="flex flex-col md:flex-row gap-3">
+											<div className="flex-1">
+												<label className="text-[10px] font-bold text-[#9a8060] uppercase mb-1 block md:hidden">Tên dịch vụ</label>
+												<Input 
+													{...form.register(`services.${index}.name`)} 
+													placeholder="Tên dịch vụ (VD: Trang điểm cô dâu)" 
+													className="bg-white"
+												/>
+											</div>
+											<div className="flex items-center">
+												<Button 
+													type="button" 
+													variant="ghost" 
+													size="sm" 
+													className="h-10 w-10 text-red-500 hover:bg-red-50 shrink-0"
+													onClick={() => remove(index)}
+												>
+													<Trash2 className="w-4 h-4" />
+												</Button>
+											</div>
+										</div>
 									</div>
 								))}
 							</div>
 
 							<div className="flex gap-3 pt-6">
 								<Button type="button" variant="ghost" className="flex-1 rounded-xl" onClick={() => setEditingCombo(null)}>Huỷ</Button>
-								<Button type="submit" className="flex-1 rounded-xl bg-theme-gold-primary text-white">Lưu Combo</Button>
+								<Button type="submit" className="flex-1 rounded-xl bg-theme-gold-primary hover:bg-theme-gold-secondary text-white">Lưu Combo</Button>
 							</div>
 						</form>
 					</div>
 				) : (
 					<div className="space-y-4">
-						{combos.map(combo => (
-							<div key={combo.id} className="bg-white rounded-2xl border border-[#e8dcc8] p-5 shadow-sm group">
+						{isLoading ? (
+							Array.from({ length: 3 }).map((_, i) => (
+								<div key={i} className="bg-white rounded-2xl border border-[#e8dcc8] p-5 shadow-[0_4px_16px_0_rgba(200,168,75,0.08)] animate-pulse">
+									<div className="flex justify-between items-start mb-4">
+										<div className="space-y-2 flex-1">
+											<div className="h-5 bg-slate-200 rounded w-1/3"></div>
+											<div className="h-3 bg-slate-100 rounded w-1/2"></div>
+										</div>
+										<div className="h-6 bg-slate-200 rounded w-24"></div>
+									</div>
+									<div className="space-y-2 my-3">
+										<div className="h-3 bg-slate-100 rounded w-full"></div>
+										<div className="h-3 bg-slate-100 rounded w-5/6"></div>
+									</div>
+								</div>
+							))
+						) : combos.map(combo => (
+							<div key={combo.id} className="bg-white rounded-2xl border border-[#e8dcc8] p-2 shadow-[0_4px_16px_0_rgba(200,168,75,0.08)] group transition-all duration-200 hover:border-theme-gold-primary hover:shadow-[0_4px_20px_0_rgba(200,168,75,0.13)] relative overflow-hidden">
+								<div className="absolute top-0 left-0 h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-theme-gold-primary via-[#e8d07a] to-theme-gold-primary transition-all duration-300" />
 								<div className="flex justify-between items-start mb-2">
 									<div>
 										<h3 className="font-bold text-[#5a3e1b]">{combo.name}</h3>
@@ -190,15 +225,15 @@ export default function WeddingCombosPage() {
 									</div>
 									<p className="font-black text-theme-gold-primary">{formatCurrency(combo.base_price)}</p>
 								</div>
-								<div className="space-y-1 my-3">
+								<div className="space-y-1.5 my-4 bg-[#fafafa]/50 p-3 rounded-xl border border-dashed border-slate-100">
 									{combo.wedding_combo_services?.map((s: any) => (
-										<div key={s.id} className="flex justify-between text-[11px] text-slate-500 italic">
-											<span>• {s.name}</span>
-											<span>{formatCurrency(s.price)}</span>
+										<div key={s.id} className="flex items-center text-xs text-slate-600 gap-2">
+											<div className="w-1 h-1 rounded-full bg-theme-gold-primary" />
+											{s.name}
 										</div>
 									))}
 								</div>
-								<div className="flex justify-end gap-2 pt-3 border-t border-dashed border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
+								<div className="flex justify-end gap-2 pt-3 border-t border-dashed border-slate-100 transition-opacity">
 									<Button 
 										variant="ghost" 
 										size="sm" 
@@ -209,7 +244,7 @@ export default function WeddingCombosPage() {
 												name: combo.name,
 												description: combo.description || "",
 												basePrice: Number(combo.base_price) || 0,
-												services: combo.wedding_combo_services.map((s: any) => ({ name: s.name, price: Number(s.price) }))
+												services: combo.wedding_combo_services.map((s: any) => ({ name: s.name, price: 0 }))
 											});
 										}}
 									>

@@ -39,6 +39,14 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+	DialogFooter,
+} from "@/components/ui/dialog";
+import {
 	Select,
 	SelectContent,
 	SelectGroup,
@@ -115,6 +123,8 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 	const [settings, setSettings] = React.useState<any>(null);
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 	const [isDownloading, setIsDownloading] = React.useState(false);
+	const [isDownloadDialogOpen, setIsDownloadDialogOpen] = React.useState(false);
+	const [saveToDbOnDownload, setSaveToDbOnDownload] = React.useState(true);
 
 	const form = useForm<BillSchema>({
 		resolver: zodResolver(billSchema),
@@ -180,6 +190,32 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 		} finally {
 			setIsDownloading(false);
 		}
+	};
+
+	const onConfirmDownload = async () => {
+		setIsDownloadDialogOpen(false);
+		if (saveToDbOnDownload) {
+			const isValid = await form.trigger();
+			if (!isValid) {
+				toast.error("Vui lòng điền đầy đủ thông tin hợp lệ trước khi lưu");
+				return;
+			}
+			setIsSubmitting(true);
+			try {
+				const result = await saveContract(form.getValues() as BillSchema);
+				if (!result.success) {
+					toast.error("Lưu thất bại: " + result.error);
+					return;
+				}
+				toast.success("Hợp đồng đã được lưu!");
+			} catch (error) {
+				toast.error("Lỗi khi lưu!");
+				return;
+			} finally {
+				setIsSubmitting(false);
+			}
+		}
+		await onDownloadImage();
 	};
 
 	const onSubmit = async (data: BillSchema) => {
@@ -268,6 +304,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 	}
 
 	return (
+		<>
 		<form
 			onSubmit={form.handleSubmit(onSubmit)}
 			className="space-y-2 pb-20 max-w-2xl mx-auto px-2"
@@ -308,7 +345,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 						]).map((acc: any, i: number) => (
 							<div
 								key={i}
-								className="flex items-center gap-1.5 bg-theme-bg-muted border border-theme-border-muted rounded-lg px-3 py-1 text-[11px] text-theme-text-dark"
+								className="flex items-center gap-1.5 bg-theme-bg-muted border border-theme-border-muted rounded-lg px-2 py-1 text-[11px] text-theme-text-dark"
 							>
 								<span className="font-semibold text-theme-text-muted">{acc.bank}</span>
 								<span className="text-theme-gold-primary">·</span>
@@ -338,7 +375,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 					<div>
-						<ElegantLabel htmlFor="phone">Số điện thoại</ElegantLabel>
+						<ElegantLabel htmlFor="phone">Số điện thoại (Không bắt buộc)</ElegantLabel>
 						<input
 							id="phone"
 							placeholder="090xxxxxxx"
@@ -375,7 +412,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 					<button
 						type="button"
 						onClick={() => append({ label: "", price: 0 })}
-						className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-theme-text-muted hover:text-theme-gold-hover border border-theme-border-muted hover:border-theme-gold-primary rounded-lg px-3 py-1 bg-white hover:bg-theme-bg-muted transition-all duration-200"
+						className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-theme-text-muted hover:text-theme-gold-hover border border-theme-border-muted hover:border-theme-gold-primary rounded-lg px-2 py-1 bg-white hover:bg-theme-bg-muted transition-all duration-200"
 					>
 						<Plus className="w-3.5 h-3.5" /> Thêm gói
 					</button>
@@ -458,7 +495,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 						</div>
 					))}
 					{fields.length === 0 && (
-						<div className="text-center py-8 border-2 border-dashed border-theme-border rounded-2xl text-theme-text-muted italic text-sm">
+						<div className="text-center py-2 border-2 border-dashed border-theme-border rounded-2xl text-theme-text-muted italic text-sm">
 							Chưa có gói nào. Bấm "Thêm gói" để bắt đầu.
 						</div>
 					)}
@@ -657,7 +694,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 							</div>
 						</div>
 
-						<div className="rounded-xl bg-theme-bg-body border border-theme-border p-3 flex items-center justify-between">
+						<div className="rounded-xl bg-theme-bg-body border border-theme-border p-2 flex items-center justify-between">
 							<span className="text-[11px] uppercase tracking-[0.18em] font-bold text-theme-text-muted">
 								Còn lại phải thu
 							</span>
@@ -687,7 +724,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 				<div className="backdrop-blur-md bg-white/80 border-t border-theme-border p-2 flex gap-2 justify-center md:justify-end">
 					<button
 						type="button"
-						onClick={onDownloadImage}
+						onClick={() => setIsDownloadDialogOpen(true)}
 						disabled={isDownloading}
 						className="flex-1 md:flex-none flex justify-center items-center gap-2 h-10 px-3 rounded-xl font-semibold text-[11px] md:text-sm text-theme-gold-hover bg-white border border-theme-border-muted hover:bg-theme-bg-muted transition-all shadow-sm disabled:opacity-60"
 					>
@@ -697,7 +734,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 						type="submit"
 						disabled={isSubmitting}
 						className={cn(
-							"flex-1 md:flex-none flex justify-center items-center gap-2 h-10 px-4 rounded-xl font-bold text-[11px] md:text-sm tracking-wide text-white transition-all duration-200 shadow-lg",
+							"flex-1 md:flex-none flex justify-center items-center gap-2 h-10 px-2 rounded-xl font-bold text-[11px] md:text-sm tracking-wide text-white transition-all duration-200 shadow-lg",
 							isSubmitting
 								? "bg-theme-gold-primary/60 cursor-not-allowed"
 								: "bg-gradient-to-r from-theme-gold-primary to-theme-gold-light hover:from-theme-gold-hover hover:to-theme-gold-hover shadow-theme-gold-primary/30 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0",
@@ -736,5 +773,46 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 				</div>
 			</div>
 		</form>
+
+			<Dialog open={isDownloadDialogOpen} onOpenChange={setIsDownloadDialogOpen}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>Tải ảnh hợp đồng</DialogTitle>
+						<DialogDescription>
+							Bạn có muốn lưu thông tin hợp đồng này vào hệ thống trước khi tải ảnh không?
+						</DialogDescription>
+					</DialogHeader>
+					
+					<div className="flex items-center space-x-2 py-2">
+						<label className="flex items-center gap-2 cursor-pointer text-sm font-medium text-theme-text-dark">
+							<input 
+								type="checkbox" 
+								className="w-4 h-4 accent-theme-gold-primary rounded border-theme-border"
+								checked={saveToDbOnDownload}
+								onChange={(e) => setSaveToDbOnDownload(e.target.checked)}
+							/>
+							Lưu hợp đồng vào cơ sở dữ liệu
+						</label>
+					</div>
+
+					<DialogFooter className="sm:justify-between flex-row">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => setIsDownloadDialogOpen(false)}
+						>
+							Huỷ
+						</Button>
+						<Button
+							type="button"
+							onClick={onConfirmDownload}
+							className="bg-theme-gold-primary text-white hover:bg-theme-gold-hover"
+						>
+							{saveToDbOnDownload ? "Lưu & Tải ảnh" : "Chỉ Tải ảnh"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		</>
 	);
 }
