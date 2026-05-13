@@ -89,6 +89,11 @@ export const weddingContractSchema = z.object({
   contractDate: z.date({
     required_error: "Vui lòng chọn ngày lập hợp đồng",
   }),
+  extraServices: z.array(z.object({
+    name: z.string().min(1, "Tên dịch vụ không được để trống"),
+    price: z.coerce.number().min(0),
+    quantity: z.coerce.number().min(1).default(1),
+  })).default([]),
   notes: z.string().optional(),
 });
 

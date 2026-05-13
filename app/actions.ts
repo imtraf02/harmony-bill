@@ -229,6 +229,21 @@ export async function getWeddingCombos() {
 	return data;
 }
 
+export async function getWeddingExtraServices() {
+	const supabase = await createClient();
+	const { data, error } = await supabase
+		.from("wedding_extra_services")
+		.select("*")
+		.order("sort_order");
+
+	if (error) {
+		console.error("Error fetching wedding extra services:", error);
+		return [];
+	}
+
+	return data;
+}
+
 export async function saveWeddingContract(data: WeddingContractSchema) {
 	const supabase = await createClient();
 
@@ -293,6 +308,24 @@ export async function saveWeddingContract(data: WeddingContractSchema) {
 		}
 	}
 
+	// 3. Insert extra services
+	if (data.extraServices && data.extraServices.length > 0) {
+		const extraServices = data.extraServices.map((s) => ({
+			contract_id: contract.id,
+			name: s.name,
+			price: s.price,
+			quantity: s.quantity,
+		}));
+
+		const { error: extraServicesError } = await supabase
+			.from("wedding_contract_extra_services")
+			.insert(extraServices);
+
+		if (extraServicesError) {
+			console.error("Error saving wedding contract extra services:", extraServicesError);
+		}
+	}
+
 	revalidatePath("/");
 	revalidatePath("/contracts");
 	return { success: true, id: contract.id };
@@ -307,7 +340,8 @@ export async function getWeddingContracts() {
 			wedding_contract_combos (
 				*,
 				wedding_contract_combo_services (*)
-			)
+			),
+			wedding_contract_extra_services (*)
 		`)
 		.order("created_at", { ascending: false });
 
@@ -328,7 +362,8 @@ export async function getWeddingContractById(id: string) {
 			wedding_contract_combos (
 				*,
 				wedding_contract_combo_services (*)
-			)
+			),
+			wedding_contract_extra_services (*)
 		`)
 		.match({ id })
 		.single();

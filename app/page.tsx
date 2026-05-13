@@ -61,7 +61,7 @@ function HomeContent() {
 	};
 
 	return (
-		<main className="min-h-screen bg-theme-bg-body pb-16">
+		<main className="min-h-screen bg-theme-bg-body pb-24">
 			<div className="container mx-auto p-2">
 				<header className="mb-6 no-print flex flex-col md:flex-row md:items-center justify-between gap-4">
 					<div>
@@ -79,7 +79,7 @@ function HomeContent() {
 								)}
 							>
 								<Camera className="w-4 h-4" />
-								Quay phim & Chụp ảnh
+								Phóng sự cưới
 							</button>
 							<button
 								onClick={() => updateTab("wedding")}

@@ -42,12 +42,17 @@ export function mapToWeddingSchema(contract: any): Partial<WeddingContractSchema
 		combos: contract.wedding_contract_combos?.map((c: any) => ({
 			id: c.combo_id,
 			comboName: c.combo_name,
+			basePrice: Number(c.base_price),
 			services: c.wedding_contract_combo_services?.map((s: any) => ({
 				name: s.service_name,
-				price: Number(s.price),
 				isRemoved: s.is_removed,
 				note: s.note,
 			})) || [],
+		})) || [],
+		extraServices: contract.wedding_contract_extra_services?.map((s: any) => ({
+			name: s.name,
+			price: Number(s.price),
+			quantity: Number(s.quantity),
 		})) || [],
 		travelFee: Number(contract.travel_fee),
 		discount: Number(contract.discount),

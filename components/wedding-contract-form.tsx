@@ -8,7 +8,7 @@ import { CalendarIcon, Plus, Printer, Trash2, Download, ChevronDown, CheckCircle
 import * as React from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { getWeddingCombos, getSettings, saveWeddingContract } from "@/app/actions";
+import { getWeddingCombos, getSettings, saveWeddingContract, getWeddingExtraServices } from "@/app/actions";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -123,11 +123,13 @@ const formatShort = (n: number) =>
 
 export function WeddingContractForm({ onDataChange, initialData }: WeddingContractFormProps) {
 	const [masterCombos, setMasterCombos] = React.useState<any[]>([]);
+	const [masterExtraServices, setMasterExtraServices] = React.useState<any[]>([]);
 	const [settings, setSettings] = React.useState<any>(null);
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
 	const [isDownloading, setIsDownloading] = React.useState(false);
 	const [isDownloadDialogOpen, setIsDownloadDialogOpen] = React.useState(false);
 	const [isComboDialogOpen, setIsComboDialogOpen] = React.useState(false);
+	const [isExtraDialogOpen, setIsExtraDialogOpen] = React.useState(false);
 	const [saveToDbOnDownload, setSaveToDbOnDownload] = React.useState(true);
 
 	const form = useForm<WeddingContractSchema>({
@@ -140,6 +142,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 			incurredCostReason: "",
 			deposit: 0,
 			includeVAT: false,
+			extraServices: [],
 			contractDate: new Date(),
 		},
 	});
@@ -150,6 +153,10 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 		control,
 		name: "combos",
 	});
+	const { fields: extraFields, append: appendExtra, remove: removeExtra } = useFieldArray({
+		control,
+		name: "extraServices",
+	});
 
 	React.useEffect(() => {
 		if (initialData) form.reset(initialData);
@@ -159,6 +166,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 
 	React.useEffect(() => {
 		getWeddingCombos().then(setMasterCombos);
+		getWeddingExtraServices().then(setMasterExtraServices);
 		getSettings().then(setSettings);
 	}, []);
 
@@ -227,7 +235,8 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 
 	// Totals
 	const comboTotal = (values.combos || []).reduce((a, c) => a + (Number(c.basePrice) || 0), 0);
-	const subtotal = comboTotal + (Number(values.travelFee) || 0) + (Number(values.incurredCost) || 0) - (Number(values.discount) || 0);
+	const extraTotal = (values.extraServices || []).reduce((a, c) => a + (Number(c.price) * (Number(c.quantity) || 1) || 0), 0);
+	const subtotal = comboTotal + extraTotal + (Number(values.travelFee) || 0) + (Number(values.incurredCost) || 0) - (Number(values.discount) || 0);
 	const vatAmount = values.includeVAT ? subtotal * 0.1 : 0;
 	const totalPrice = subtotal + vatAmount;
 	const remaining = totalPrice - (Number(values.deposit) || 0);
@@ -381,28 +390,39 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 								{/* Services */}
 								<div className="p-3 space-y-2">
 									{values.combos?.[ci]?.services?.map((svc, si) => (
-										<label
+										<div
 											key={si}
 											className={cn(
-												"flex items-center gap-3 p-2.5 rounded-xl transition-all cursor-pointer",
+												"flex items-center gap-3 p-2 rounded-xl transition-all",
 												svc.isRemoved ? "opacity-40 bg-slate-100" : "bg-white border border-theme-border-muted",
 											)}
 										>
-											<input
-												type="checkbox"
-												checked={!svc.isRemoved}
-												onChange={(e) => setValue(`combos.${ci}.services.${si}.isRemoved`, !e.target.checked)}
-												className="sr-only"
-											/>
-											{svc.isRemoved
-												? <Circle className="w-4 h-4 text-theme-text-muted shrink-0" />
-												: <CheckCircle2 className="w-4 h-4 text-theme-gold-primary shrink-0" />}
+											<button
+												type="button"
+												onClick={() => setValue(`combos.${ci}.services.${si}.isRemoved`, !svc.isRemoved)}
+												className="shrink-0"
+											>
+												{svc.isRemoved
+													? <Circle className="w-4 h-4 text-theme-text-muted" />
+													: <CheckCircle2 className="w-4 h-4 text-theme-gold-primary" />}
+											</button>
 											<Input
 												{...register(`combos.${ci}.services.${si}.name`)}
 												placeholder="Tên dịch vụ"
 												className="h-8 text-xs bg-transparent border-none p-0 focus:ring-0 flex-1"
 											/>
-										</label>
+											<button
+												type="button"
+												onClick={() => {
+													const cur = form.getValues(`combos.${ci}.services`);
+													const updated = cur.filter((_, idx) => idx !== si);
+													setValue(`combos.${ci}.services`, updated);
+												}}
+												className="w-6 h-6 flex items-center justify-center text-red-400 active:scale-95"
+											>
+												<Trash2 className="w-3.5 h-3.5" />
+											</button>
+										</div>
 									))}
 									<button
 										type="button"
@@ -425,6 +445,90 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 								</div>
 							</div>
 						))}
+					</div>
+				</div>
+
+				{/* ── Dịch vụ lẻ ────────────────────────────────────────── */}
+				<div className="rounded-2xl border border-theme-border bg-white shadow-[0_2px_12px_0_rgba(180,150,80,0.08)] overflow-hidden">
+					<SectionHeader
+						title="Dịch vụ lẻ"
+						action={
+							<div className="flex gap-2">
+								<button
+									type="button"
+									onClick={() => setIsExtraDialogOpen(true)}
+									className="h-8 rounded-xl border border-theme-border-muted text-theme-text-muted bg-white px-2 text-[11px] font-semibold flex items-center gap-1.5 hover:bg-theme-bg-muted transition-colors"
+								>
+									<Plus className="w-3.5 h-3.5" />
+									DANH SÁCH
+								</button>
+								<Button
+									type="button"
+									size="sm"
+									variant="outline"
+									className="h-8 rounded-xl border-theme-border-muted text-theme-text-muted text-[11px] font-semibold"
+									onClick={() => appendExtra({ name: "Dịch vụ mới", price: 0, quantity: 1 })}
+								>
+									<Plus className="w-3.5 h-3.5 mr-1" /> Thủ công
+								</Button>
+							</div>
+						}
+					/>
+
+					<div className="p-3 space-y-2">
+						{extraFields.length === 0 && (
+							<p className="text-center py-4 border-2 border-dashed border-theme-border rounded-2xl text-theme-text-muted text-xs italic">
+								Chưa có dịch vụ lẻ nào.
+							</p>
+						)}
+
+						{extraFields.map((field, index) => (
+							<div key={field.id} className="flex gap-2 items-start bg-theme-bg-body p-2 rounded-xl border border-theme-border-muted">
+								<div className="flex-1 space-y-1.5">
+									<Input
+										{...register(`extraServices.${index}.name`)}
+										placeholder="Tên dịch vụ"
+										className="h-9 text-sm"
+									/>
+									<div className="flex gap-2 items-center">
+										<div className="flex-1">
+											<Input
+												type="number"
+												inputMode="numeric"
+												{...register(`extraServices.${index}.price`, { valueAsNumber: true })}
+												placeholder="Giá"
+												className="h-9 text-sm"
+											/>
+										</div>
+										<div className="w-16">
+											<Input
+												type="number"
+												inputMode="numeric"
+												{...register(`extraServices.${index}.quantity`, { valueAsNumber: true })}
+												placeholder="SL"
+												className="h-9 text-sm text-center"
+											/>
+										</div>
+									</div>
+								</div>
+								<button
+									type="button"
+									onClick={() => removeExtra(index)}
+									className="mt-1 w-9 h-9 flex items-center justify-center rounded-xl text-red-400 active:bg-red-50"
+								>
+									<Trash2 className="w-4 h-4" />
+								</button>
+							</div>
+						))}
+
+						{extraFields.length > 0 && (
+							<div className="flex justify-between items-center px-2 py-2 bg-gradient-to-r from-theme-bg-muted to-white border-t border-dashed border-theme-border mt-2">
+								<span className="text-[10px] uppercase font-bold text-theme-text-muted">Tổng dịch vụ lẻ</span>
+								<span className="font-bold text-sm text-theme-gold-primary">
+									{formatVND(extraTotal)}
+								</span>
+							</div>
+						)}
 					</div>
 				</div>
 
@@ -568,7 +672,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 
 			{/* ── Download dialog ──────────────────────────────────────── */}
 			<Dialog open={isDownloadDialogOpen} onOpenChange={setIsDownloadDialogOpen}>
-				<DialogContent className="w-[calc(100vw-2rem)] max-w-sm rounded-2xl p-6">
+				<DialogContent className="w-[calc(100vw-2rem)] max-w-sm">
 					<DialogHeader>
 						<DialogTitle className="text-base font-bold text-theme-text-dark">Tải ảnh hợp đồng</DialogTitle>
 						<DialogDescription className="text-sm text-theme-text-muted mt-1">
@@ -605,13 +709,13 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 				</DialogContent>
 			</Dialog>
 			<Dialog open={isComboDialogOpen} onOpenChange={setIsComboDialogOpen}>
-				<DialogContent className="w-[calc(100vw-2rem)] max-w-md h-[85vh] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl flex flex-col !gap-0">
-					<DialogHeader className="p-5 bg-white border-b border-theme-border/50 shrink-0">
+				<DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md h-[85vh] overflow-hidden border-none shadow-2xl flex flex-col !gap-0">
+					<DialogHeader className="pb-2 shrink-0">
 						<DialogTitle className="text-xs font-black tracking-[0.2em] uppercase text-theme-gold-hover text-center">
 							Mẫu Combo
 						</DialogTitle>
 					</DialogHeader>
-					<div className="flex-1 overflow-y-auto p-3 space-y-3 bg-theme-bg-body/30 min-h-0 overscroll-contain">
+					<div className="flex-1 overflow-y-auto py-1 space-y-3 bg-theme-bg-body/30 min-h-0 overscroll-contain">
 						{masterCombos.map((template) => (
 							<button
 								key={template.id}
@@ -647,11 +751,69 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 							</button>
 						))}
 					</div>
-					<div className="p-4 bg-white border-t border-theme-border/50 shrink-0">
+					<div className="pt-2 shrink-0">
 						<button
 							type="button"
 							onClick={() => setIsComboDialogOpen(false)}
-							className="w-full h-12 rounded-2xl bg-theme-bg-muted text-sm font-bold text-theme-text-muted active:scale-95 transition-all"
+							className="w-full h-9 rounded-2xl bg-theme-bg-muted text-sm font-bold text-theme-text-muted active:scale-95 transition-all"
+						>
+							ĐÓNG
+						</button>
+					</div>
+				</DialogContent>
+			</Dialog>
+			<Dialog open={isExtraDialogOpen} onOpenChange={setIsExtraDialogOpen}>
+				<DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md h-[85vh] overflow-hidden border-none shadow-2xl flex flex-col !gap-0">
+					<DialogHeader className="pb-2 shrink-0">
+						<DialogTitle className="text-xs font-black tracking-[0.2em] uppercase text-theme-gold-hover text-center">
+							Danh sách dịch vụ lẻ
+						</DialogTitle>
+					</DialogHeader>
+					<div className="flex-1 overflow-y-auto py-1 space-y-4 bg-theme-bg-body/30 min-h-0 overscroll-contain">
+						{Array.from(new Set(masterExtraServices.map(s => s.category))).map(category => (
+							<div key={category} className="space-y-2">
+								<h3 className="text-[10px] font-black tracking-[0.15em] uppercase text-theme-text-muted px-1">
+									{category}
+								</h3>
+								<div className="grid gap-2">
+									{masterExtraServices
+										.filter(s => s.category === category)
+										.map(service => (
+											<button
+												key={service.id}
+												type="button"
+												onClick={() => {
+													appendExtra({
+														name: service.name,
+														price: service.price,
+														quantity: 1
+													});
+													setIsExtraDialogOpen(false);
+												}}
+												className="w-full flex items-center justify-between p-3 rounded-xl bg-white border border-theme-border shadow-sm hover:border-theme-gold-primary hover:bg-theme-gold-primary/5 group transition-all text-left"
+											>
+												<span className="font-bold text-sm text-theme-text-dark group-hover:text-theme-gold-hover transition-colors">
+													{service.name}
+												</span>
+												<div className="flex items-center gap-3">
+													<span className="text-xs font-bold text-theme-gold-primary">
+														{formatVND(service.price)}
+													</span>
+													<div className="h-6 w-6 rounded-full bg-theme-bg-muted flex items-center justify-center group-hover:bg-theme-gold-primary group-hover:text-white transition-all">
+														<Plus className="w-3 h-3" />
+													</div>
+												</div>
+											</button>
+										))}
+								</div>
+							</div>
+						))}
+					</div>
+					<div className="pt-2 shrink-0">
+						<button
+							type="button"
+							onClick={() => setIsExtraDialogOpen(false)}
+							className="w-full h-9 rounded-2xl bg-theme-bg-muted text-sm font-bold text-theme-text-muted active:scale-95 transition-all"
 						>
 							ĐÓNG
 						</button>

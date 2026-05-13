@@ -38,6 +38,8 @@ import { LogoutButton } from "@/components/logout-button";
 export default function ContractsPage() {
 	const [contracts, setContracts] = React.useState<any[]>([]);
 	const [searchTerm, setSearchTerm] = React.useState("");
+	const [typeFilter, setTypeFilter] = React.useState<"all" | "photo" | "wedding">("all");
+	const [paymentFilter, setPaymentFilter] = React.useState<"all" | "pending" | "completed">("all");
 	const [selectedContract, setSelectedContract] = React.useState<any | null>(null);
 	const [isDownloading, setIsDownloading] = React.useState(false);
 	const [settings, setSettings] = React.useState<SettingsSchema | undefined>();
@@ -89,11 +91,36 @@ export default function ContractsPage() {
 			currency: "VND",
 		}).format(Number(amount) || 0);
 
-	const filteredContracts = contracts.filter(
-		(c) =>
+	const filteredContracts = contracts.filter((c) => {
+		// Search
+		const matchesSearch =
 			c.customer_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			c.phone.includes(searchTerm)
-	);
+			c.phone.includes(searchTerm);
+		if (!matchesSearch) return false;
+
+		// Type filter
+		if (typeFilter !== "all" && c.type !== typeFilter) return false;
+
+		// Payment filter
+		if (paymentFilter !== "all") {
+			let total = 0;
+			if (c.type === 'photo') {
+				const pkgTotal = c.contract_packages?.reduce((acc: number, p: any) => acc + Number(p.price), 0) || 0;
+				const subtotal = pkgTotal + Number(c.travel_fee) + Number(c.incurred_cost || 0) - (Number(c.discount) || 0);
+				total = c.include_vat ? subtotal * 1.1 : subtotal;
+			} else {
+				const comboTotal = c.wedding_contract_combos?.reduce((acc: number, combo: any) => acc + (Number(combo.base_price) || 0), 0) || 0;
+				const extraTotal = c.wedding_contract_extra_services?.reduce((acc: number, s: any) => acc + (Number(s.price) * (Number(s.quantity) || 1)), 0) || 0;
+				const subtotal = comboTotal + extraTotal + Number(c.travel_fee) + Number(c.incurred_cost || 0) - (Number(c.discount) || 0);
+				total = c.include_vat ? subtotal * 1.1 : subtotal;
+			}
+			const remaining = total - Number(c.deposit || 0);
+			if (paymentFilter === "pending" && remaining <= 0) return false;
+			if (paymentFilter === "completed" && remaining > 0) return false;
+		}
+
+		return true;
+	});
 
 	const onDownloadImage = async () => {
 		if (!selectedContract) return;
@@ -171,6 +198,52 @@ export default function ContractsPage() {
 						/>
 					</div>
 				</div>
+
+				{/* Filters */}
+				<div className="px-2 pb-3 max-w-2xl mx-auto space-y-2.5">
+					<div className="flex flex-wrap gap-1.5 items-center">
+						<span className="text-[10px] font-black uppercase tracking-widest text-theme-text-muted mr-1.5">Loại:</span>
+						{[
+							{ id: "all", label: "Tất cả" },
+							{ id: "photo", label: "Chụp ảnh" },
+							{ id: "wedding", label: "Cưới" },
+						].map((f) => (
+							<button
+								key={f.id}
+								onClick={() => setTypeFilter(f.id as any)}
+								className={cn(
+									"px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all",
+									typeFilter === f.id
+										? "bg-theme-gold-primary text-white shadow-sm"
+										: "bg-white border border-theme-border-muted text-theme-text-muted"
+								)}
+							>
+								{f.label}
+							</button>
+						))}
+					</div>
+					<div className="flex flex-wrap gap-1.5 items-center">
+						<span className="text-[10px] font-black uppercase tracking-widest text-theme-text-muted mr-1.5">Thanh toán:</span>
+						{[
+							{ id: "all", label: "Tất cả" },
+							{ id: "pending", label: "Còn nợ" },
+							{ id: "completed", label: "Xong" },
+						].map((f) => (
+							<button
+								key={f.id}
+								onClick={() => setPaymentFilter(f.id as any)}
+								className={cn(
+									"px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all",
+									paymentFilter === f.id
+										? "bg-theme-gold-primary text-white shadow-sm"
+										: "bg-white border border-theme-border-muted text-theme-text-muted"
+								)}
+							>
+								{f.label}
+							</button>
+						))}
+					</div>
+				</div>
 			</div>
 
 			{/* ── Contract list ── */}
@@ -210,9 +283,12 @@ export default function ContractsPage() {
 							total = contract.include_vat ? subtotal * 1.1 : subtotal;
 						} else {
 							const comboTotal = contract.wedding_contract_combos?.reduce((acc: number, c: any) => {
-								return acc + c.wedding_contract_combo_services?.reduce((accS: number, s: any) => accS + (s.is_removed ? 0 : Number(s.price)), 0);
+								return acc + (Number(c.base_price) || 0);
 							}, 0) || 0;
-							const subtotal = comboTotal + Number(contract.travel_fee) + Number(contract.incurred_cost || 0) - (Number(contract.discount) || 0);
+							const extraTotal = contract.wedding_contract_extra_services?.reduce((acc: number, s: any) => {
+								return acc + (Number(s.price) * (Number(s.quantity) || 1));
+							}, 0) || 0;
+							const subtotal = comboTotal + extraTotal + Number(contract.travel_fee) + Number(contract.incurred_cost || 0) - (Number(contract.discount) || 0);
 							total = contract.include_vat ? subtotal * 1.1 : subtotal;
 						}
 						const remaining = total - Number(contract.deposit || 0);

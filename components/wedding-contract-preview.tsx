@@ -41,11 +41,12 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 		return format(date, "dd/MM/yyyy");
 	};
 
-	const calculateComboTotal = (combo: any) =>
-		Number(combo.basePrice) || 0;
+	const calculateComboTotal = (combo: any) => Number(combo.basePrice) || 0;
+	const extraTotal = (data.extraServices || []).reduce((acc, svc) => acc + (Number(svc.price) * (Number(svc.quantity) || 1) || 0), 0);
 
 	const subtotalBeforeDiscount =
 		(data.combos || []).reduce((acc, combo) => acc + calculateComboTotal(combo), 0) +
+		extraTotal +
 		(Number(data.travelFee) || 0) +
 		(Number(data.incurredCost) || 0);
 	const subtotal = subtotalBeforeDiscount - (Number(data.discount) || 0);
@@ -201,7 +202,7 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 							<div className="grid grid-cols-[2fr_1fr] gap-x-4 gap-y-1 text-[8.5px] text-black">
 								<div className="flex items-baseline gap-1.5 border-b border-black/10 pb-0.5">
 									<span className="font-bold shrink-0 text-[8.5px]">Khách hàng:</span>
-									<span className="font-semibold truncate">{data.customerName || "............................................................................"}</span>
+									<span className="font-semibold whitespace-nowrap">{data.customerName || "............................................................................"}</span>
 								</div>
 								<div className="flex items-baseline gap-1.5 border-b border-black/10 pb-0.5">
 									<span className="font-bold shrink-0 text-[8.5px]">SĐT:</span>
@@ -258,11 +259,23 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 											</div>
 										))}
 									</div>
-									{cIdx < (data.combos || []).length - 1 && (
-										<div className="mt-1.5 border-b border-black/10" />
-									)}
 								</div>
 							))}
+
+							{(data.extraServices || []).length > 0 && (
+								<div className="space-y-1 pt-1 border-t border-black/10">
+									{(data.extraServices || []).map((svc, idx) => (
+										<div key={idx} className="flex justify-between items-baseline text-[8.5px] text-black">
+											<span className="font-semibold italic">
+												• {svc.name} {Number(svc.quantity) > 1 ? `x${svc.quantity}` : ""}
+											</span>
+											<span className="font-bold">
+												{formatCurrency(Number(svc.price) * (Number(svc.quantity) || 1))}
+											</span>
+										</div>
+									))}
+								</div>
+							)}
 
 							{Number(data.travelFee) > 0 && (
 								<div className="flex justify-between text-[8.5px] text-black border-t border-black/10 pt-1 mt-1">
