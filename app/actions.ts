@@ -459,3 +459,47 @@ export async function deleteWeddingCombo(id: string) {
 	return { success: true };
 }
 
+export async function addWeddingExtraService(data: { name: string, category: string, price: number, sortOrder?: number }) {
+	const supabase = await createClient();
+	const { data: service, error } = await supabase
+		.from("wedding_extra_services")
+		.insert({
+			name: data.name,
+			category: data.category,
+			price: data.price,
+			sort_order: data.sortOrder || 0,
+		})
+		.select()
+		.single();
+
+	if (error) return { error: error.message };
+	revalidatePath("/extra-services");
+	return { success: true, data: service };
+}
+
+export async function updateWeddingExtraService(id: string, data: { name: string, category: string, price: number, sortOrder?: number }) {
+	const supabase = await createClient();
+	const { error } = await supabase
+		.from("wedding_extra_services")
+		.update({
+			name: data.name,
+			category: data.category,
+			price: data.price,
+			sort_order: data.sortOrder || 0,
+			updated_at: new Date().toISOString(),
+		})
+		.match({ id });
+
+	if (error) return { error: error.message };
+	revalidatePath("/extra-services");
+	return { success: true };
+}
+
+export async function deleteWeddingExtraService(id: string) {
+	const supabase = await createClient();
+	const { error } = await supabase.from("wedding_extra_services").delete().match({ id });
+
+	if (error) return { error: error.message };
+	revalidatePath("/extra-services");
+	return { success: true };
+}

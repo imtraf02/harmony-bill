@@ -89,26 +89,6 @@ export default function SettingsPage() {
 
 					<div className="ml-auto flex items-center gap-1.5 md:gap-2">
 						<Button
-							variant="outline"
-							size="sm"
-							className="rounded-xl border-theme-border-muted text-theme-text-muted h-9 px-2 md:px-3 gap-0 md:gap-2"
-							nativeButton={false}
-							render={<Link href="/packages" />}
-							title="Quản lý gói"
-						>
-							<span className="text-[10px] md:text-sm">Gói chụp</span>
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							className="rounded-xl border-theme-border-muted text-theme-text-muted h-9 px-2 md:px-3 gap-0 md:gap-2"
-							nativeButton={false}
-							render={<Link href="/wedding-combos" />}
-							title="Quản lý combo cưới"
-						>
-							<span className="text-[10px] md:text-sm">Combo cưới</span>
-						</Button>
-						<Button
 							onClick={form.handleSubmit(onSubmit)}
 							className="h-9 rounded-xl bg-gradient-to-r from-theme-gold-primary to-theme-gold-light text-white font-bold px-3 md:px-4 gap-1.5 md:gap-2"
 							title="Lưu"
@@ -121,6 +101,44 @@ export default function SettingsPage() {
 			</div>
 
 			<div className="p-2 max-w-2xl mx-auto space-y-8">
+				{/* ── Data Management Section ── */}
+				<div className="rounded-2xl border border-theme-border-muted bg-white shadow-[0_4px_20px_0_rgba(200,168,75,0.08)] overflow-hidden">
+					<div className="p-2 bg-gradient-to-r from-theme-bg-muted to-white border-b border-theme-border">
+						<span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-theme-text-muted">
+							Quản lý dữ liệu
+						</span>
+					</div>
+					<div className="p-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
+						<Link href="/packages" className="flex items-center gap-3 p-3 rounded-xl border border-theme-border-muted bg-theme-bg-body hover:border-theme-gold-primary hover:bg-theme-gold-primary/5 transition-all group">
+							<div className="w-10 h-10 rounded-full bg-white border border-theme-border flex items-center justify-center text-theme-gold-primary group-hover:scale-110 transition-transform shadow-sm shrink-0">
+								<Package className="w-5 h-5" />
+							</div>
+							<div className="min-w-0">
+								<h3 className="font-bold text-sm text-theme-text-dark group-hover:text-theme-gold-hover transition-colors truncate">Gói chụp</h3>
+								<p className="text-[10px] text-theme-text-muted mt-0.5 truncate">Quản lý các gói chụp ảnh</p>
+							</div>
+						</Link>
+						<Link href="/wedding-combos" className="flex items-center gap-3 p-3 rounded-xl border border-theme-border-muted bg-theme-bg-body hover:border-theme-gold-primary hover:bg-theme-gold-primary/5 transition-all group">
+							<div className="w-10 h-10 rounded-full bg-white border border-theme-border flex items-center justify-center text-theme-gold-primary group-hover:scale-110 transition-transform shadow-sm shrink-0">
+								<Layers className="w-5 h-5" />
+							</div>
+							<div className="min-w-0">
+								<h3 className="font-bold text-sm text-theme-text-dark group-hover:text-theme-gold-hover transition-colors truncate">Combo cưới</h3>
+								<p className="text-[10px] text-theme-text-muted mt-0.5 truncate">Quản lý các combo cưới</p>
+							</div>
+						</Link>
+						<Link href="/extra-services" className="flex items-center gap-3 p-3 rounded-xl border border-theme-border-muted bg-theme-bg-body hover:border-theme-gold-primary hover:bg-theme-gold-primary/5 transition-all group">
+							<div className="w-10 h-10 rounded-full bg-white border border-theme-border flex items-center justify-center text-theme-gold-primary group-hover:scale-110 transition-transform shadow-sm shrink-0">
+								<Plus className="w-5 h-5" />
+							</div>
+							<div className="min-w-0">
+								<h3 className="font-bold text-sm text-theme-text-dark group-hover:text-theme-gold-hover transition-colors truncate">Dịch vụ lẻ</h3>
+								<p className="text-[10px] text-theme-text-muted mt-0.5 truncate">Quản lý dịch vụ lẻ (A la carte)</p>
+							</div>
+						</Link>
+					</div>
+				</div>
+
 				{/* ── Studio Info Section ── */}
 				<div className="rounded-2xl border border-theme-border-muted bg-white shadow-[0_4px_20px_0_rgba(200,168,75,0.08)] overflow-hidden">
 					<div className="p-2 bg-gradient-to-r from-theme-bg-muted to-white border-b border-theme-border">

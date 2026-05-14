@@ -34,6 +34,14 @@ import { WeddingContractPreview } from "@/components/wedding-contract-preview";
 import { mapToBillSchema, mapToWeddingSchema } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/components/logout-button";
+import { useIsMobile } from "@/hooks/use-is-mobile";
+import {
+	Drawer,
+	DrawerContent,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerClose,
+} from "@/components/ui/drawer";
 
 export default function ContractsPage() {
 	const [contracts, setContracts] = React.useState<any[]>([]);
@@ -44,6 +52,7 @@ export default function ContractsPage() {
 	const [isDownloading, setIsDownloading] = React.useState(false);
 	const [settings, setSettings] = React.useState<SettingsSchema | undefined>();
 	const [isLoading, setIsLoading] = React.useState(true);
+	const isMobile = useIsMobile();
 
 	const loadContracts = async () => {
 		setIsLoading(true);
@@ -392,56 +401,99 @@ export default function ContractsPage() {
 
 			{/* ── Preview Overlay ── */}
 			{selectedContract && (
-				<div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-2 animate-in fade-in duration-200">
-					{/* Backdrop */}
-					<div
-						className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-						onClick={() => setSelectedContract(null)}
-					/>
+				<>
+					{isMobile ? (
+						<Drawer open={!!selectedContract} onOpenChange={(open) => !open && setSelectedContract(null)}>
+							<DrawerContent className="h-[95vh] bg-theme-bg-body">
+								<DrawerHeader className="border-b border-theme-border pb-2 shrink-0">
+									<div className="flex items-center justify-between">
+										<DrawerTitle className="text-sm font-bold text-theme-gold-hover uppercase tracking-widest">Xem lại hợp đồng</DrawerTitle>
+										<DrawerClose asChild>
+											<button className="w-8 h-8 flex items-center justify-center rounded-full bg-theme-bg-muted text-theme-text-muted">
+												<X className="w-4 h-4" />
+											</button>
+										</DrawerClose>
+									</div>
+								</DrawerHeader>
+								<div className="flex-1 overflow-auto p-2 pb-24 flex justify-center">
+									{selectedContract.type === 'photo' ? (
+										<BillPreview data={mapToBillSchema(selectedContract)} settings={settings} />
+									) : (
+										<WeddingContractPreview data={mapToWeddingSchema(selectedContract)} settings={settings} />
+									)}
+								</div>
+								<div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-theme-border p-2 flex gap-2 justify-end safe-area-bottom">
+									<button
+										onClick={onDownloadImage}
+										disabled={isDownloading}
+										className="flex-1 h-12 flex items-center justify-center gap-2 rounded-2xl border border-theme-border-muted bg-white font-bold text-[11px] text-theme-gold-hover shadow-sm active:bg-theme-bg-muted disabled:opacity-60 transition-all"
+									>
+										<Download className="w-4 h-4" />
+										{isDownloading ? "Đang tạo..." : "TẢI ẢNH"}
+									</button>
+									<button
+										onClick={() => window.print()}
+										className="flex-[1.5] h-12 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-theme-gold-primary to-theme-gold-light font-bold text-[11px] text-white shadow-lg active:opacity-90 transition-all"
+									>
+										<Printer className="w-4 h-4" />
+										IN LẠI
+									</button>
+								</div>
+							</DrawerContent>
+						</Drawer>
+					) : (
+						<div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-2 animate-in fade-in duration-200">
+							{/* Backdrop */}
+							<div
+								className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+								onClick={() => setSelectedContract(null)}
+							/>
 
-					{/* Modal */}
-					<div className="relative bg-white rounded-3xl w-full max-w-4xl max-h-full overflow-hidden flex flex-col shadow-2xl no-print border border-theme-border">
-						{/* Modal header */}
-						<div className="flex items-center justify-between p-2 border-b border-theme-border bg-gradient-to-r from-theme-bg-muted to-white">
-							<div className="flex items-center gap-2">
-								<div className="h-4 w-px bg-theme-gold-primary" />
-								<h2 className="font-bold text-theme-text-dark">Xem lại hợp đồng</h2>
-							</div>
+							{/* Modal */}
+							<div className="relative bg-white rounded-3xl w-full max-w-4xl max-h-full overflow-hidden flex flex-col shadow-2xl no-print border border-theme-border">
+								{/* Modal header */}
+								<div className="flex items-center justify-between p-2 border-b border-theme-border bg-gradient-to-r from-theme-bg-muted to-white">
+									<div className="flex items-center gap-2">
+										<div className="h-4 w-px bg-theme-gold-primary" />
+										<h2 className="font-bold text-theme-text-dark">Xem lại hợp đồng</h2>
+									</div>
 
-							<div className="flex items-center gap-2">
-								<button
-									onClick={onDownloadImage}
-									disabled={isDownloading}
-									className="flex items-center gap-1.5 text-xs font-semibold text-theme-gold-hover border border-theme-border-muted rounded-xl px-3 py-2 bg-white hover:bg-theme-bg-muted transition-all disabled:opacity-60"
-								>
-									<Download className="w-3.5 h-3.5" />
-									{isDownloading ? "Đang tạo..." : "Tải ảnh"}
-								</button>
-								<button
-									onClick={() => window.print()}
-									className="flex items-center gap-1.5 text-xs font-semibold text-theme-text-muted border border-theme-border-muted rounded-xl px-3 py-2 bg-theme-bg-muted hover:bg-theme-border-muted hover:border-theme-gold-primary transition-all"
-								>
-									<Printer className="w-3.5 h-3.5" />
-									In lại
-								</button>
-								<button
-									onClick={() => setSelectedContract(null)}
-									className="w-8 h-8 rounded-xl flex items-center justify-center border border-theme-border-muted bg-theme-bg-muted hover:bg-theme-border-muted text-theme-text-muted transition-colors"
-								>
-									<X className="w-4 h-4 rotate-[270deg]" />
-								</button>
+									<div className="flex items-center gap-2">
+										<button
+											onClick={onDownloadImage}
+											disabled={isDownloading}
+											className="flex items-center gap-1.5 text-xs font-semibold text-theme-gold-hover border border-theme-border-muted rounded-xl px-3 py-2 bg-white hover:bg-theme-bg-muted transition-all disabled:opacity-60"
+										>
+											<Download className="w-3.5 h-3.5" />
+											{isDownloading ? "Đang tạo..." : "Tải ảnh"}
+										</button>
+										<button
+											onClick={() => window.print()}
+											className="flex items-center gap-1.5 text-xs font-semibold text-theme-text-muted border border-theme-border-muted rounded-xl px-3 py-2 bg-theme-bg-muted hover:bg-theme-border-muted hover:border-theme-gold-primary transition-all"
+										>
+											<Printer className="w-3.5 h-3.5" />
+											In lại
+										</button>
+										<button
+											onClick={() => setSelectedContract(null)}
+											className="w-8 h-8 rounded-xl flex items-center justify-center border border-theme-border-muted bg-theme-bg-muted hover:bg-theme-border-muted text-theme-text-muted transition-colors"
+										>
+											<X className="w-4 h-4 rotate-[270deg]" />
+										</button>
+									</div>
+								</div>
+
+								{/* Preview content */}
+								<div className="flex-1 overflow-auto p-2 flex justify-center bg-theme-bg-body">
+									{selectedContract.type === 'photo' ? (
+										<BillPreview data={mapToBillSchema(selectedContract)} settings={settings} />
+									) : (
+										<WeddingContractPreview data={mapToWeddingSchema(selectedContract)} settings={settings} />
+									)}
+								</div>
 							</div>
 						</div>
-
-						{/* Preview content */}
-						<div className="flex-1 overflow-auto p-2 flex justify-center bg-theme-bg-body">
-							{selectedContract.type === 'photo' ? (
-								<BillPreview data={mapToBillSchema(selectedContract)} settings={settings} />
-							) : (
-								<WeddingContractPreview data={mapToWeddingSchema(selectedContract)} settings={settings} />
-							)}
-						</div>
-					</div>
+					)}
 
 					{/* Print only */}
 					<div className="hidden print:block fixed inset-0 bg-white z-[10000]">
@@ -451,7 +503,7 @@ export default function ContractsPage() {
 							<WeddingContractPreview data={mapToWeddingSchema(selectedContract)} settings={settings} />
 						)}
 					</div>
-				</div>
+				</>
 			)}
 		</div>
 	);

@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { captureElement } from "@/lib/capture";
-import { CalendarIcon, Plus, Printer, X } from "lucide-react";
+import { CalendarIcon, Plus, Printer, X, Eye } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
@@ -54,7 +54,16 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import {
+	Drawer,
+	DrawerContent,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerTrigger,
+	DrawerClose,
+} from "@/components/ui/drawer";
 import { Textarea } from "@/components/ui/textarea";
+import { useIsMobile } from "@/hooks/use-is-mobile";
 import { type BillSchema, billSchema } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 import { BillPreview } from "./bill-preview";
@@ -125,6 +134,9 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 	const [isDownloading, setIsDownloading] = React.useState(false);
 	const [isDownloadDialogOpen, setIsDownloadDialogOpen] = React.useState(false);
 	const [saveToDbOnDownload, setSaveToDbOnDownload] = React.useState(true);
+	const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
+	
+	const isMobile = useIsMobile();
 
 	const form = useForm<BillSchema>({
 		resolver: zodResolver(billSchema),
@@ -436,59 +448,98 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 									<Controller
 										control={control}
 										name={`packages.${index}.label`}
-										render={({ field: selectField }) => (
-											<Select
-												value={selectField.value}
-												onValueChange={(val) => {
-													const pkg = masterPackages.find(
-														(p) => p.label === val,
-													);
-													if (pkg) {
-														setValue(`packages.${index}.label`, pkg.label);
-														setValue(`packages.${index}.price`, pkg.price);
-														setValue(`packages.${index}.id`, pkg.id);
-													}
-												}}
-											>
-												<SelectTrigger className="w-full !h-[52px] rounded-xl border border-theme-border-muted bg-theme-bg-body px-2 text-sm text-theme-text-dark focus:ring-theme-gold-primary/40 focus:border-theme-gold-primary transition-all">
-													<SelectValue placeholder="Bấm để chọn gói...">
-														{(val: string) => {
-															if (!val) return "Bấm để chọn gói...";
-															const pkg = masterPackages.find(
-																(p) => p.label === val,
-															);
-															if (!pkg) return val;
-															return (
+										render={({ field: selectField }) => {
+											const handleSelect = (val: string | null) => {
+												if (!val) return;
+												const pkg = masterPackages.find((p) => p.label === val);
+												if (pkg) {
+													setValue(`packages.${index}.label`, pkg.label);
+													setValue(`packages.${index}.price`, pkg.price);
+													setValue(`packages.${index}.id`, pkg.id);
+												}
+											};
+											const selectedPkg = masterPackages.find(p => p.label === selectField.value);
+											
+											if (isMobile) {
+												return (
+													<Drawer>
+														<DrawerTrigger className="w-full h-[52px] rounded-xl border border-theme-border-muted bg-theme-bg-body px-2 text-sm text-theme-text-dark focus:outline-none focus:ring-2 focus:ring-theme-gold-primary/40 focus:border-theme-gold-primary transition-all text-left flex items-center justify-between">
+															{selectedPkg ? (
 																<span className="flex flex-col items-start gap-0">
-																	<span className="font-bold text-sm leading-tight">
-																		{pkg.label}
-																	</span>
-																	<span className="text-[10px] text-theme-text-muted font-semibold">
-																		{formatCurrency(pkg.price)}
-																	</span>
+																	<span className="font-bold text-sm leading-tight">{selectedPkg.label}</span>
+																	<span className="text-[10px] text-theme-text-muted font-semibold">{formatCurrency(selectedPkg.price)}</span>
 																</span>
-															);
-														}}
-													</SelectValue>
-												</SelectTrigger>
-												<SelectContent className="rounded-xl border-theme-border shadow-xl">
-													<SelectGroup>
-														{masterPackages.map((p) => (
-															<SelectItem key={p.id} value={p.label}>
-																<div className="flex flex-col items-start gap-0 py-1">
-																	<span className="font-semibold text-sm">
-																		{p.label}
+															) : (
+																<span className="text-theme-text-muted">Bấm để chọn gói...</span>
+															)}
+														</DrawerTrigger>
+														<DrawerContent className="max-h-[85vh]">
+															<DrawerHeader className="border-b border-theme-border pb-3">
+																<DrawerTitle className="text-base font-bold text-theme-gold-hover text-center uppercase tracking-wider">Chọn gói dịch vụ</DrawerTitle>
+															</DrawerHeader>
+															<div className="p-3 overflow-y-auto space-y-2 bg-theme-bg-body/30">
+																{masterPackages.map((p) => (
+																	<DrawerClose key={p.id} asChild>
+																		<button
+																			onClick={() => handleSelect(p.label)}
+																			className="w-full text-left p-3 rounded-xl bg-white border border-theme-border shadow-sm active:bg-theme-bg-muted hover:border-theme-gold-primary transition-all"
+																		>
+																			<div className="font-bold text-sm text-theme-text-dark">{p.label}</div>
+																			<div className="text-xs font-semibold text-theme-gold-primary mt-1">{formatCurrency(p.price)}</div>
+																		</button>
+																	</DrawerClose>
+																))}
+															</div>
+														</DrawerContent>
+													</Drawer>
+												);
+											}
+
+											return (
+												<Select
+													value={selectField.value}
+													onValueChange={handleSelect}
+												>
+													<SelectTrigger className="w-full !h-[52px] rounded-xl border border-theme-border-muted bg-theme-bg-body px-2 text-sm text-theme-text-dark focus:ring-theme-gold-primary/40 focus:border-theme-gold-primary transition-all">
+														<SelectValue placeholder="Bấm để chọn gói...">
+															{(val: string) => {
+																if (!val) return "Bấm để chọn gói...";
+																const pkg = masterPackages.find(
+																	(p) => p.label === val,
+																);
+																if (!pkg) return val;
+																return (
+																	<span className="flex flex-col items-start gap-0">
+																		<span className="font-bold text-sm leading-tight">
+																			{pkg.label}
+																		</span>
+																		<span className="text-[10px] text-theme-text-muted font-semibold">
+																			{formatCurrency(pkg.price)}
+																		</span>
 																	</span>
-																	<span className="text-[10px] opacity-70 font-medium">
-																		{formatCurrency(p.price)}
-																	</span>
-																</div>
-															</SelectItem>
-														))}
-													</SelectGroup>
-												</SelectContent>
-											</Select>
-										)}
+																);
+															}}
+														</SelectValue>
+													</SelectTrigger>
+													<SelectContent className="rounded-xl border-theme-border shadow-xl">
+														<SelectGroup>
+															{masterPackages.map((p) => (
+																<SelectItem key={p.id} value={p.label}>
+																	<div className="flex flex-col items-start gap-0 py-1">
+																		<span className="font-semibold text-sm">
+																			{p.label}
+																		</span>
+																		<span className="text-[10px] opacity-70 font-medium">
+																			{formatCurrency(p.price)}
+																		</span>
+																	</div>
+																</SelectItem>
+															))}
+														</SelectGroup>
+													</SelectContent>
+												</Select>
+											);
+										}}
 									/>
 								</div>
 							</div>
@@ -719,14 +770,23 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 			</div>
 
 			{/* ── Sticky Submit Bar ── */}
-			<div className="fixed bottom-0 left-0 right-0 z-50 print:hidden">
+			<div className="fixed bottom-0 left-0 right-0 z-50 print:hidden safe-area-bottom">
 				{/* Blur backdrop */}
-				<div className="backdrop-blur-md bg-white/80 border-t border-theme-border p-2 flex gap-2 justify-center md:justify-end">
+				<div className="backdrop-blur-md bg-white/80 border-t border-theme-border p-2 px-3 flex gap-2 justify-center md:justify-end">
+					{isMobile && (
+						<button
+							type="button"
+							onClick={() => setIsPreviewOpen(true)}
+							className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-2xl bg-theme-bg-muted border border-theme-border-muted text-theme-gold-hover hover:bg-theme-border-muted transition-all shadow-sm"
+						>
+							<Eye className="w-5 h-5" />
+						</button>
+					)}
 					<button
 						type="button"
 						onClick={() => setIsDownloadDialogOpen(true)}
 						disabled={isDownloading}
-						className="flex-1 md:flex-none flex justify-center items-center gap-2 h-10 px-3 rounded-xl font-semibold text-[11px] md:text-sm text-theme-gold-hover bg-white border border-theme-border-muted hover:bg-theme-bg-muted transition-all shadow-sm disabled:opacity-60"
+						className="flex-1 md:flex-none flex justify-center items-center gap-2 h-12 px-3 rounded-2xl font-semibold text-[11px] md:text-sm text-theme-gold-hover bg-white border border-theme-border-muted hover:bg-theme-bg-muted transition-all shadow-sm disabled:opacity-60"
 					>
 						{isDownloading ? "Đang tạo..." : "TẢI ẢNH"}
 					</button>
@@ -734,7 +794,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 						type="submit"
 						disabled={isSubmitting}
 						className={cn(
-							"flex-1 md:flex-none flex justify-center items-center gap-2 h-10 px-2 rounded-xl font-bold text-[11px] md:text-sm tracking-wide text-white transition-all duration-200 shadow-lg",
+							"flex-[1.5] md:flex-none flex justify-center items-center gap-2 h-12 px-2 rounded-2xl font-bold text-[11px] md:text-sm tracking-wide text-white transition-all duration-200 shadow-lg",
 							isSubmitting
 								? "bg-theme-gold-primary/60 cursor-not-allowed"
 								: "bg-gradient-to-r from-theme-gold-primary to-theme-gold-light hover:from-theme-gold-hover hover:to-theme-gold-hover shadow-theme-gold-primary/30 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0",
@@ -773,6 +833,27 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 				</div>
 			</div>
 		</form>
+
+			{/* Mobile Preview Drawer */}
+			{isMobile && (
+				<Drawer open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+					<DrawerContent className="h-[90vh] bg-theme-bg-body">
+						<DrawerHeader className="border-b border-theme-border pb-2 shrink-0">
+							<div className="flex items-center justify-between">
+								<DrawerTitle className="text-sm font-bold text-theme-gold-hover uppercase tracking-widest">Xem trước</DrawerTitle>
+								<DrawerClose asChild>
+									<button className="w-8 h-8 flex items-center justify-center rounded-full bg-theme-bg-muted text-theme-text-muted">
+										<X className="w-4 h-4" />
+									</button>
+								</DrawerClose>
+							</div>
+						</DrawerHeader>
+						<div className="flex-1 overflow-auto p-2">
+							<BillPreview data={values as BillSchema} settings={settings} />
+						</div>
+					</DrawerContent>
+				</Drawer>
+			)}
 
 			<Dialog open={isDownloadDialogOpen} onOpenChange={setIsDownloadDialogOpen}>
 				<DialogContent className="sm:max-w-md">

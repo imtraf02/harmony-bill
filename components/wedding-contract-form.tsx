@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { captureElement } from "@/lib/capture";
-import { CalendarIcon, Plus, Printer, Trash2, Download, ChevronDown, CheckCircle2, Circle } from "lucide-react";
+import { CalendarIcon, Plus, Printer, Trash2, Download, ChevronDown, CheckCircle2, Circle, Eye, X } from "lucide-react";
 import * as React from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -32,8 +32,17 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import {
+	Drawer,
+	DrawerContent,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerClose,
+} from "@/components/ui/drawer";
 import { type WeddingContractSchema, weddingContractSchema } from "@/lib/schema";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-is-mobile";
+import { WeddingContractPreview } from "./wedding-contract-preview";
 
 interface WeddingContractFormProps {
 	onDataChange: (data: WeddingContractSchema) => void;
@@ -131,6 +140,8 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 	const [isComboDialogOpen, setIsComboDialogOpen] = React.useState(false);
 	const [isExtraDialogOpen, setIsExtraDialogOpen] = React.useState(false);
 	const [saveToDbOnDownload, setSaveToDbOnDownload] = React.useState(true);
+	const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
+	const isMobile = useIsMobile();
 
 	const form = useForm<WeddingContractSchema>({
 		resolver: zodResolver(weddingContractSchema),
@@ -648,7 +659,16 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 					</div>
 
 					{/* Action buttons */}
-					<div className="bg-white/95 backdrop-blur-md px-2 pb-2 pt-2 flex gap-2">
+					<div className="bg-white/95 backdrop-blur-md px-2 pb-2 pt-2 flex gap-2 justify-center md:justify-end">
+						{isMobile && (
+							<button
+								type="button"
+								onClick={() => setIsPreviewOpen(true)}
+								className="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-2xl bg-theme-bg-muted border border-theme-border-muted text-theme-gold-hover hover:bg-theme-border-muted transition-all shadow-sm"
+							>
+								<Eye className="w-5 h-5" />
+							</button>
+						)}
 						<button
 							type="button"
 							onClick={() => setIsDownloadDialogOpen(true)}
@@ -661,7 +681,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 						<button
 							type="submit"
 							disabled={isSubmitting}
-							className="flex-1 h-12 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-theme-gold-primary to-theme-gold-light font-bold text-[11px] text-white shadow-lg active:opacity-90 disabled:opacity-60 transition-all"
+							className="flex-[1.5] h-12 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-theme-gold-primary to-theme-gold-light font-bold text-[11px] text-white shadow-lg active:opacity-90 disabled:opacity-60 transition-all"
 						>
 							<Printer className="w-4 h-4" />
 							{isSubmitting ? "Đang lưu..." : "LƯU & IN"}
@@ -669,6 +689,27 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 					</div>
 				</div>
 			</form>
+
+			{/* Mobile Preview Drawer */}
+			{isMobile && (
+				<Drawer open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+					<DrawerContent className="h-[90vh] bg-theme-bg-body">
+						<DrawerHeader className="border-b border-theme-border pb-2 shrink-0">
+							<div className="flex items-center justify-between">
+								<DrawerTitle className="text-sm font-bold text-theme-gold-hover uppercase tracking-widest">Xem trước</DrawerTitle>
+								<DrawerClose asChild>
+									<button className="w-8 h-8 flex items-center justify-center rounded-full bg-theme-bg-muted text-theme-text-muted">
+										<X className="w-4 h-4" />
+									</button>
+								</DrawerClose>
+							</div>
+						</DrawerHeader>
+						<div className="flex-1 overflow-auto p-2">
+							<WeddingContractPreview data={values as WeddingContractSchema} settings={settings} />
+						</div>
+					</DrawerContent>
+				</Drawer>
+			)}
 
 			{/* ── Download dialog ──────────────────────────────────────── */}
 			<Dialog open={isDownloadDialogOpen} onOpenChange={setIsDownloadDialogOpen}>
@@ -708,118 +749,233 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
-			<Dialog open={isComboDialogOpen} onOpenChange={setIsComboDialogOpen}>
-				<DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md h-[85vh] overflow-hidden border-none shadow-2xl flex flex-col !gap-0">
-					<DialogHeader className="pb-2 shrink-0">
-						<DialogTitle className="text-xs font-black tracking-[0.2em] uppercase text-theme-gold-hover text-center">
-							Mẫu Combo
-						</DialogTitle>
-					</DialogHeader>
-					<div className="flex-1 overflow-y-auto py-1 space-y-3 bg-theme-bg-body/30 min-h-0 overscroll-contain">
-						{masterCombos.map((template) => (
-							<button
-								key={template.id}
-								type="button"
-								onClick={() => {
-									addComboFromTemplate(template);
-									setIsComboDialogOpen(false);
-								}}
-								className="w-full flex flex-col p-4 rounded-2xl bg-white border border-theme-border shadow-sm hover:border-theme-gold-primary hover:shadow-md hover:bg-theme-gold-primary/5 group transition-all duration-300 text-left gap-3"
-							>
-								<div className="flex justify-between items-start gap-4">
-									<h3 className="font-bold text-base leading-tight text-theme-text-dark group-hover:text-theme-gold-hover transition-colors break-words">
-										{template.name}
-									</h3>
-									<span className="text-[15px] font-black text-theme-gold-primary shrink-0 whitespace-nowrap">
-										{formatVND(template.base_price || 0)}
-									</span>
-								</div>
+			{isMobile ? (
+				<Drawer open={isComboDialogOpen} onOpenChange={setIsComboDialogOpen}>
+					<DrawerContent className="h-[85vh] bg-theme-bg-body">
+						<DrawerHeader className="pb-2 shrink-0 border-b border-theme-border">
+							<div className="flex items-center justify-between">
+								<DrawerTitle className="text-xs font-black tracking-[0.2em] uppercase text-theme-gold-hover">
+									Mẫu Combo
+								</DrawerTitle>
+								<DrawerClose asChild>
+									<button className="w-8 h-8 flex items-center justify-center rounded-full bg-theme-bg-muted text-theme-text-muted">
+										<X className="w-4 h-4" />
+									</button>
+								</DrawerClose>
+							</div>
+						</DrawerHeader>
+						<div className="flex-1 overflow-y-auto p-3 space-y-3 bg-theme-bg-body/30 overscroll-contain">
+							{masterCombos.map((template) => (
+								<button
+									key={template.id}
+									type="button"
+									onClick={() => {
+										addComboFromTemplate(template);
+										setIsComboDialogOpen(false);
+									}}
+									className="w-full flex flex-col p-4 rounded-2xl bg-white border border-theme-border shadow-sm active:border-theme-gold-primary active:bg-theme-gold-primary/5 transition-all duration-200 text-left gap-3"
+								>
+									<div className="flex justify-between items-start gap-4">
+										<h3 className="font-bold text-base leading-tight text-theme-text-dark break-words">
+											{template.name}
+										</h3>
+										<span className="text-[15px] font-black text-theme-gold-primary shrink-0 whitespace-nowrap">
+											{formatVND(template.base_price || 0)}
+										</span>
+									</div>
 
-								{template.description && (
-									<p className="text-[13px] leading-relaxed text-theme-text-muted font-medium break-words">
-										{template.description}
-									</p>
-								)}
-								<div className="flex items-center justify-between mt-1">
-									<span className="text-[9px] uppercase tracking-widest font-bold text-theme-text-muted opacity-60">
-										Click để chọn gói
-									</span>
-									<div className="h-8 w-8 rounded-full bg-theme-bg-muted flex items-center justify-center group-hover:bg-theme-gold-primary group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-inner">
-										<Plus className="w-4 h-4" />
+									{template.description && (
+										<p className="text-[13px] leading-relaxed text-theme-text-muted font-medium break-words">
+											{template.description}
+										</p>
+									)}
+									<div className="flex items-center justify-between mt-1">
+										<span className="text-[9px] uppercase tracking-widest font-bold text-theme-text-muted opacity-60">
+											Chạm để chọn gói
+										</span>
+										<div className="h-8 w-8 rounded-full bg-theme-bg-muted flex items-center justify-center text-theme-text-muted">
+											<Plus className="w-4 h-4" />
+										</div>
+									</div>
+								</button>
+							))}
+						</div>
+					</DrawerContent>
+				</Drawer>
+			) : (
+				<Dialog open={isComboDialogOpen} onOpenChange={setIsComboDialogOpen}>
+					<DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md h-[85vh] overflow-hidden border-none shadow-2xl flex flex-col !gap-0">
+						<DialogHeader className="pb-2 shrink-0">
+							<DialogTitle className="text-xs font-black tracking-[0.2em] uppercase text-theme-gold-hover text-center">
+								Mẫu Combo
+							</DialogTitle>
+						</DialogHeader>
+						<div className="flex-1 overflow-y-auto py-1 space-y-3 bg-theme-bg-body/30 min-h-0 overscroll-contain">
+							{masterCombos.map((template) => (
+								<button
+									key={template.id}
+									type="button"
+									onClick={() => {
+										addComboFromTemplate(template);
+										setIsComboDialogOpen(false);
+									}}
+									className="w-full flex flex-col p-4 rounded-2xl bg-white border border-theme-border shadow-sm hover:border-theme-gold-primary hover:shadow-md hover:bg-theme-gold-primary/5 group transition-all duration-300 text-left gap-3"
+								>
+									<div className="flex justify-between items-start gap-4">
+										<h3 className="font-bold text-base leading-tight text-theme-text-dark group-hover:text-theme-gold-hover transition-colors break-words">
+											{template.name}
+										</h3>
+										<span className="text-[15px] font-black text-theme-gold-primary shrink-0 whitespace-nowrap">
+											{formatVND(template.base_price || 0)}
+										</span>
+									</div>
+
+									{template.description && (
+										<p className="text-[13px] leading-relaxed text-theme-text-muted font-medium break-words">
+											{template.description}
+										</p>
+									)}
+									<div className="flex items-center justify-between mt-1">
+										<span className="text-[9px] uppercase tracking-widest font-bold text-theme-text-muted opacity-60">
+											Click để chọn gói
+										</span>
+										<div className="h-8 w-8 rounded-full bg-theme-bg-muted flex items-center justify-center group-hover:bg-theme-gold-primary group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-inner">
+											<Plus className="w-4 h-4" />
+										</div>
+									</div>
+								</button>
+							))}
+						</div>
+						<div className="pt-2 shrink-0">
+							<button
+								type="button"
+								onClick={() => setIsComboDialogOpen(false)}
+								className="w-full h-9 rounded-2xl bg-theme-bg-muted text-sm font-bold text-theme-text-muted active:scale-95 transition-all"
+							>
+								ĐÓNG
+							</button>
+						</div>
+					</DialogContent>
+				</Dialog>
+			)}
+
+			{isMobile ? (
+				<Drawer open={isExtraDialogOpen} onOpenChange={setIsExtraDialogOpen}>
+					<DrawerContent className="h-[85vh] bg-theme-bg-body">
+						<DrawerHeader className="pb-2 shrink-0 border-b border-theme-border">
+							<div className="flex items-center justify-between">
+								<DrawerTitle className="text-xs font-black tracking-[0.2em] uppercase text-theme-gold-hover">
+									Danh sách dịch vụ lẻ
+								</DrawerTitle>
+								<DrawerClose asChild>
+									<button className="w-8 h-8 flex items-center justify-center rounded-full bg-theme-bg-muted text-theme-text-muted">
+										<X className="w-4 h-4" />
+									</button>
+								</DrawerClose>
+							</div>
+						</DrawerHeader>
+						<div className="flex-1 overflow-y-auto p-3 space-y-4 bg-theme-bg-body/30 overscroll-contain">
+							{Array.from(new Set(masterExtraServices.map(s => s.category))).map(category => (
+								<div key={category} className="space-y-2">
+									<h3 className="text-[10px] font-black tracking-[0.15em] uppercase text-theme-text-muted px-1">
+										{category}
+									</h3>
+									<div className="grid gap-2">
+										{masterExtraServices
+											.filter(s => s.category === category)
+											.map(service => (
+												<button
+													key={service.id}
+													type="button"
+													onClick={() => {
+														appendExtra({
+															name: service.name,
+															price: service.price,
+															quantity: 1
+														});
+														setIsExtraDialogOpen(false);
+													}}
+													className="w-full flex items-center justify-between p-3 rounded-xl bg-white border border-theme-border shadow-sm active:border-theme-gold-primary active:bg-theme-gold-primary/5 transition-all text-left"
+												>
+													<span className="font-bold text-sm text-theme-text-dark">
+														{service.name}
+													</span>
+													<div className="flex items-center gap-3">
+														<span className="text-xs font-bold text-theme-gold-primary">
+															{formatVND(service.price)}
+														</span>
+														<div className="h-6 w-6 rounded-full bg-theme-bg-muted flex items-center justify-center text-theme-text-muted">
+															<Plus className="w-3 h-3" />
+														</div>
+													</div>
+												</button>
+											))}
 									</div>
 								</div>
-							</button>
-						))}
-					</div>
-					<div className="pt-2 shrink-0">
-						<button
-							type="button"
-							onClick={() => setIsComboDialogOpen(false)}
-							className="w-full h-9 rounded-2xl bg-theme-bg-muted text-sm font-bold text-theme-text-muted active:scale-95 transition-all"
-						>
-							ĐÓNG
-						</button>
-					</div>
-				</DialogContent>
-			</Dialog>
-			<Dialog open={isExtraDialogOpen} onOpenChange={setIsExtraDialogOpen}>
-				<DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md h-[85vh] overflow-hidden border-none shadow-2xl flex flex-col !gap-0">
-					<DialogHeader className="pb-2 shrink-0">
-						<DialogTitle className="text-xs font-black tracking-[0.2em] uppercase text-theme-gold-hover text-center">
-							Danh sách dịch vụ lẻ
-						</DialogTitle>
-					</DialogHeader>
-					<div className="flex-1 overflow-y-auto py-1 space-y-4 bg-theme-bg-body/30 min-h-0 overscroll-contain">
-						{Array.from(new Set(masterExtraServices.map(s => s.category))).map(category => (
-							<div key={category} className="space-y-2">
-								<h3 className="text-[10px] font-black tracking-[0.15em] uppercase text-theme-text-muted px-1">
-									{category}
-								</h3>
-								<div className="grid gap-2">
-									{masterExtraServices
-										.filter(s => s.category === category)
-										.map(service => (
-											<button
-												key={service.id}
-												type="button"
-												onClick={() => {
-													appendExtra({
-														name: service.name,
-														price: service.price,
-														quantity: 1
-													});
-													setIsExtraDialogOpen(false);
-												}}
-												className="w-full flex items-center justify-between p-3 rounded-xl bg-white border border-theme-border shadow-sm hover:border-theme-gold-primary hover:bg-theme-gold-primary/5 group transition-all text-left"
-											>
-												<span className="font-bold text-sm text-theme-text-dark group-hover:text-theme-gold-hover transition-colors">
-													{service.name}
-												</span>
-												<div className="flex items-center gap-3">
-													<span className="text-xs font-bold text-theme-gold-primary">
-														{formatVND(service.price)}
+							))}
+						</div>
+					</DrawerContent>
+				</Drawer>
+			) : (
+				<Dialog open={isExtraDialogOpen} onOpenChange={setIsExtraDialogOpen}>
+					<DialogContent className="w-[calc(100vw-2rem)] sm:max-w-md h-[85vh] overflow-hidden border-none shadow-2xl flex flex-col !gap-0">
+						<DialogHeader className="pb-2 shrink-0">
+							<DialogTitle className="text-xs font-black tracking-[0.2em] uppercase text-theme-gold-hover text-center">
+								Danh sách dịch vụ lẻ
+							</DialogTitle>
+						</DialogHeader>
+						<div className="flex-1 overflow-y-auto py-1 space-y-4 bg-theme-bg-body/30 min-h-0 overscroll-contain">
+							{Array.from(new Set(masterExtraServices.map(s => s.category))).map(category => (
+								<div key={category} className="space-y-2">
+									<h3 className="text-[10px] font-black tracking-[0.15em] uppercase text-theme-text-muted px-1">
+										{category}
+									</h3>
+									<div className="grid gap-2">
+										{masterExtraServices
+											.filter(s => s.category === category)
+											.map(service => (
+												<button
+													key={service.id}
+													type="button"
+													onClick={() => {
+														appendExtra({
+															name: service.name,
+															price: service.price,
+															quantity: 1
+														});
+														setIsExtraDialogOpen(false);
+													}}
+													className="w-full flex items-center justify-between p-3 rounded-xl bg-white border border-theme-border shadow-sm hover:border-theme-gold-primary hover:bg-theme-gold-primary/5 group transition-all text-left"
+												>
+													<span className="font-bold text-sm text-theme-text-dark group-hover:text-theme-gold-hover transition-colors">
+														{service.name}
 													</span>
-													<div className="h-6 w-6 rounded-full bg-theme-bg-muted flex items-center justify-center group-hover:bg-theme-gold-primary group-hover:text-white transition-all">
-														<Plus className="w-3 h-3" />
+													<div className="flex items-center gap-3">
+														<span className="text-xs font-bold text-theme-gold-primary">
+															{formatVND(service.price)}
+														</span>
+														<div className="h-6 w-6 rounded-full bg-theme-bg-muted flex items-center justify-center group-hover:bg-theme-gold-primary group-hover:text-white transition-all">
+															<Plus className="w-3 h-3" />
+														</div>
 													</div>
-												</div>
-											</button>
-										))}
+												</button>
+											))}
+									</div>
 								</div>
-							</div>
-						))}
-					</div>
-					<div className="pt-2 shrink-0">
-						<button
-							type="button"
-							onClick={() => setIsExtraDialogOpen(false)}
-							className="w-full h-9 rounded-2xl bg-theme-bg-muted text-sm font-bold text-theme-text-muted active:scale-95 transition-all"
-						>
-							ĐÓNG
-						</button>
-					</div>
-				</DialogContent>
-			</Dialog>
+							))}
+						</div>
+						<div className="pt-2 shrink-0">
+							<button
+								type="button"
+								onClick={() => setIsExtraDialogOpen(false)}
+								className="w-full h-9 rounded-2xl bg-theme-bg-muted text-sm font-bold text-theme-text-muted active:scale-95 transition-all"
+							>
+								ĐÓNG
+							</button>
+						</div>
+					</DialogContent>
+				</Dialog>
+			)}
 		</>
 	);
 }

@@ -63,39 +63,42 @@ function HomeContent() {
 	return (
 		<main className="min-h-screen bg-theme-bg-body pb-24">
 			<div className="container mx-auto p-2">
-				<header className="mb-6 no-print flex flex-col md:flex-row md:items-center justify-between gap-4">
-					<div>
-						<h1 className="text-3xl font-extrabold tracking-tight text-theme-text-dark">
+				<header className="mb-6 no-print space-y-4 md:space-y-0 md:flex md:items-center md:justify-between relative">
+					{/* Hàng 1 trên mobile: Logo + Actions */}
+					<div className="flex items-center justify-between">
+						<h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-theme-text-dark">
 							Harmony Bill
 						</h1>
-						<div className="flex gap-1 mt-3">
-							<button
-								onClick={() => updateTab("photo")}
-								className={cn(
-									"flex items-center gap-2 p-2 rounded-xl text-sm font-bold transition-all",
-									activeTab === "photo"
-										? "bg-theme-gold-primary text-white shadow-lg shadow-theme-gold-primary/20"
-										: "bg-theme-bg-card border border-theme-border-muted text-theme-text-muted hover:bg-theme-bg-muted"
-								)}
+						<div className="flex items-center gap-1.5 md:hidden">
+							{editId && (
+								<Button variant="ghost" size="sm" onClick={() => window.location.href = "/"}>
+									Mới
+								</Button>
+							)}
+							<Button
+								variant="outline"
+								size="icon"
+								className="h-8 w-8 rounded-xl border-theme-border-muted text-theme-text-muted"
+								nativeButton={false}
+								render={<Link href="/settings" />}
 							>
-								<Camera className="w-4 h-4" />
-								Phóng sự cưới
-							</button>
-							<button
-								onClick={() => updateTab("wedding")}
-								className={cn(
-									"flex items-center gap-2 p-2 rounded-xl text-sm font-bold transition-all",
-									activeTab === "wedding"
-										? "bg-theme-gold-primary text-white shadow-lg shadow-theme-gold-primary/20"
-										: "bg-theme-bg-card border border-theme-border-muted text-theme-text-muted hover:bg-theme-bg-muted"
-								)}
+								<Settings className="w-4 h-4" />
+							</Button>
+							<Button
+								variant="outline"
+								size="icon"
+								className="h-8 w-8 rounded-xl border-theme-border-muted text-theme-text-muted"
+								nativeButton={false}
+								render={<Link href="/contracts" />}
 							>
-								<Heart className="w-4 h-4" />
-								Dịch vụ cưới
-							</button>
+								<History className="w-4 h-4" />
+							</Button>
+							<LogoutButton />
 						</div>
 					</div>
-					<div className="flex flex-wrap gap-2">
+
+					{/* Desktop Actions */}
+					<div className="hidden md:flex items-center gap-2">
 						{editId && (
 							<Button variant="ghost" onClick={() => window.location.href = "/"}>
 								Tạo mới
@@ -108,7 +111,7 @@ function HomeContent() {
 							render={<Link href="/settings" />}
 						>
 							<Settings className="w-4 h-4" />
-							<span className="text-[10px] md:text-sm">Cài đặt</span>
+							<span className="text-sm">Cài đặt</span>
 						</Button>
 						<Button
 							variant="outline"
@@ -117,9 +120,37 @@ function HomeContent() {
 							render={<Link href="/contracts" />}
 						>
 							<History className="w-4 h-4" />
-							<span className="text-[10px] md:text-sm">Lịch sử</span>
+							<span className="text-sm">Lịch sử</span>
 						</Button>
 						<LogoutButton />
+					</div>
+
+					{/* Tabs */}
+					<div className="flex gap-1.5 w-full md:w-auto md:absolute md:left-1/2 md:-translate-x-1/2">
+						<button
+							onClick={() => updateTab("photo")}
+							className={cn(
+								"flex-1 md:flex-none flex items-center justify-center gap-2 p-2 px-4 rounded-xl text-sm font-bold transition-all",
+								activeTab === "photo"
+									? "bg-theme-gold-primary text-white shadow-lg shadow-theme-gold-primary/20"
+									: "bg-theme-bg-card border border-theme-border-muted text-theme-text-muted hover:bg-theme-bg-muted"
+							)}
+						>
+							<Camera className="w-4 h-4" />
+							Phóng sự
+						</button>
+						<button
+							onClick={() => updateTab("wedding")}
+							className={cn(
+								"flex-1 md:flex-none flex items-center justify-center gap-2 p-2 px-4 rounded-xl text-sm font-bold transition-all",
+								activeTab === "wedding"
+									? "bg-theme-gold-primary text-white shadow-lg shadow-theme-gold-primary/20"
+									: "bg-theme-bg-card border border-theme-border-muted text-theme-text-muted hover:bg-theme-bg-muted"
+							)}
+						>
+							<Heart className="w-4 h-4" />
+							Đám cưới
+						</button>
 					</div>
 				</header>
 
@@ -133,10 +164,10 @@ function HomeContent() {
 						)}
 					</div>
 
-					{/* Right: Preview */}
-					<div className="relative">
+					{/* Right: Preview (Desktop Only) */}
+					<div className="hidden lg:block relative">
 						<div className="lg:sticky lg:top-10">
-							<div className="hidden lg:block no-print text-sm font-medium text-muted-foreground mb-4 text-center italic">
+							<div className="no-print text-sm font-medium text-muted-foreground mb-4 text-center italic">
 								Xem trước hợp đồng
 							</div>
 							{activeTab === "photo" ? (
