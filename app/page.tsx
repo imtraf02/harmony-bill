@@ -15,8 +15,8 @@ import { WeddingContractForm } from "@/components/wedding-contract-form";
 import { WeddingContractPreview } from "@/components/wedding-contract-preview";
 import { Button } from "@/components/ui/button";
 import type { BillSchema, WeddingContractSchema } from "@/lib/schema";
-import { cn, mapToBillSchema } from "@/lib/utils";
-import { getContractById, getSettings } from "@/app/actions";
+import { cn, mapToBillSchema, mapToWeddingSchema } from "@/lib/utils";
+import { getContractById, getWeddingContractById, getSettings } from "@/app/actions";
 import type { SettingsSchema } from "@/lib/schema";
 import { Camera, Heart, Settings } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
@@ -31,27 +31,47 @@ function HomeContent() {
 	const [weddingData, setWeddingData] = React.useState<Partial<WeddingContractSchema>>({});
 
 	const [initialData, setInitialData] = React.useState<Partial<BillSchema> | undefined>();
+	const [weddingInitialData, setWeddingInitialData] = React.useState<Partial<WeddingContractSchema> | undefined>();
 	const [settings, setSettings] = React.useState<SettingsSchema | undefined>();
 
 	React.useEffect(() => {
 		getSettings().then((s) => setSettings(s || undefined));
 		if (editId) {
-			getContractById(editId).then((contract) => {
-				if (contract) {
-					const mapped = mapToBillSchema(contract);
-					setInitialData(mapped);
-					setActiveTab("photo");
-				}
-			});
+			if (tabParam === "wedding") {
+				getWeddingContractById(editId).then((contract) => {
+					if (contract) {
+						const mapped = mapToWeddingSchema(contract);
+						setWeddingInitialData(mapped);
+						setActiveTab("wedding");
+					}
+				});
+			} else {
+				getContractById(editId).then((contract) => {
+					if (contract) {
+						const mapped = mapToBillSchema(contract);
+						setInitialData(mapped);
+						setActiveTab("photo");
+					} else {
+						// Try fetching wedding contract if photo contract not found
+						getWeddingContractById(editId).then((wc) => {
+							if (wc) {
+								const mapped = mapToWeddingSchema(wc);
+								setWeddingInitialData(mapped);
+								setActiveTab("wedding");
+							}
+						});
+					}
+				});
+			}
 		}
-	}, [editId]);
+	}, [editId, tabParam]);
 
-	// Sync active tab with search param
+	// Sync active tab with search param (only if not editing, or if editing and it's initial load)
 	React.useEffect(() => {
-		if (tabParam === "wedding" || tabParam === "photo") {
+		if (!editId && (tabParam === "wedding" || tabParam === "photo")) {
 			setActiveTab(tabParam as any);
 		}
-	}, [tabParam]);
+	}, [tabParam, editId]);
 
 	const updateTab = (tab: "photo" | "wedding") => {
 		setActiveTab(tab);
@@ -158,9 +178,9 @@ function HomeContent() {
 					{/* Left: Form */}
 					<div className="no-print">
 						{activeTab === "photo" ? (
-							<BillForm onDataChange={setBillData} initialData={initialData} />
+							<BillForm onDataChange={setBillData} initialData={initialData} contractId={editId || undefined} />
 						) : (
-							<WeddingContractForm onDataChange={setWeddingData} />
+							<WeddingContractForm onDataChange={setWeddingData} initialData={weddingInitialData} contractId={editId || undefined} />
 						)}
 					</div>
 

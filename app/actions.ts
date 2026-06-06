@@ -4,8 +4,60 @@ import { revalidatePath } from "next/cache";
 import type { BillSchema } from "@/lib/schema";
 import { createClient } from "@/lib/supabase/server";
 
-export async function saveContract(data: BillSchema) {
+export async function saveContract(data: BillSchema, id?: string) {
 	const supabase = await createClient();
+
+	if (id) {
+		// 1. Update contract
+		const { error: contractError } = await supabase
+			.from("contracts")
+			.update({
+				customer_name: data.customerName,
+				phone: data.phone,
+				address: data.address,
+				wedding_date_start: data.weddingDateStart.toISOString(),
+				wedding_date_end: data.weddingDateEnd.toISOString(),
+				travel_fee: data.travelFee,
+				discount: data.discount,
+				incurred_cost: data.incurredCost,
+				incurred_cost_reason: data.incurredCostReason,
+				include_vat: data.includeVAT,
+				benefits: data.benefits,
+				deposit: data.deposit,
+				pickup_date: data.pickupDate.toISOString(),
+				contract_date: data.contractDate.toISOString(),
+				updated_at: new Date().toISOString(),
+			})
+			.match({ id });
+
+		if (contractError) {
+			console.error("Error updating contract:", contractError);
+			return { error: contractError.message };
+		}
+
+		// 2. Delete old contract packages
+		await supabase.from("contract_packages").delete().match({ contract_id: id });
+
+		// 3. Insert new contract packages
+		const contractPackages = data.packages.map((pkg) => ({
+			contract_id: id,
+			package_id: pkg.id || null,
+			label: pkg.label,
+			price: pkg.price,
+		}));
+
+		const { error: packagesError } = await supabase
+			.from("contract_packages")
+			.insert(contractPackages);
+
+		if (packagesError) {
+			console.error("Error saving contract packages:", packagesError);
+			return { error: packagesError.message };
+		}
+
+		revalidatePath("/");
+		return { success: true, id };
+	}
 
 	// 1. Insert contract
 	const { data: contract, error: contractError } = await supabase
@@ -244,8 +296,97 @@ export async function getWeddingExtraServices() {
 	return data;
 }
 
-export async function saveWeddingContract(data: WeddingContractSchema) {
+export async function saveWeddingContract(data: WeddingContractSchema, id?: string) {
 	const supabase = await createClient();
+
+	if (id) {
+		// 1. Update contract
+		const { error: contractError } = await supabase
+			.from("wedding_contracts")
+			.update({
+				customer_name: data.customerName,
+				phone: data.phone,
+				address: data.address,
+				wedding_date: data.weddingDate.toISOString(),
+				travel_fee: data.travelFee,
+				discount: data.discount,
+				incurred_cost: data.incurredCost,
+				incurred_cost_reason: data.incurredCostReason,
+				include_vat: data.includeVAT,
+				deposit: data.deposit,
+				pickup_date: data.pickupDate.toISOString(),
+				contract_date: data.contractDate.toISOString(),
+				notes: data.notes,
+				updated_at: new Date().toISOString(),
+			})
+			.match({ id });
+
+		if (contractError) {
+			console.error("Error updating wedding contract:", contractError);
+			return { error: contractError.message };
+		}
+
+		// 2. Delete old combos (cascades to combo services) and extra services
+		await supabase.from("wedding_contract_combos").delete().match({ contract_id: id });
+		await supabase.from("wedding_contract_extra_services").delete().match({ contract_id: id });
+
+		// 3. Insert combos and services
+		for (const combo of data.combos) {
+			const { data: insertedCombo, error: comboError } = await supabase
+				.from("wedding_contract_combos")
+				.insert({
+					contract_id: id,
+					combo_id: combo.id || null,
+					combo_name: combo.comboName,
+					base_price: combo.basePrice,
+				})
+				.select()
+				.single();
+
+			if (comboError) {
+				console.error("Error saving wedding contract combo:", comboError);
+				continue;
+			}
+
+			const services = combo.services.map((s, idx) => ({
+				contract_combo_id: insertedCombo.id,
+				service_name: s.name,
+				is_removed: s.isRemoved,
+				note: s.note,
+				sort_order: idx,
+			}));
+
+			const { error: servicesError } = await supabase
+				.from("wedding_contract_combo_services")
+				.insert(services);
+
+			if (servicesError) {
+				console.error("Error saving wedding contract combo services:", servicesError);
+			}
+		}
+
+		// 4. Insert extra services
+		if (data.extraServices && data.extraServices.length > 0) {
+			const extraServices = data.extraServices.map((s) => ({
+				contract_id: id,
+				name: s.name,
+				price: s.price,
+				quantity: s.quantity,
+			}));
+
+			const { error: extraServicesError } = await supabase
+				.from("wedding_contract_extra_services")
+				.insert(extraServices);
+
+			if (extraServicesError) {
+				console.error("Error saving wedding contract extra services:", extraServicesError);
+			}
+		}
+
+		revalidatePath("/");
+		revalidatePath("/contracts");
+		return { success: true, id };
+	}
 
 	// 1. Insert contract
 	const { data: contract, error: contractError } = await supabase

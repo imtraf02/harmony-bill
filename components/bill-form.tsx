@@ -71,6 +71,7 @@ import { BillPreview } from "./bill-preview";
 interface BillFormProps {
 	onDataChange: (data: BillSchema) => void;
 	initialData?: Partial<BillSchema>;
+	contractId?: string;
 }
 
 // Removed hardcoded studioInfo - now fetched from settings
@@ -127,7 +128,7 @@ function ElegantLabel({
 const inputCls =
 	"w-full h-11 rounded-xl border border-theme-border-muted bg-theme-bg-body px-2 text-sm text-theme-text-dark placeholder:text-theme-text-muted focus:outline-none focus:ring-2 focus:ring-theme-gold-primary/40 focus:border-theme-gold-primary transition-all duration-200";
 
-export function BillForm({ onDataChange, initialData }: BillFormProps) {
+export function BillForm({ onDataChange, initialData, contractId }: BillFormProps) {
 	const [masterPackages, setMasterPackages] = React.useState<any[]>([]);
 	const [settings, setSettings] = React.useState<any>(null);
 	const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -214,12 +215,12 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 			}
 			setIsSubmitting(true);
 			try {
-				const result = await saveContract(form.getValues() as BillSchema);
+				const result = await saveContract(form.getValues() as BillSchema, contractId);
 				if (!result.success) {
 					toast.error("Lưu thất bại: " + result.error);
 					return;
 				}
-				toast.success("Hợp đồng đã được lưu!");
+				toast.success(contractId ? "Hợp đồng đã được cập nhật!" : "Hợp đồng đã được lưu!");
 			} catch (error) {
 				toast.error("Lỗi khi lưu!");
 				return;
@@ -233,9 +234,9 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 	const onSubmit = async (data: BillSchema) => {
 		setIsSubmitting(true);
 		try {
-			const result = await saveContract(data);
+			const result = await saveContract(data, contractId);
 			if (result.success) {
-				toast.success("Hợp đồng đã được lưu thành công!");
+				toast.success(contractId ? "Hợp đồng đã được cập nhật thành công!" : "Hợp đồng đã được lưu thành công!");
 				setTimeout(() => {
 					window.print();
 				}, 500);
@@ -826,7 +827,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 						) : (
 							<>
 								<Printer className="w-4 h-4" />
-								LƯU & IN
+								{contractId ? "CẬP NHẬT & IN" : "LƯU & IN"}
 							</>
 						)}
 					</button>
@@ -872,7 +873,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 								checked={saveToDbOnDownload}
 								onChange={(e) => setSaveToDbOnDownload(e.target.checked)}
 							/>
-							Lưu hợp đồng vào cơ sở dữ liệu
+							{contractId ? "Cập nhật hợp đồng trong cơ sở dữ liệu" : "Lưu hợp đồng vào cơ sở dữ liệu"}
 						</label>
 					</div>
 
@@ -889,7 +890,7 @@ export function BillForm({ onDataChange, initialData }: BillFormProps) {
 							onClick={onConfirmDownload}
 							className="bg-theme-gold-primary text-white hover:bg-theme-gold-hover"
 						>
-							{saveToDbOnDownload ? "Lưu & Tải ảnh" : "Chỉ Tải ảnh"}
+							{saveToDbOnDownload ? (contractId ? "Cập nhật & Tải ảnh" : "Lưu & Tải ảnh") : "Chỉ Tải ảnh"}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

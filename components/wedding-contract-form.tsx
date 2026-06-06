@@ -47,6 +47,7 @@ import { WeddingContractPreview } from "./wedding-contract-preview";
 interface WeddingContractFormProps {
 	onDataChange: (data: WeddingContractSchema) => void;
 	initialData?: Partial<WeddingContractSchema>;
+	contractId?: string;
 }
 
 // ─── Micro components ────────────────────────────────────────────────────────
@@ -130,7 +131,7 @@ const formatShort = (n: number) =>
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function WeddingContractForm({ onDataChange, initialData }: WeddingContractFormProps) {
+export function WeddingContractForm({ onDataChange, initialData, contractId }: WeddingContractFormProps) {
 	const [masterCombos, setMasterCombos] = React.useState<any[]>([]);
 	const [masterExtraServices, setMasterExtraServices] = React.useState<any[]>([]);
 	const [settings, setSettings] = React.useState<any>(null);
@@ -221,9 +222,9 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 			if (!isValid) { toast.error("Vui lòng điền đầy đủ thông tin hợp lệ trước khi lưu"); return; }
 			setIsSubmitting(true);
 			try {
-				const result = await saveWeddingContract(form.getValues() as WeddingContractSchema);
+				const result = await saveWeddingContract(form.getValues() as WeddingContractSchema, contractId);
 				if (!result.success) { toast.error("Lưu thất bại: " + result.error); return; }
-				toast.success("Hợp đồng đã được lưu!");
+				toast.success(contractId ? "Hợp đồng đã được cập nhật!" : "Hợp đồng đã được lưu!");
 			} catch { toast.error("Lỗi khi lưu!"); return; }
 			finally { setIsSubmitting(false); }
 		}
@@ -233,9 +234,9 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 	const onSubmit = async (data: WeddingContractSchema) => {
 		setIsSubmitting(true);
 		try {
-			const result = await saveWeddingContract(data);
+			const result = await saveWeddingContract(data, contractId);
 			if (result.success) {
-				toast.success("Hợp đồng cưới đã được lưu!");
+				toast.success(contractId ? "Hợp đồng đã được cập nhật!" : "Hợp đồng cưới đã được lưu!");
 				setTimeout(() => window.print(), 500);
 			} else {
 				toast.error("Lỗi: " + result.error);
@@ -684,7 +685,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 							className="flex-[1.5] h-12 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-theme-gold-primary to-theme-gold-light font-bold text-[11px] text-white shadow-lg active:opacity-90 disabled:opacity-60 transition-all"
 						>
 							<Printer className="w-4 h-4" />
-							{isSubmitting ? "Đang lưu..." : "LƯU & IN"}
+							{isSubmitting ? "Đang lưu..." : (contractId ? "CẬP NHẬT & IN" : "LƯU & IN")}
 						</button>
 					</div>
 				</div>
@@ -728,7 +729,9 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 							checked={saveToDbOnDownload}
 							onChange={(e) => setSaveToDbOnDownload(e.target.checked)}
 						/>
-						<span className="text-sm font-semibold text-theme-text-dark">Lưu vào cơ sở dữ liệu</span>
+						<span className="text-sm font-semibold text-theme-text-dark">
+							{contractId ? "Cập nhật trong cơ sở dữ liệu" : "Lưu vào cơ sở dữ liệu"}
+						</span>
 					</label>
 
 					<DialogFooter className="flex-row gap-2 mt-2">
@@ -744,7 +747,7 @@ export function WeddingContractForm({ onDataChange, initialData }: WeddingContra
 							onClick={onConfirmDownload}
 							className="flex-1 h-11 rounded-xl bg-theme-gold-primary text-white font-bold text-sm active:opacity-90"
 						>
-							{saveToDbOnDownload ? "Lưu & Tải ảnh" : "Chỉ Tải ảnh"}
+							{saveToDbOnDownload ? (contractId ? "Cập nhật & Tải ảnh" : "Lưu & Tải ảnh") : "Chỉ Tải ảnh"}
 						</button>
 					</DialogFooter>
 				</DialogContent>
