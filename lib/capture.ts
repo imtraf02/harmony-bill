@@ -116,13 +116,49 @@ export async function captureElement(
             },
         });
 
-        // 7. Export JPEG
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
-        const link = document.createElement("a");
+        // 7. Export JPEG & Xử lý download/chia sẻ hỗ trợ iOS & Mobile
+        const blob = await new Promise<Blob | null>((resolve) => {
+            canvas.toBlob((b) => resolve(b), "image/jpeg", 0.95);
+        });
+
+        if (!blob) throw new Error("Không thể xuất file ảnh JPEG.");
+
         const safeName = fileName.replace(/[^a-z0-9]/gi, "-").toLowerCase();
-        link.download = `hop-dong-${safeName}.jpg`;
-        link.href = dataUrl;
+        const imageFileName = `hop-dong-${safeName}.jpg`;
+        const file = new File([blob], imageFileName, { type: "image/jpeg" });
+
+        // Ưu tiên Web Share API trên iOS / Mobile (Mở Share Sheet để chọn "Lưu hình ảnh" hoặc gửi Zalo)
+        if (
+            typeof navigator !== "undefined" &&
+            navigator.canShare &&
+            navigator.canShare({ files: [file] })
+        ) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: imageFileName,
+                });
+                return;
+            } catch (shareErr: any) {
+                if (shareErr.name === "AbortError") {
+                    return; // Người dùng đóng/hủy bảng chia sẻ
+                }
+                console.warn("Web Share API thất bại, chuyển sang phương thức tải về thông thường:", shareErr);
+            }
+        }
+
+        // Tải xuống bằng Blob URL cho máy tính hoặc thiết bị hỗ trợ download trực tiếp
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.download = imageFileName;
+        link.href = blobUrl;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
+
+        setTimeout(() => {
+            URL.revokeObjectURL(blobUrl);
+        }, 10000);
     } finally {
         // 8. Cleanup
         restoreImages();
