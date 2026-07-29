@@ -215,11 +215,27 @@ export function WeddingContractForm({ onDataChange, initialData, contractId }: W
 		}
 	};
 
+	const getFirstErrorMessage = (errObj: any): string | null => {
+		if (!errObj) return null;
+		if (errObj.message) return errObj.message;
+		if (typeof errObj === "object") {
+			for (const key of Object.keys(errObj)) {
+				const msg = getFirstErrorMessage(errObj[key]);
+				if (msg) return msg;
+			}
+		}
+		return null;
+	};
+
 	const onConfirmDownload = async () => {
 		setIsDownloadDialogOpen(false);
 		if (saveToDbOnDownload) {
 			const isValid = await form.trigger();
-			if (!isValid) { toast.error("Vui lòng điền đầy đủ thông tin hợp lệ trước khi lưu"); return; }
+			if (!isValid) {
+				const firstErr = getFirstErrorMessage(form.formState.errors);
+				toast.error(firstErr ? `Vui lòng sửa lỗi: ${firstErr}` : "Vui lòng điền đầy đủ thông tin hợp lệ trước khi lưu");
+				return;
+			}
 			setIsSubmitting(true);
 			try {
 				const result = await saveWeddingContract(form.getValues() as WeddingContractSchema, contractId);
@@ -229,6 +245,11 @@ export function WeddingContractForm({ onDataChange, initialData, contractId }: W
 			finally { setIsSubmitting(false); }
 		}
 		await onDownloadImage();
+	};
+
+	const onInvalid = (formErrors: any) => {
+		const firstErr = getFirstErrorMessage(formErrors);
+		toast.error(firstErr ? `Vui lòng sửa lỗi: ${firstErr}` : "Vui lòng điền đầy đủ thông tin hợp lệ");
 	};
 
 	const onSubmit = async (data: WeddingContractSchema) => {
@@ -256,7 +277,7 @@ export function WeddingContractForm({ onDataChange, initialData, contractId }: W
 	return (
 		<>
 			<form
-				onSubmit={form.handleSubmit(onSubmit)}
+				onSubmit={form.handleSubmit(onSubmit, onInvalid)}
 				className="space-y-3 pb-28 max-w-lg mx-auto px-2"
 			>
 				{/* ── Studio header ─────────────────────────────────────── */}
@@ -301,14 +322,23 @@ export function WeddingContractForm({ onDataChange, initialData, contractId }: W
 					<Field>
 						<Label>Tên khách hàng</Label>
 						<Input {...register("customerName")} placeholder="Nguyễn Văn A" className={inputCls} />
+						{errors.customerName && (
+							<p className="mt-1 text-xs text-red-500 font-medium">{errors.customerName.message}</p>
+						)}
 					</Field>
 					<Field>
 						<Label>Số điện thoại (Không bắt buộc)</Label>
 						<Input {...register("phone")} placeholder="090..." className={inputCls} inputMode="tel" />
+						{errors.phone && (
+							<p className="mt-1 text-xs text-red-500 font-medium">{errors.phone.message}</p>
+						)}
 					</Field>
 					<Field>
 						<Label>Địa chỉ</Label>
 						<Input {...register("address")} placeholder="Địa chỉ liên hệ..." className={inputCls} />
+						{errors.address && (
+							<p className="mt-1 text-xs text-red-500 font-medium">{errors.address.message}</p>
+						)}
 					</Field>
 				</Section>
 
@@ -328,6 +358,9 @@ export function WeddingContractForm({ onDataChange, initialData, contractId }: W
 								</Popover>
 							)}
 						/>
+						{errors.weddingDate && (
+							<p className="mt-1 text-xs text-red-500 font-medium">{errors.weddingDate.message}</p>
+						)}
 					</Field>
 					<Field>
 						<Label>Ghi chú</Label>
@@ -626,6 +659,9 @@ export function WeddingContractForm({ onDataChange, initialData, contractId }: W
 									</Popover>
 								)}
 							/>
+							{errors.pickupDate && (
+								<p className="mt-1 text-xs text-red-500 font-medium">{errors.pickupDate.message}</p>
+							)}
 						</Field>
 						<Field>
 							<Label>Ngày lập hợp đồng</Label>
@@ -641,6 +677,9 @@ export function WeddingContractForm({ onDataChange, initialData, contractId }: W
 									</Popover>
 								)}
 							/>
+							{errors.contractDate && (
+								<p className="mt-1 text-xs text-red-500 font-medium">{errors.contractDate.message}</p>
+							)}
 						</Field>
 					</div>
 				</Section>

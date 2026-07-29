@@ -263,7 +263,7 @@ export function WeddingContractPreview({ data, settings }: WeddingContractPrevie
 							))}
 
 							{(data.extraServices || []).length > 0 && (
-								<div className="space-y-1 pt-1 border-t border-black/10">
+								<div className={cn("space-y-1", (data.combos || []).length > 0 && "pt-1 border-t border-black/10")}>
 									{(data.extraServices || []).map((svc, idx) => (
 										<div key={idx} className="flex justify-between items-baseline text-[8.5px] text-black">
 											<span className="font-semibold italic">

@@ -76,7 +76,7 @@ export const weddingContractSchema = z.object({
       isRemoved: z.boolean().default(false),
       note: z.string().optional(),
     })).min(1, "Combo phải có ít nhất một dịch vụ"),
-  })).min(1, "Vui lòng thêm ít nhất một combo dịch vụ"),
+  })).default([]),
   travelFee: z.coerce.number().min(0).default(0),
   discount: z.coerce.number().min(0).default(0),
   incurredCost: z.coerce.number().min(0).default(0),

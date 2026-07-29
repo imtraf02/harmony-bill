@@ -205,12 +205,25 @@ export function BillForm({ onDataChange, initialData, contractId }: BillFormProp
 		}
 	};
 
+	const getFirstErrorMessage = (errObj: any): string | null => {
+		if (!errObj) return null;
+		if (errObj.message) return errObj.message;
+		if (typeof errObj === "object") {
+			for (const key of Object.keys(errObj)) {
+				const msg = getFirstErrorMessage(errObj[key]);
+				if (msg) return msg;
+			}
+		}
+		return null;
+	};
+
 	const onConfirmDownload = async () => {
 		setIsDownloadDialogOpen(false);
 		if (saveToDbOnDownload) {
 			const isValid = await form.trigger();
 			if (!isValid) {
-				toast.error("Vui lòng điền đầy đủ thông tin hợp lệ trước khi lưu");
+				const firstErr = getFirstErrorMessage(form.formState.errors);
+				toast.error(firstErr ? `Vui lòng sửa lỗi: ${firstErr}` : "Vui lòng điền đầy đủ thông tin hợp lệ trước khi lưu");
 				return;
 			}
 			setIsSubmitting(true);
@@ -229,6 +242,11 @@ export function BillForm({ onDataChange, initialData, contractId }: BillFormProp
 			}
 		}
 		await onDownloadImage();
+	};
+
+	const onInvalid = (formErrors: any) => {
+		const firstErr = getFirstErrorMessage(formErrors);
+		toast.error(firstErr ? `Vui lòng sửa lỗi: ${firstErr}` : "Vui lòng điền đầy đủ thông tin hợp lệ");
 	};
 
 	const onSubmit = async (data: BillSchema) => {
@@ -319,7 +337,7 @@ export function BillForm({ onDataChange, initialData, contractId }: BillFormProp
 	return (
 		<>
 		<form
-			onSubmit={form.handleSubmit(onSubmit)}
+			onSubmit={form.handleSubmit(onSubmit, onInvalid)}
 			className="space-y-2 pb-20 max-w-2xl mx-auto px-2"
 		>
 			{/* ── Studio Header ── */}
